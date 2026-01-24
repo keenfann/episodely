@@ -17,7 +17,7 @@ RUN npm install --omit=dev
 
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
-COPY --from=build /app/db ./db
+RUN mkdir -p /app/db
 
 ENV NODE_ENV=production
 ENV PORT=3000

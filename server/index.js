@@ -9,7 +9,7 @@ import { fetchEpisodes, fetchShow, searchShows } from './tvmaze.js';
 import { isReleased, stripHtml } from './utils.js';
 
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4285;
 
 app.use(express.json({ limit: '10mb' }));
 app.use(

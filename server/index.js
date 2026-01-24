@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import express from 'express';
 import session from 'express-session';
 import fs from 'fs';
@@ -8,13 +9,17 @@ import db from './db.js';
 import { fetchEpisodes, fetchShow, searchShows } from './tvmaze.js';
 import { isReleased, stripHtml } from './utils.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 const port = process.env.PORT || 3000;
+const sessionSecret = resolveSessionSecret();
 
 app.use(express.json({ limit: '10mb' }));
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'episodely-dev-secret',
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -24,6 +29,38 @@ app.use(
     },
   })
 );
+
+function resolveSessionSecret() {
+  if (process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
+
+  const dbPath =
+    process.env.DB_PATH ||
+    path.resolve(__dirname, '..', 'db', 'episodely.sqlite');
+  const secretPath = path.join(
+    path.dirname(dbPath),
+    '.episodely-session-secret'
+  );
+
+  try {
+    const existing = fs.readFileSync(secretPath, 'utf8').trim();
+    if (existing) return existing;
+  } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      console.warn('Failed to read session secret, regenerating.', error);
+    }
+  }
+
+  const secret = crypto.randomBytes(32).toString('hex');
+  try {
+    fs.mkdirSync(path.dirname(secretPath), { recursive: true });
+    fs.writeFileSync(secretPath, `${secret}\n`, { mode: 0o600 });
+  } catch (error) {
+    console.warn('Failed to persist session secret, using in-memory value.', error);
+  }
+  return secret;
+}
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -785,8 +822,6 @@ app.post('/api/import', requireAuth, requireProfile, async (req, res) => {
   }
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, '..', 'dist');
 const indexHtml = path.join(distPath, 'index.html');
 

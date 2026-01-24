@@ -41,10 +41,10 @@ The API is available at `http://localhost:3000/api/health` during development.
 - Search TVmaze and add shows to your queue.
 
 ## Quick Start (Docker)
-- `docker compose up --build`
+- `docker compose up`
 - Visit `http://localhost:3000`
 
-Set `SESSION_SECRET` and `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`).
+Set `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`). The server generates and stores `SESSION_SECRET` on first start, and the Compose file pulls `ghcr.io/keenfann/episodely:latest` on start.
 
 ## Project Structure
 - `src/` React UI

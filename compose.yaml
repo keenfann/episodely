@@ -1,11 +1,11 @@
 services:
   episodely:
-    build: .
+    image: ghcr.io/keenfann/episodely:latest
+    pull_policy: always
     ports:
       - "3000:3000"
     environment:
       PORT: 3000
-      SESSION_SECRET: change-me
       DB_PATH: /data/episodely.sqlite
     volumes:
       - ./data:/data

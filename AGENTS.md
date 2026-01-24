@@ -5,6 +5,7 @@ Current layout is a single Node server with a Vite-built UI:
 - `src/` React UI code
 - `server/` Express API (`server/index.js`)
 - `db/` local SQLite files (ignored by git)
+- `data/` Docker-mounted SQLite data
 - `index.html`, `vite.config.js`, `package.json` at repo root
 
 If you add a new top-level directory, update this section with a one-line purpose.
@@ -15,6 +16,7 @@ If you add a new top-level directory, update this section with a one-line purpos
 - `npm run build` build the UI to `dist/`
 - `npm run preview` preview the UI build
 - `npm run start` serve the API and built UI from one process
+- `docker compose up --build` build and run the Docker image
 
 The Vite dev server proxies `/api` to `http://localhost:3000` for local API calls.
 
@@ -34,10 +36,10 @@ Testing framework is TBD. Until then:
 - New features should include tests or a short PR note explaining why coverage is deferred.
 
 ## Commit & Pull Request Guidelines
-Git history only contains an “Initial commit,” so no convention exists yet. Use Conventional Commits going forward:
+Git history only contains an "Initial commit," so no convention exists yet. Use Conventional Commits going forward:
 - Examples: `feat: add calendar view`, `fix: handle missing air dates`, `docs: update README`
 
 PRs should include a short summary, linked issue (if any), test steps, and UI screenshots for visual changes. Note any migration or data-impacting changes explicitly.
 
 ## Security & Configuration
-Store configuration in `.env` files and provide a `.env.example` when adding new variables. Never commit secrets; prefer Docker secrets or environment variables in deployment.
+Store configuration in `.env` files and provide a `.env.example` when adding new variables. Current config includes `SESSION_SECRET`, `PORT`, and `DB_PATH`. Never commit secrets; prefer Docker secrets or environment variables in deployment.

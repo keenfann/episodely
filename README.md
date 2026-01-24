@@ -2,7 +2,7 @@
 
 Episodely is a self-hosted web app for tracking watched TV series. It aims to provide the core watch tracking flow of TV Time with a local-first setup, plus calendar views for upcoming releases and import/export to make migration easy.
 
-Status: early-stage repository. Features and setup will expand as development progresses.
+Status: early-stage repository with a working local stack. Expect changes as features expand.
 
 ## Goals
 - Simple, fast watch tracking for TV series
@@ -10,20 +10,20 @@ Status: early-stage repository. Features and setup will expand as development pr
 - Easy import/export for migration in and out
 - Self-hosted and Docker-first, similar to the *arr suite
 
-## Planned Features
+## Features
 - Track watched/unwatched status, seasons, and episodes
-- Release calendar with notifications and filters
-- Import/export for common formats and services
+- Release calendar for upcoming episodes
+- Import/export for backups and migration
 - Multi-user support with profiles
-- Backups and data portability
+- TVmaze metadata and imagery (no API key required)
 
 ## Stack
 - UI: React + Vite
 - Backend: Node.js + Express
-- Storage: SQLite (planned)
+- Storage: SQLite
 
 ## Quick Start (Local)
-Requirements: Node.js 18+
+Requirements: Node.js 22+
 
 - `npm install`
 - `npm run dev` starts Vite (web) and the Express API together
@@ -32,14 +32,26 @@ Requirements: Node.js 18+
 
 The API is available at `http://localhost:3000/api/health` during development.
 
+### First run
+- Create an account and log in.
+- Create or select a profile.
+- Search TVmaze and add shows to your queue.
+
+## Quick Start (Docker)
+- `docker compose up --build`
+- Visit `http://localhost:3000`
+
+Set `SESSION_SECRET` and `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`).
+
 ## Project Structure
 - `src/` React UI
 - `server/` Express API
 - `db/` SQLite database files (local only)
+- `data/` Docker volume mount for SQLite
 - `vite.config.js` Vite config and API proxy
 
 ## Import and Export
-Import and export will be first-class features to help you migrate data. Planned formats will be documented here once implemented.
+Import and export are available in Settings. Exports are JSON backups that can be imported into another instance. Imports also accept a CSV of TVmaze IDs (one per line).
 
 ## Roadmap
 - MVP watch tracking

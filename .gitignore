@@ -19,6 +19,8 @@ pnpm-debug.log*
 coverage
 db/*.sqlite
 db/*.sqlite-journal
+db/*.sqlite-wal
+db/*.sqlite-shm
 db/*.db
 db/*.db-journal
 .vscode
@@ -26,3 +28,4 @@ docker-compose.override.yml
 docker-compose.override.yaml
 compose.override.yml
 compose.override.yaml
+data

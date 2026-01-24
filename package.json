@@ -3,9 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\"",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:web\" \"npm run dev:open\"",
     "dev:web": "vite",
     "dev:server": "node --watch server/index.js",
+    "dev:open": "node -e \"const url='http://localhost:5173';const {exec}=require('child_process');const cmds=[];if(process.platform==='darwin'){cmds.push('open -a \\\\\\\"Google Chrome\\\\\\\" '+url,'open '+url);}else if(process.platform==='win32'){cmds.push('start \\\\\\\"\\\\\\\" '+url);}else{cmds.push('xdg-open '+url);}const cmd=cmds.find(Boolean);setTimeout(()=>{if(cmd){exec(cmd);}},2000);\"",
     "build": "vite build",
     "preview": "vite preview",
     "start": "node server/index.js"

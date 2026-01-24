@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import db from './db.js';
 import { fetchEpisodes, fetchShow, searchShows } from './tvmaze.js';
 import { isReleased, stripHtml } from './utils.js';
+import SqliteSessionStore from './session-store.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,6 +21,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(
   session({
     secret: sessionSecret,
+    store: new SqliteSessionStore(),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -246,7 +248,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
 function listShowsForProfile(profileId) {
   const shows = db
     .prepare(
-      `SELECT s.*
+      `SELECT s.*, ps.status AS profile_status
        FROM shows s
        JOIN profile_shows ps ON ps.show_id = s.id
        WHERE ps.profile_id = ?
@@ -296,8 +298,10 @@ function listShowsForProfile(profileId) {
       showEpisodes.length > 0 &&
       showEpisodes.every((episode) => episode.watched_at);
 
-    let state = 'planned';
-    if (started && releasedUnwatched.length > 0) {
+    let state = 'queued';
+    if (show.profile_status === 'stopped') {
+      state = 'stopped';
+    } else if (started && releasedUnwatched.length > 0) {
       state = 'watch-next';
     } else if (!started && hasReleased) {
       state = 'queued';
@@ -306,7 +310,7 @@ function listShowsForProfile(profileId) {
     } else if (isEnded && allEpisodesWatched) {
       state = 'completed';
     } else if (!hasReleased) {
-      state = 'planned';
+      state = 'queued';
     } else {
       state = 'up-to-date';
     }
@@ -326,6 +330,7 @@ function listShowsForProfile(profileId) {
       premiered: show.premiered,
       ended: show.ended,
       image: show.image_original || show.image_medium,
+      profileStatus: show.profile_status || null,
       state,
       stats: {
         totalEpisodes: showEpisodes.length,
@@ -504,23 +509,23 @@ app.get('/api/shows', requireAuth, requireProfile, (req, res) => {
 
   const categories = [
     { id: 'watch-next', label: 'Watch Next', shows: [] },
-    { id: 'queued', label: 'Queued', shows: [] },
+    { id: 'queued', label: 'Not Started', shows: [] },
     { id: 'up-to-date', label: 'Up To Date', shows: [] },
     { id: 'completed', label: 'Completed', shows: [] },
-    { id: 'planned', label: 'Planned', shows: [] },
+    { id: 'stopped', label: 'Stopped Watching', shows: [] },
   ];
 
   const bucketMap = new Map(categories.map((category) => [category.id, category]));
 
   shows.forEach((show) => {
-    if (show.state === 'watch-next') {
+    if (show.state === 'stopped') {
+      bucketMap.get('stopped').shows.push(show);
+    } else if (show.state === 'watch-next') {
       bucketMap.get('watch-next').shows.push(show);
     } else if (show.state === 'queued') {
       bucketMap.get('queued').shows.push(show);
     } else if (show.state === 'up-to-date') {
       bucketMap.get('up-to-date').shows.push(show);
-    } else if (show.state === 'planned') {
-      bucketMap.get('planned').shows.push(show);
     } else {
       bucketMap.get('completed').shows.push(show);
     }
@@ -533,7 +538,7 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
   const showId = Number(req.params.id);
   const show = db
     .prepare(
-      `SELECT s.*
+      `SELECT s.*, ps.status AS profile_status
        FROM shows s
        JOIN profile_shows ps ON ps.show_id = s.id
        WHERE ps.profile_id = ? AND s.id = ?`
@@ -602,9 +607,37 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       premiered: show.premiered,
       ended: show.ended,
       image: show.image_original || show.image_medium,
+      profileStatus: show.profile_status || null,
     },
     seasons,
   });
+});
+
+app.post('/api/shows/:id/status', requireAuth, requireProfile, (req, res) => {
+  const showId = Number(req.params.id);
+  const { status } = req.body || {};
+  const allowed = [null, 'stopped'];
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  const row = db
+    .prepare(
+      `SELECT ps.show_id
+       FROM profile_shows ps
+       WHERE ps.profile_id = ? AND ps.show_id = ?`
+    )
+    .get(req.session.profileId, showId);
+
+  if (!row) {
+    return res.status(404).json({ error: 'Show not found' });
+  }
+
+  db.prepare(
+    'UPDATE profile_shows SET status = ? WHERE profile_id = ? AND show_id = ?'
+  ).run(status, req.session.profileId, showId);
+
+  return res.json({ ok: true });
 });
 
 app.post('/api/episodes/:id/watch', requireAuth, requireProfile, (req, res) => {
@@ -704,7 +737,11 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
     .all(req.session.profileId);
 
   const upcoming = episodes.filter((episode) => {
-    if (!episode.airdate) return true;
+    const airtime = (episode.airtime || '').trim();
+    if (airtime.toUpperCase() === 'TBD') {
+      return false;
+    }
+    if (!episode.airdate) return false;
     const airdate = new Date(episode.airdate);
     return airdate >= today && airdate <= cutoff;
   });

@@ -6,6 +6,7 @@ Current layout is a single Node server with a Vite-built UI:
 - `server/` Express API (`server/index.js`)
 - `db/` local SQLite files (ignored by git)
 - `data/` Docker-mounted SQLite data
+- `scripts/` one-off helpers for imports and maintenance
 - `index.html`, `vite.config.js`, `package.json` at repo root
 
 If you add a new top-level directory, update this section with a one-line purpose.

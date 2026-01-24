@@ -69,6 +69,7 @@ function App() {
   const [loadingShows, setLoadingShows] = useState(false);
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -250,9 +251,16 @@ function App() {
   };
 
   const handleImport = async (event) => {
-    const file = event.target.files?.[0];
+    if (importing) {
+      setNotice('Import already running. Please wait.');
+      return;
+    }
+    const input = event.target;
+    const file = input.files?.[0];
     if (!file) return;
     try {
+      setNotice('Import started. This can take a few minutes.');
+      setImporting(true);
       const text = await file.text();
       let payload = null;
       if (file.name.endsWith('.csv')) {
@@ -277,7 +285,12 @@ function App() {
       await loadShows();
       await loadCalendar();
     } catch (error) {
-      setNotice(error.message);
+      setNotice(`Import failed: ${error.message}`);
+    } finally {
+      setImporting(false);
+      if (input) {
+        input.value = '';
+      }
     }
   };
 
@@ -390,6 +403,7 @@ function App() {
                 profiles={profiles}
                 activeProfile={activeProfile}
                 notice={notice}
+                isImporting={importing}
                 onProfileSelect={handleProfileSelect}
                 onProfileCreate={handleProfileCreate}
                 onExport={handleExport}
@@ -653,6 +667,7 @@ function SettingsPage({
   profiles,
   activeProfile,
   notice,
+  isImporting,
   onProfileSelect,
   onProfileCreate,
   onExport,
@@ -696,16 +711,24 @@ function SettingsPage({
             <button className="primary" onClick={onExport}>
               Export data
             </button>
-            <label className="outline">
+            <label className={isImporting ? 'outline is-disabled' : 'outline'}>
               Import file
               <input
                 type="file"
                 accept=".json,.csv,application/json,text/csv"
                 onChange={onImport}
+                disabled={isImporting}
               />
             </label>
           </div>
           {notice && <p className="notice">{notice}</p>}
+          {isImporting && (
+            <div className="import-status" aria-live="polite">
+              <div className="progress-bar" role="progressbar" aria-valuetext="Importing">
+                <span className="progress-bar__fill" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -587,6 +587,48 @@ input:focus {
   font-size: 0.9rem;
 }
 
+.outline.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.import-status {
+  margin-top: 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.progress-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(79, 209, 197, 0.2);
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  position: absolute;
+  inset: 0;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    rgba(79, 209, 197, 0),
+    rgba(79, 209, 197, 0.8),
+    rgba(79, 209, 197, 0)
+  );
+  animation: progress-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes progress-slide {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 @media (max-width: 900px) {
   .top-bar {
     flex-direction: column;

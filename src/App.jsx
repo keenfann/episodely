@@ -355,12 +355,11 @@ function App() {
         </nav>
         <div className="top-bar__right">
           <button
-            className="primary icon-button"
+            className="primary"
             type="button"
-            aria-label="Add shows"
             onClick={() => navigate('/add')}
           >
-            +
+            Add show
           </button>
           <div className="profile-chip">
             <span>{activeProfile.name}</span>

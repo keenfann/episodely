@@ -203,6 +203,10 @@ input:focus {
   margin-bottom: 1.5rem;
 }
 
+.add-show-page .panel__header {
+  align-items: center;
+}
+
 .panel__header h2 {
   font-size: 1.6rem;
 }
@@ -243,6 +247,15 @@ input:focus {
 
 .search-bar input {
   width: min(320px, 100%);
+}
+
+.add-show-page .search-bar {
+  width: 100%;
+}
+
+.add-show-page .search-bar input {
+  flex: 1;
+  width: auto;
 }
 
 .icon-button {
@@ -653,6 +666,48 @@ input:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+}
+
+.profile-panel {
+  padding: 1.5rem;
+  gap: 1rem;
+  width: min(640px, 100%);
+}
+
+.profile-panel .panel__header {
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.profile-panel .panel__header h2 {
+  font-size: 1.4rem;
+}
+
+.profile-panel .muted {
+  font-size: 0.95rem;
+}
+
+.profile-panel .profile-list {
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-panel .chip {
+  padding: 0.35rem 0.85rem;
+}
+
+.profile-panel .inline-form {
+  gap: 0.5rem;
+}
+
+.profile-panel .inline-form input {
+  flex: 1;
+  min-width: 220px;
+}
+
+.profile-panel .outline,
+.profile-panel .primary {
+  padding: 0.45rem 1rem;
 }
 
 .chip {

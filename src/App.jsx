@@ -563,7 +563,7 @@ function AddShowPage({
   onAddShow,
 }) {
   return (
-    <section className="panel">
+    <section className="panel add-show-page">
       <div className="panel__header">
         <div>
           <h2>Add Shows</h2>
@@ -870,7 +870,7 @@ function ProfileView({ profiles, onCreate, onSelect, onLogout }) {
 
   return (
     <div className="auth-shell">
-      <div className="panel panel--center">
+      <div className="panel panel--center profile-panel">
         <div className="panel__header">
           <div>
             <h2>Select a profile</h2>

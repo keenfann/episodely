@@ -18,7 +18,12 @@ Status: early-stage repository with a working local stack. Expect changes as fea
 - Import/export for backups and migration
 - Multi-user support with profiles
 - TVmaze metadata and imagery (no API key required)
-- Show lists grouped by status (watch next, queued, up to date, completed, planned)
+- Show lists grouped by status (watch next, not started, up to date, completed, stopped watching)
+
+## Screenshots
+![Shows dashboard](docs/screenshots/shows-dashboard.png)
+![Calendar view](docs/screenshots/calendar-view.png)
+![Add shows view](docs/screenshots/add-shows-view.png)
 
 ## Stack
 - UI: React + Vite
@@ -45,6 +50,15 @@ The API is available at `http://localhost:4285/api/health` during development.
 - Visit `http://localhost:4285`
 
 Set `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`). The server generates and stores `SESSION_SECRET` on first start, and the Compose file pulls `ghcr.io/keenfann/episodely:latest` on start.
+
+Sessions are stored in SQLite, so logins persist across restarts as long as `DB_PATH` points to durable storage.
+
+## Background Sync
+Episodely can refresh show/episode metadata from TVmaze on a schedule. Configure in `.env`:
+- `TVMAZE_SYNC_ENABLED` (default `true`)
+- `TVMAZE_SYNC_INTERVAL_MS` (default `43200000` / 12 hours)
+- `TVMAZE_SYNC_DELAY_MS` (default `500`)
+- `TVMAZE_SYNC_ON_STARTUP` (default `true`)
 
 ## Project Structure
 - `src/` React UI

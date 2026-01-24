@@ -42,5 +42,8 @@ Git history only contains an "Initial commit," so no convention exists yet. Use 
 
 PRs should include a short summary, linked issue (if any), test steps, and UI screenshots for visual changes. Note any migration or data-impacting changes explicitly.
 
+## Documentation
+Keep `README.md` in sync with user-facing behavior, feature lists, and configuration defaults whenever changes are made.
+
 ## Security & Configuration
 Store configuration in `.env` files and provide a `.env.example` when adding new variables. Current config includes `SESSION_SECRET`, `PORT`, and `DB_PATH`. Never commit secrets; prefer Docker secrets or environment variables in deployment.

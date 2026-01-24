@@ -16,6 +16,7 @@ Status: early-stage repository with a working local stack. Expect changes as fea
 - Import/export for backups and migration
 - Multi-user support with profiles
 - TVmaze metadata and imagery (no API key required)
+- Show lists grouped by status (watch next, queued, up to date, completed, planned)
 
 ## Stack
 - UI: React + Vite

@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import express from 'express';
 import session from 'express-session';
 import fs from 'fs';
@@ -7,14 +8,27 @@ import { fileURLToPath } from 'url';
 import db from './db.js';
 import { fetchEpisodes, fetchShow, searchShows } from './tvmaze.js';
 import { isReleased, stripHtml } from './utils.js';
+import SqliteSessionStore from './session-store.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 4285;
+const sessionSecret = resolveSessionSecret();
+const tvmazeSyncEnabled = process.env.TVMAZE_SYNC_ENABLED !== 'false';
+const tvmazeSyncIntervalMs =
+  Number(process.env.TVMAZE_SYNC_INTERVAL_MS) || 12 * 60 * 60 * 1000;
+const tvmazeSyncDelayMs =
+  Number(process.env.TVMAZE_SYNC_DELAY_MS) || 500;
+const tvmazeSyncOnStartup = process.env.TVMAZE_SYNC_ON_STARTUP !== 'false';
+let tvmazeSyncInProgress = false;
 
 app.use(express.json({ limit: '10mb' }));
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'episodely-dev-secret',
+    secret: sessionSecret,
+    store: new SqliteSessionStore(),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -24,6 +38,38 @@ app.use(
     },
   })
 );
+
+function resolveSessionSecret() {
+  if (process.env.SESSION_SECRET) {
+    return process.env.SESSION_SECRET;
+  }
+
+  const dbPath =
+    process.env.DB_PATH ||
+    path.resolve(__dirname, '..', 'db', 'episodely.sqlite');
+  const secretPath = path.join(
+    path.dirname(dbPath),
+    '.episodely-session-secret'
+  );
+
+  try {
+    const existing = fs.readFileSync(secretPath, 'utf8').trim();
+    if (existing) return existing;
+  } catch (error) {
+    if (error?.code !== 'ENOENT') {
+      console.warn('Failed to read session secret, regenerating.', error);
+    }
+  }
+
+  const secret = crypto.randomBytes(32).toString('hex');
+  try {
+    fs.mkdirSync(path.dirname(secretPath), { recursive: true });
+    fs.writeFileSync(secretPath, `${secret}\n`, { mode: 0o600 });
+  } catch (error) {
+    console.warn('Failed to persist session secret, using in-memory value.', error);
+  }
+  return secret;
+}
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -45,6 +91,10 @@ function requireProfile(req, res, next) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function runTransaction(fn) {
@@ -209,7 +259,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
 function listShowsForProfile(profileId) {
   const shows = db
     .prepare(
-      `SELECT s.*
+      `SELECT s.*, ps.status AS profile_status
        FROM shows s
        JOIN profile_shows ps ON ps.show_id = s.id
        WHERE ps.profile_id = ?
@@ -259,8 +309,10 @@ function listShowsForProfile(profileId) {
       showEpisodes.length > 0 &&
       showEpisodes.every((episode) => episode.watched_at);
 
-    let state = 'planned';
-    if (started && releasedUnwatched.length > 0) {
+    let state = 'queued';
+    if (show.profile_status === 'stopped') {
+      state = 'stopped';
+    } else if (started && releasedUnwatched.length > 0) {
       state = 'watch-next';
     } else if (!started && hasReleased) {
       state = 'queued';
@@ -269,7 +321,7 @@ function listShowsForProfile(profileId) {
     } else if (isEnded && allEpisodesWatched) {
       state = 'completed';
     } else if (!hasReleased) {
-      state = 'planned';
+      state = 'queued';
     } else {
       state = 'up-to-date';
     }
@@ -289,6 +341,7 @@ function listShowsForProfile(profileId) {
       premiered: show.premiered,
       ended: show.ended,
       image: show.image_original || show.image_medium,
+      profileStatus: show.profile_status || null,
       state,
       stats: {
         totalEpisodes: showEpisodes.length,
@@ -467,23 +520,23 @@ app.get('/api/shows', requireAuth, requireProfile, (req, res) => {
 
   const categories = [
     { id: 'watch-next', label: 'Watch Next', shows: [] },
-    { id: 'queued', label: 'Queued', shows: [] },
+    { id: 'queued', label: 'Not Started', shows: [] },
     { id: 'up-to-date', label: 'Up To Date', shows: [] },
     { id: 'completed', label: 'Completed', shows: [] },
-    { id: 'planned', label: 'Planned', shows: [] },
+    { id: 'stopped', label: 'Stopped Watching', shows: [] },
   ];
 
   const bucketMap = new Map(categories.map((category) => [category.id, category]));
 
   shows.forEach((show) => {
-    if (show.state === 'watch-next') {
+    if (show.state === 'stopped') {
+      bucketMap.get('stopped').shows.push(show);
+    } else if (show.state === 'watch-next') {
       bucketMap.get('watch-next').shows.push(show);
     } else if (show.state === 'queued') {
       bucketMap.get('queued').shows.push(show);
     } else if (show.state === 'up-to-date') {
       bucketMap.get('up-to-date').shows.push(show);
-    } else if (show.state === 'planned') {
-      bucketMap.get('planned').shows.push(show);
     } else {
       bucketMap.get('completed').shows.push(show);
     }
@@ -496,7 +549,7 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
   const showId = Number(req.params.id);
   const show = db
     .prepare(
-      `SELECT s.*
+      `SELECT s.*, ps.status AS profile_status
        FROM shows s
        JOIN profile_shows ps ON ps.show_id = s.id
        WHERE ps.profile_id = ? AND s.id = ?`
@@ -565,9 +618,37 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       premiered: show.premiered,
       ended: show.ended,
       image: show.image_original || show.image_medium,
+      profileStatus: show.profile_status || null,
     },
     seasons,
   });
+});
+
+app.post('/api/shows/:id/status', requireAuth, requireProfile, (req, res) => {
+  const showId = Number(req.params.id);
+  const { status } = req.body || {};
+  const allowed = [null, 'stopped'];
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  const row = db
+    .prepare(
+      `SELECT ps.show_id
+       FROM profile_shows ps
+       WHERE ps.profile_id = ? AND ps.show_id = ?`
+    )
+    .get(req.session.profileId, showId);
+
+  if (!row) {
+    return res.status(404).json({ error: 'Show not found' });
+  }
+
+  db.prepare(
+    'UPDATE profile_shows SET status = ? WHERE profile_id = ? AND show_id = ?'
+  ).run(status, req.session.profileId, showId);
+
+  return res.json({ ok: true });
 });
 
 app.post('/api/episodes/:id/watch', requireAuth, requireProfile, (req, res) => {
@@ -667,7 +748,11 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
     .all(req.session.profileId);
 
   const upcoming = episodes.filter((episode) => {
-    if (!episode.airdate) return true;
+    const airtime = (episode.airtime || '').trim();
+    if (airtime.toUpperCase() === 'TBD') {
+      return false;
+    }
+    if (!episode.airdate) return false;
     const airdate = new Date(episode.airdate);
     return airdate >= today && airdate <= cutoff;
   });
@@ -785,8 +870,6 @@ app.post('/api/import', requireAuth, requireProfile, async (req, res) => {
   }
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const distPath = path.resolve(__dirname, '..', 'dist');
 const indexHtml = path.join(distPath, 'index.html');
 
@@ -802,3 +885,44 @@ if (fs.existsSync(indexHtml)) {
 app.listen(port, () => {
   console.log(`API running on http://localhost:${port}`);
 });
+
+function startTvmazeSync() {
+  if (!tvmazeSyncEnabled) {
+    return;
+  }
+
+  const runSync = async () => {
+    if (tvmazeSyncInProgress) {
+      return;
+    }
+    tvmazeSyncInProgress = true;
+    try {
+      const rows = db.prepare('SELECT DISTINCT tvmaze_id FROM shows').all();
+      for (const row of rows) {
+        if (!row?.tvmaze_id) continue;
+        try {
+          await upsertShowWithEpisodes(row.tvmaze_id);
+        } catch (error) {
+          console.warn(
+            `TVmaze sync failed for ${row.tvmaze_id}: ${error.message}`
+          );
+        }
+        if (tvmazeSyncDelayMs > 0) {
+          await sleep(tvmazeSyncDelayMs);
+        }
+      }
+    } finally {
+      tvmazeSyncInProgress = false;
+    }
+  };
+
+  if (tvmazeSyncOnStartup) {
+    runSync();
+  }
+
+  if (tvmazeSyncIntervalMs > 0) {
+    setInterval(runSync, tvmazeSyncIntervalMs);
+  }
+}
+
+startTvmazeSync();

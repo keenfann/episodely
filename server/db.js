@@ -66,6 +66,7 @@ db.exec(`
     profile_id INTEGER NOT NULL,
     show_id INTEGER NOT NULL,
     created_at TEXT NOT NULL,
+    status TEXT,
     PRIMARY KEY (profile_id, show_id),
     FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE,
     FOREIGN KEY (show_id) REFERENCES shows(id) ON DELETE CASCADE
@@ -83,6 +84,13 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_episodes_show_id ON episodes(show_id);
   CREATE INDEX IF NOT EXISTS idx_profile_episodes_profile_id
     ON profile_episodes(profile_id);
+
+  CREATE TABLE IF NOT EXISTS sessions (
+    sid TEXT PRIMARY KEY,
+    sess TEXT NOT NULL,
+    expires INTEGER
+  );
+  CREATE INDEX IF NOT EXISTS idx_sessions_expires ON sessions(expires);
 `);
 
 const userColumns = db
@@ -92,6 +100,15 @@ const userColumns = db
 
 if (!userColumns.includes('last_profile_id')) {
   db.exec('ALTER TABLE users ADD COLUMN last_profile_id INTEGER;');
+}
+
+const profileShowColumns = db
+  .prepare('PRAGMA table_info(profile_shows)')
+  .all()
+  .map((column) => column.name);
+
+if (!profileShowColumns.includes('status')) {
+  db.exec('ALTER TABLE profile_shows ADD COLUMN status TEXT;');
 }
 
 export default db;

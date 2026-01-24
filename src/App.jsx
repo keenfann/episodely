@@ -12,10 +12,10 @@ import { apiFetch } from './api.js';
 
 const STATE_LABELS = {
   'watch-next': 'Watch Next',
-  queued: 'Queued',
+  queued: 'Not Started',
   'up-to-date': 'Up To Date',
-  completed: 'Completed / Planned',
-  planned: 'Planned',
+  completed: 'Completed',
+  stopped: 'Stopped Watching',
 };
 
 function formatEpisodeCode(episode) {
@@ -69,6 +69,7 @@ function App() {
   const [loadingShows, setLoadingShows] = useState(false);
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -212,6 +213,15 @@ function App() {
     await loadShows();
   };
 
+  const handleShowStatus = async (showId, status) => {
+    await apiFetch(`/api/shows/${showId}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    });
+    await loadShowDetail(showId);
+    await loadShows();
+  };
+
   const toggleEpisode = async (episodeId, watched) => {
     await apiFetch(`/api/episodes/${episodeId}/watch`, {
       method: 'POST',
@@ -250,9 +260,16 @@ function App() {
   };
 
   const handleImport = async (event) => {
-    const file = event.target.files?.[0];
+    if (importing) {
+      setNotice('Import already running. Please wait.');
+      return;
+    }
+    const input = event.target;
+    const file = input.files?.[0];
     if (!file) return;
     try {
+      setNotice('Import started. This can take a few minutes.');
+      setImporting(true);
       const text = await file.text();
       let payload = null;
       if (file.name.endsWith('.csv')) {
@@ -277,7 +294,12 @@ function App() {
       await loadShows();
       await loadCalendar();
     } catch (error) {
-      setNotice(error.message);
+      setNotice(`Import failed: ${error.message}`);
+    } finally {
+      setImporting(false);
+      if (input) {
+        input.value = '';
+      }
     }
   };
 
@@ -331,18 +353,27 @@ function App() {
             Settings
           </NavLink>
         </nav>
-        <div className="profile-chip">
-          <span>{activeProfile.name}</span>
+        <div className="top-bar__right">
           <button
-            className="text-button"
-            onClick={() => {
-              setActiveProfile(null);
-              setShowDetail(null);
-              navigate('/profiles');
-            }}
+            className="primary"
+            type="button"
+            onClick={() => navigate('/add')}
           >
-            Switch
+            Add show
           </button>
+          <div className="profile-chip">
+            <span>{activeProfile.name}</span>
+            <button
+              className="text-button"
+              onClick={() => {
+                setActiveProfile(null);
+                setShowDetail(null);
+                navigate('/profiles');
+              }}
+            >
+              Switch
+            </button>
+          </div>
         </div>
       </header>
 
@@ -353,15 +384,22 @@ function App() {
             path="/shows"
             element={
               <ShowsPage
+                categories={categories}
+                loadingShows={loadingShows}
+                onRefresh={loadShows}
+              />
+            }
+          />
+          <Route
+            path="/add"
+            element={
+              <AddShowPage
                 searchQuery={searchQuery}
                 searchResults={searchResults}
                 searchError={searchError}
-                categories={categories}
-                loadingShows={loadingShows}
                 onSearchQuery={setSearchQuery}
                 onSearch={handleSearch}
                 onAddShow={handleAddShow}
-                onRefresh={loadShows}
               />
             }
           />
@@ -374,6 +412,7 @@ function App() {
                 onLoadShowDetail={loadShowDetail}
                 onToggleEpisode={toggleEpisode}
                 onToggleSeason={toggleSeason}
+                onUpdateShowStatus={handleShowStatus}
               />
             }
           />
@@ -390,6 +429,7 @@ function App() {
                 profiles={profiles}
                 activeProfile={activeProfile}
                 notice={notice}
+                isImporting={importing}
                 onProfileSelect={handleProfileSelect}
                 onProfileCreate={handleProfileCreate}
                 onExport={handleExport}
@@ -406,72 +446,27 @@ function App() {
 }
 
 function ShowsPage({
-  searchQuery,
-  searchResults,
-  searchError,
   categories,
   loadingShows,
-  onSearchQuery,
-  onSearch,
-  onAddShow,
   onRefresh,
 }) {
   const navigate = useNavigate();
+  const [collapsedCategories, setCollapsedCategories] = useState(() => ({
+    completed: true,
+    stopped: true,
+  }));
+
+  const toggleCategory = (categoryId) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [categoryId]: !prev[categoryId],
+    }));
+  };
 
   return (
-    <div className="shows-layout">
-      <section className="panel">
-        <div className="panel__header">
-          <div>
-            <h2>Shows</h2>
-            <p className="muted">Search TVmaze and add a show to your queue.</p>
-          </div>
-          <form
-            className="search-bar"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onSearch();
-            }}
-          >
-            <input
-              type="search"
-              placeholder="Search shows..."
-              value={searchQuery}
-              onChange={(event) => onSearchQuery(event.target.value)}
-            />
-            <button className="primary" type="submit">
-              Search
-            </button>
-          </form>
-        </div>
-        {searchResults.length > 0 && (
-          <div className="search-results">
-            {searchResults.map((result) => (
-              <div key={result.id} className="search-card">
-                {result.image ? (
-                  <img src={result.image} alt={result.name} />
-                ) : (
-                  <div className="image-fallback" />
-                )}
-                <div>
-                  <h3>{result.name}</h3>
-                  <p className="muted">
-                    {result.summary || 'No summary available.'}
-                  </p>
-                </div>
-                <button className="outline" onClick={() => onAddShow(result.id)}>
-                  Add
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        {searchError && <div className="error">{searchError}</div>}
-      </section>
-
-      <section className="panel">
-        <div className="panel__header">
-          <div>
+    <section className="panel">
+      <div className="panel__header">
+        <div>
             <h2>Watch Queue</h2>
             <p className="muted">Your shows sorted by what to watch next.</p>
           </div>
@@ -483,62 +478,139 @@ function ShowsPage({
           <div className="empty-state">Loading shows...</div>
         ) : (
           categories.map((category) => (
-            <div key={category.id} className="category">
-              <div className="category__title">{category.label}</div>
-              {category.shows.length === 0 ? (
-                <div className="empty-state">No shows here yet.</div>
-              ) : (
-                <div className="show-grid">
-                  {category.shows.map((show) => (
-                    <button
-                      key={show.id}
-                      type="button"
-                      className="show-card"
-                      onClick={() => navigate(`/shows/${show.id}`)}
-                    >
-                      <div className="show-card__art">
-                        {show.image ? (
-                          <img src={show.image} alt={show.name} />
-                        ) : (
-                          <div className="image-fallback" />
-                        )}
-                      </div>
-                      <div className="show-card__body">
-                        <div>
-                          <h3>{show.name}</h3>
-                          <span className="tag">{STATE_LABELS[show.state]}</span>
-                        </div>
-                        {show.nextEpisode && (
-                          <div className="show-card__meta">
-                            <span>
-                              Next: {formatEpisodeCode(show.nextEpisode)}
-                            </span>
-                            <span className="muted">
-                              {show.nextEpisode.name || 'Upcoming episode'}
-                            </span>
+            <div
+              key={category.id}
+              className={`category category--${category.id}`}
+            >
+              <button
+                type="button"
+                className="category__header"
+                aria-expanded={!collapsedCategories[category.id]}
+                aria-controls={`category-${category.id}`}
+                onClick={() => toggleCategory(category.id)}
+              >
+                <div className="category__title">{category.label}</div>
+                <span className="text-button category__toggle">
+                  {collapsedCategories[category.id] ? 'Show' : 'Hide'}
+                </span>
+              </button>
+              {!collapsedCategories[category.id] && (
+                <div id={`category-${category.id}`} className="category__body">
+                  {category.shows.length === 0 ? (
+                    <div className="empty-state">No shows here yet.</div>
+                  ) : (
+                    <div className="show-grid">
+                      {category.shows.map((show) => (
+                        <button
+                          key={show.id}
+                          type="button"
+                          className="show-card"
+                          onClick={() => navigate(`/shows/${show.id}`)}
+                        >
+                          <div className="show-card__art">
+                            {show.image ? (
+                              <img src={show.image} alt={show.name} />
+                            ) : (
+                              <div className="image-fallback" />
+                            )}
                           </div>
-                        )}
-                        <div className="show-card__stats">
-                          <span>
-                            Watched {show.stats.watchedEpisodes}/
-                            {show.stats.totalEpisodes}
-                          </span>
-                          {show.stats.releasedUnwatched > 0 && (
-                            <span className="highlight">
-                              {show.stats.releasedUnwatched} released left
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                          <div className="show-card__body">
+                            <div>
+                              <h3>{show.name}</h3>
+                              <span className="tag">{STATE_LABELS[show.state]}</span>
+                            </div>
+                            {show.nextEpisode && (
+                              <div className="show-card__meta">
+                                <span>
+                                  Next: {formatEpisodeCode(show.nextEpisode)}
+                                </span>
+                                <span className="muted">
+                                  {show.nextEpisode.name || 'Upcoming episode'}
+                                </span>
+                              </div>
+                            )}
+                            <div className="show-card__stats">
+                              <span>
+                                Watched {show.stats.watchedEpisodes}/
+                                {show.stats.totalEpisodes}
+                              </span>
+                              {show.stats.releasedUnwatched > 0 && (
+                                <span className="highlight">
+                                  {show.stats.releasedUnwatched} released left
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
           ))
         )}
-      </section>
-    </div>
+    </section>
+  );
+}
+
+function AddShowPage({
+  searchQuery,
+  searchResults,
+  searchError,
+  onSearchQuery,
+  onSearch,
+  onAddShow,
+}) {
+  return (
+    <section className="panel add-show-page">
+      <div className="panel__header">
+        <div>
+          <h2>Add Shows</h2>
+          <p className="muted">Search TVmaze and add a show to your queue.</p>
+        </div>
+        <form
+          className="search-bar"
+          onSubmit={(event) => {
+            event.preventDefault();
+            onSearch();
+          }}
+        >
+          <input
+            type="search"
+            placeholder="Search shows..."
+            value={searchQuery}
+            onChange={(event) => onSearchQuery(event.target.value)}
+          />
+          <button className="primary" type="submit">
+            Search
+          </button>
+        </form>
+      </div>
+      {searchResults.length > 0 && (
+        <div className="search-results">
+          {searchResults.map((result) => (
+            <div key={result.id} className="search-card">
+              {result.image ? (
+                <img src={result.image} alt={result.name} />
+              ) : (
+                <div className="image-fallback" />
+              )}
+              <div>
+                <h3>{result.name}</h3>
+                <p className="muted">
+                  {result.summary || 'No summary available.'}
+                </p>
+              </div>
+              <button className="outline" onClick={() => onAddShow(result.id)}>
+                Add
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      {searchError && <div className="error">{searchError}</div>}
+    </section>
   );
 }
 
@@ -548,6 +620,7 @@ function ShowDetailPage({
   onLoadShowDetail,
   onToggleEpisode,
   onToggleSeason,
+  onUpdateShowStatus,
 }) {
   const navigate = useNavigate();
   const params = useParams();
@@ -597,6 +670,7 @@ function ShowDetailPage({
       onBack={() => navigate('/shows')}
       onToggleEpisode={onToggleEpisode}
       onToggleSeason={onToggleSeason}
+      onUpdateShowStatus={onUpdateShowStatus}
     />
   );
 }
@@ -628,12 +702,12 @@ function CalendarPage({ calendar, onRefresh }) {
               </div>
               <div className="calendar-card__body">
                 <div className="calendar-card__meta">
-                  <span className="tag">{episode.showName}</span>
                   <AirdateBadge airdate={episode.airdate} />
                 </div>
-                <h3>
+                <h3 className="calendar-card__show">{episode.showName}</h3>
+                <h4 className="calendar-card__episode">
                   {formatEpisodeCode(episode)} - {episode.name}
-                </h3>
+                </h4>
                 {episode.airtime && (
                   <p className="muted">Airs at {episode.airtime}</p>
                 )}
@@ -653,6 +727,7 @@ function SettingsPage({
   profiles,
   activeProfile,
   notice,
+  isImporting,
   onProfileSelect,
   onProfileCreate,
   onExport,
@@ -696,16 +771,24 @@ function SettingsPage({
             <button className="primary" onClick={onExport}>
               Export data
             </button>
-            <label className="outline">
+            <label className={isImporting ? 'outline is-disabled' : 'outline'}>
               Import file
               <input
                 type="file"
                 accept=".json,.csv,application/json,text/csv"
                 onChange={onImport}
+                disabled={isImporting}
               />
             </label>
           </div>
           {notice && <p className="notice">{notice}</p>}
+          {isImporting && (
+            <div className="import-status" aria-live="polite">
+              <div className="progress-bar" role="progressbar" aria-valuetext="Importing">
+                <span className="progress-bar__fill" />
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </section>
@@ -787,7 +870,7 @@ function ProfileView({ profiles, onCreate, onSelect, onLogout }) {
 
   return (
     <div className="auth-shell">
-      <div className="panel panel--center">
+      <div className="panel panel--center profile-panel">
         <div className="panel__header">
           <div>
             <h2>Select a profile</h2>
@@ -880,6 +963,7 @@ function ShowDetailView({
   onBack,
   onToggleEpisode,
   onToggleSeason,
+  onUpdateShowStatus,
 }) {
   const [openSeasons, setOpenSeasons] = useState({});
 
@@ -907,17 +991,36 @@ function ShowDetailView({
   return (
     <section className="panel show-detail">
       <div className="panel__header">
-        <button className="outline" onClick={onBack}>
-          Back to shows
-        </button>
-        <div className="show-detail__title">
-          <h2>{show.name}</h2>
-          <p className="muted">
-            {show.status || 'Unknown status'}
-            {show.premiered ? ` - Premiered ${show.premiered}` : ''}
-            {show.ended ? ` - Ended ${show.ended}` : ''}
-          </p>
+        <div className="show-detail__heading">
+          <button className="outline" onClick={onBack}>
+            Back to shows
+          </button>
+          <div className="show-detail__title">
+            <div className="show-detail__title-row">
+              <h2>{show.name}</h2>
+              {show.profileStatus === 'stopped' && (
+                <span className="badge badge--muted">Stopped Watching</span>
+              )}
+            </div>
+            <p className="muted">
+              {show.status || 'Unknown status'}
+              {show.premiered ? ` - Premiered ${show.premiered}` : ''}
+              {show.ended ? ` - Ended ${show.ended}` : ''}
+            </p>
+          </div>
         </div>
+        <button
+          className="outline"
+          type="button"
+          onClick={() =>
+            onUpdateShowStatus(
+              show.id,
+              show.profileStatus === 'stopped' ? null : 'stopped'
+            )
+          }
+        >
+          {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
+        </button>
       </div>
       <div className="show-detail__hero">
         <div className="show-detail__image">

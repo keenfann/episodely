@@ -1,11 +1,11 @@
 # Episodely
 
-Episodely is a self-hosted web app for tracking watched TV series and movies. It aims to provide the core watch tracking flow of TV Time with a local-first setup, plus calendar views for upcoming releases and import/export to make migration easy.
+Episodely is a self-hosted web app for tracking watched TV series. It aims to provide the core watch tracking flow of TV Time with a local-first setup, plus calendar views for upcoming releases and import/export to make migration easy.
 
 Status: early-stage repository. Features and setup will expand as development progresses.
 
 ## Goals
-- Simple, fast watch tracking for series and movies
+- Simple, fast watch tracking for TV series
 - Calendar views for upcoming episodes and releases
 - Easy import/export for migration in and out
 - Self-hosted and Docker-first, similar to the *arr suite

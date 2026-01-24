@@ -33,7 +33,7 @@ Requirements: Node.js 22+
 - `npm run build` builds the UI to `dist/`
 - `npm run start` serves the API and the built UI from one process
 
-The API is available at `http://localhost:3000/api/health` during development.
+The API is available at `http://localhost:4285/api/health` during development.
 
 ### First run
 - Create an account and log in.
@@ -42,7 +42,7 @@ The API is available at `http://localhost:3000/api/health` during development.
 
 ## Quick Start (Docker)
 - `docker compose up`
-- Visit `http://localhost:3000`
+- Visit `http://localhost:4285`
 
 Set `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`). The server generates and stores `SESSION_SECRET` on first start, and the Compose file pulls `ghcr.io/keenfann/episodely:latest` on start.
 

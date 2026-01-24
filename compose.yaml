@@ -3,9 +3,9 @@ services:
     image: ghcr.io/keenfann/episodely:latest
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "4285:4285"
     environment:
-      PORT: 3000
+      PORT: 4285
       DB_PATH: /data/episodely.sqlite
     volumes:
       - ./data:/data

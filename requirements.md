@@ -35,9 +35,7 @@ Episodely is a self-hosted web app for tracking watched TV series. It provides a
 - Self-hosted using Docker
 
 ## Metadata Source
-- TMDb (The Movie Database) for TV and movie metadata
-- Store the TMDb API key in `.env` and never commit it
-- Follow TMDb attribution requirements in the UI
+- TVmaze for TV metadata (no API key required)
 
 ## Notes
 - Scope is intentionally smaller than the *arr suite.

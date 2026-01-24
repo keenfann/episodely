@@ -1,7 +1,7 @@
 services:
   episodely:
     image: ghcr.io/keenfann/episodely:latest
-    pull_policy: always
+    restart: unless-stopped
     ports:
       - "3000:3000"
     environment:

@@ -2,9 +2,9 @@ services:
   episodely:
     build: .
     ports:
-      - "3000:3000"
+      - "4285:4285"
     environment:
-      PORT: 3000
+      PORT: 4285
       SESSION_SECRET: change-me
       DB_PATH: /data/episodely.sqlite
     volumes:

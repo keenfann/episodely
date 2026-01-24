@@ -16,6 +16,13 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 const sessionSecret = resolveSessionSecret();
+const tvmazeSyncEnabled = process.env.TVMAZE_SYNC_ENABLED !== 'false';
+const tvmazeSyncIntervalMs =
+  Number(process.env.TVMAZE_SYNC_INTERVAL_MS) || 12 * 60 * 60 * 1000;
+const tvmazeSyncDelayMs =
+  Number(process.env.TVMAZE_SYNC_DELAY_MS) || 500;
+const tvmazeSyncOnStartup = process.env.TVMAZE_SYNC_ON_STARTUP !== 'false';
+let tvmazeSyncInProgress = false;
 
 app.use(express.json({ limit: '10mb' }));
 app.use(
@@ -84,6 +91,10 @@ function requireProfile(req, res, next) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function runTransaction(fn) {
@@ -874,3 +885,44 @@ if (fs.existsSync(indexHtml)) {
 app.listen(port, () => {
   console.log(`API running on http://localhost:${port}`);
 });
+
+function startTvmazeSync() {
+  if (!tvmazeSyncEnabled) {
+    return;
+  }
+
+  const runSync = async () => {
+    if (tvmazeSyncInProgress) {
+      return;
+    }
+    tvmazeSyncInProgress = true;
+    try {
+      const rows = db.prepare('SELECT DISTINCT tvmaze_id FROM shows').all();
+      for (const row of rows) {
+        if (!row?.tvmaze_id) continue;
+        try {
+          await upsertShowWithEpisodes(row.tvmaze_id);
+        } catch (error) {
+          console.warn(
+            `TVmaze sync failed for ${row.tvmaze_id}: ${error.message}`
+          );
+        }
+        if (tvmazeSyncDelayMs > 0) {
+          await sleep(tvmazeSyncDelayMs);
+        }
+      }
+    } finally {
+      tvmazeSyncInProgress = false;
+    }
+  };
+
+  if (tvmazeSyncOnStartup) {
+    runSync();
+  }
+
+  if (tvmazeSyncIntervalMs > 0) {
+    setInterval(runSync, tvmazeSyncIntervalMs);
+  }
+}
+
+startTvmazeSync();

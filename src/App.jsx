@@ -18,6 +18,9 @@ const STATE_LABELS = {
   stopped: 'Stopped Watching',
 };
 
+const APP_VERSION =
+  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : 'dev';
+
 function formatEpisodeCode(episode) {
   const season = episode.season ?? 0;
   const number = episode.number ?? 0;
@@ -430,6 +433,7 @@ function App() {
                 activeProfile={activeProfile}
                 notice={notice}
                 isImporting={importing}
+                appVersion={APP_VERSION}
                 onProfileSelect={handleProfileSelect}
                 onProfileCreate={handleProfileCreate}
                 onExport={handleExport}
@@ -728,6 +732,7 @@ function SettingsPage({
   activeProfile,
   notice,
   isImporting,
+  appVersion,
   onProfileSelect,
   onProfileCreate,
   onExport,
@@ -740,6 +745,7 @@ function SettingsPage({
         <div>
           <h2>Settings</h2>
           <p className="muted">Manage profiles, exports, and account access.</p>
+          <p className="muted settings-version">Version {appVersion}</p>
         </div>
         <button className="outline" onClick={onLogout}>
           Log out

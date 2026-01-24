@@ -215,6 +215,10 @@ input:focus {
   color: var(--text-muted);
 }
 
+.settings-version {
+  font-size: 0.85rem;
+}
+
 .primary,
 .outline,
 .text-button {

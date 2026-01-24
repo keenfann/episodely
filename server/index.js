@@ -875,7 +875,7 @@ const indexHtml = path.join(distPath, 'index.html');
 
 if (fs.existsSync(indexHtml)) {
   app.use(express.static(distPath));
-  app.get('*', (req, res) => {
+  app.get('/*', (req, res) => {
     res.sendFile(indexHtml);
   });
 } else {

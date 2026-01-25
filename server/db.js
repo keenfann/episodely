@@ -114,4 +114,13 @@ if (!profileShowColumns.includes('status')) {
   db.exec('ALTER TABLE profile_shows ADD COLUMN status TEXT;');
 }
 
+const showColumns = db
+  .prepare('PRAGMA table_info(shows)')
+  .all()
+  .map((column) => column.name);
+
+if (!showColumns.includes('imdb_id')) {
+  db.exec('ALTER TABLE shows ADD COLUMN imdb_id TEXT;');
+}
+
 export default db;

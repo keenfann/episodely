@@ -1366,6 +1366,9 @@ function ShowDetailView({
   const isFinished = show.state === 'completed';
   const canToggleStatus = !isFinished;
   const canRemove = show.profileStatus === 'stopped';
+  const imdbUrl = show.imdbId
+    ? `https://www.imdb.com/title/${show.imdbId}/`
+    : null;
   return (
     <section className="panel show-detail">
       <div className="panel__header show-detail__header">
@@ -1401,6 +1404,19 @@ function ShowDetailView({
               {show.status || 'Unknown status'}
               {show.premiered ? ` - Premiered ${show.premiered}` : ''}
               {show.ended ? ` - Ended ${show.ended}` : ''}
+              {imdbUrl && (
+                <>
+                  {' · '}
+                  <a
+                    className="show-detail__imdb-link"
+                    href={imdbUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    IMDb
+                  </a>
+                </>
+              )}
             </p>
           </div>
         </div>

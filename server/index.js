@@ -190,6 +190,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
     ended: show.ended,
     image_medium: show.image?.medium || null,
     image_original: show.image?.original || null,
+    imdb_id: show.externals?.imdb || null,
     updated_at: nowIso(),
   };
 
@@ -199,13 +200,13 @@ async function upsertShowWithEpisodes(tvmazeId) {
 
   const insertShow = db.prepare(
     `INSERT INTO shows
-      (tvmaze_id, name, summary, status, premiered, ended, image_medium, image_original, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      (tvmaze_id, name, summary, status, premiered, ended, image_medium, image_original, imdb_id, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const updateShow = db.prepare(
     `UPDATE shows
        SET name = ?, summary = ?, status = ?, premiered = ?, ended = ?,
-           image_medium = ?, image_original = ?, updated_at = ?
+           image_medium = ?, image_original = ?, imdb_id = ?, updated_at = ?
      WHERE tvmaze_id = ?`
   );
 
@@ -236,6 +237,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
         showPayload.ended,
         showPayload.image_medium,
         showPayload.image_original,
+        showPayload.imdb_id,
         showPayload.updated_at,
         showPayload.tvmaze_id
       );
@@ -249,6 +251,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
         showPayload.ended,
         showPayload.image_medium,
         showPayload.image_original,
+        showPayload.imdb_id,
         showPayload.updated_at
       );
       showId = toNumber(result.lastInsertRowid);
@@ -737,6 +740,7 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       premiered: show.premiered,
       ended: show.ended,
       image: show.image_original || show.image_medium,
+      imdbId: show.imdb_id || null,
       profileStatus: show.profile_status || null,
       state,
     },

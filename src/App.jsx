@@ -508,8 +508,17 @@ function ShowsPage({
                 onClick={() => toggleCategory(category.id)}
               >
                 <div className="category__title">{category.label}</div>
-                <span className="text-button category__toggle">
-                  {collapsedCategories[category.id] ? 'Show' : 'Hide'}
+                <span className="category__toggle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path
+                      d="M6 9l6 6 6-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
               </button>
               {!collapsedCategories[category.id] && (
@@ -1076,32 +1085,65 @@ function ShowDetailView({
               openSeasons[String(season.season)] ?? !season.watched;
             return (
               <div key={season.season} className="season-card">
-                <div className="season-card__header">
+                <div
+                  className="season-card__header"
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isOpen}
+                  aria-controls={`season-${season.season}`}
+                  onClick={() => toggleSeasonOpen(season.season)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      toggleSeasonOpen(season.season);
+                    }
+                  }}
+                >
                   <div>
                     <h3>Season {season.season}</h3>
                     <p className="muted">
                       Watched {season.watchedCount}/{season.totalCount}
                     </p>
                   </div>
-                <div className="season-actions">
-                  <button
-                    className="season-toggle"
-                    onClick={() => toggleSeasonOpen(season.season)}
-                    type="button"
-                  >
-                    {isOpen ? 'Hide episodes' : 'Show episodes'}
-                  </button>
-                  <CheckButton
-                    active={season.watched}
-                    label={
-                      season.watched ? 'Mark season unwatched' : 'Mark season watched'
-                    }
-                    onClick={() => onToggleSeason(season.season, !season.watched)}
-                  />
-                </div>
+                  <div className="season-actions">
+                    <button
+                      className="season-toggle"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleSeasonOpen(season.season);
+                      }}
+                      type="button"
+                      aria-label={isOpen ? 'Collapse season' : 'Expand season'}
+                      aria-expanded={isOpen}
+                      title={isOpen ? 'Collapse season' : 'Expand season'}
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path
+                          d="M6 9l6 6 6-6"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                    <CheckButton
+                      active={season.watched}
+                      label={
+                        season.watched
+                          ? 'Mark season unwatched'
+                          : 'Mark season watched'
+                      }
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onToggleSeason(season.season, !season.watched);
+                      }}
+                    />
+                  </div>
                 </div>
                 {isOpen && (
-                  <div className="episode-list">
+                  <div id={`season-${season.season}`} className="episode-list">
                     {season.episodes.map((episode) => {
                       return (
                         <div

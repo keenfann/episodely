@@ -727,6 +727,22 @@ input:focus {
   gap: 1rem;
 }
 
+.settings-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.settings-form label {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.settings-form input {
+  width: 100%;
+}
+
 .profile-list {
   display: flex;
   flex-wrap: wrap;
@@ -819,6 +835,12 @@ input:focus {
 }
 
 .outline.is-disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.primary.is-disabled {
   opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;

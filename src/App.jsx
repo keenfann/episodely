@@ -832,8 +832,100 @@ function SettingsPage({
             </div>
           )}
         </div>
+        <ChangePasswordCard />
       </div>
     </section>
+  );
+}
+
+function ChangePasswordCard() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setNotice('');
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError('Complete all password fields.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await apiFetch('/api/auth/password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setNotice('Password updated.');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="settings-card">
+      <h3>Change password</h3>
+      <p className="muted">Update your account password.</p>
+      <form className="settings-form" onSubmit={handleSubmit}>
+        <label>
+          Current password
+          <input
+            type="password"
+            autoComplete="current-password"
+            value={currentPassword}
+            onChange={(event) => setCurrentPassword(event.target.value)}
+          />
+        </label>
+        <label>
+          New password
+          <input
+            type="password"
+            autoComplete="new-password"
+            minLength={6}
+            value={newPassword}
+            onChange={(event) => setNewPassword(event.target.value)}
+          />
+        </label>
+        <label>
+          Confirm new password
+          <input
+            type="password"
+            autoComplete="new-password"
+            minLength={6}
+            value={confirmPassword}
+            onChange={(event) => setConfirmPassword(event.target.value)}
+          />
+        </label>
+        <button
+          className={isSubmitting ? 'primary is-disabled' : 'primary'}
+          type="submit"
+          disabled={isSubmitting}
+        >
+          Update password
+        </button>
+      </form>
+      {error && <p className="error">{error}</p>}
+      {notice && <p className="notice">{notice}</p>}
+    </div>
   );
 }
 

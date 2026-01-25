@@ -418,6 +418,38 @@ app.post('/api/auth/login', async (req, res) => {
   return res.json({ ok: true });
 });
 
+app.post('/api/auth/password', requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) {
+    return res
+      .status(400)
+      .json({ error: 'Current and new password required' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password too short' });
+  }
+
+  const user = db
+    .prepare('SELECT id, password_hash FROM users WHERE id = ?')
+    .get(req.session.userId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const ok = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!ok) {
+    return res.status(401).json({ error: 'Invalid current password' });
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(
+    passwordHash,
+    req.session.userId
+  );
+
+  return res.json({ ok: true });
+});
+
 app.post('/api/auth/logout', (req, res) => {
   req.session.destroy(() => {
     res.json({ ok: true });

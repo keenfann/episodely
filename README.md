@@ -17,6 +17,7 @@ Status: early-stage repository with a working local stack. Expect changes as fea
 - Release calendar for upcoming episodes
 - Import/export for backups and migration
 - Multi-user support with profiles
+- Change account password from settings
 - TVmaze metadata and imagery (no API key required)
 - Show lists grouped by status (watch next, not started, up to date, completed, stopped watching)
 

@@ -771,6 +771,38 @@ app.post('/api/shows/:id/status', requireAuth, requireProfile, (req, res) => {
   return res.json({ ok: true });
 });
 
+app.delete('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
+  const showId = Number(req.params.id);
+  if (!showId) {
+    return res.status(400).json({ error: 'Show id required' });
+  }
+
+  const row = db
+    .prepare(
+      `SELECT ps.show_id
+       FROM profile_shows ps
+       WHERE ps.profile_id = ? AND ps.show_id = ?`
+    )
+    .get(req.session.profileId, showId);
+
+  if (!row) {
+    return res.status(404).json({ error: 'Show not found' });
+  }
+
+  runTransaction(() => {
+    db.prepare(
+      `DELETE FROM profile_episodes
+       WHERE profile_id = ?
+         AND episode_id IN (SELECT id FROM episodes WHERE show_id = ?)`
+    ).run(req.session.profileId, showId);
+    db.prepare(
+      'DELETE FROM profile_shows WHERE profile_id = ? AND show_id = ?'
+    ).run(req.session.profileId, showId);
+  });
+
+  return res.json({ ok: true });
+});
+
 app.post('/api/episodes/:id/watch', requireAuth, requireProfile, (req, res) => {
   const episodeId = Number(req.params.id);
   const { watched } = req.body || {};

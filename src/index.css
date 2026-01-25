@@ -613,6 +613,35 @@ input:focus {
   white-space: nowrap;
 }
 
+.show-detail__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.show-detail__remove {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 139, 130, 0.45);
+  background: rgba(242, 139, 130, 0.08);
+  color: #f28b82;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.show-detail__remove:hover {
+  transform: translateY(-1px);
+  border-color: rgba(242, 139, 130, 0.7);
+  background: rgba(242, 139, 130, 0.18);
+}
+
+.show-detail__remove svg {
+  width: 18px;
+  height: 18px;
+}
+
 .show-detail__hero {
   display: grid;
   grid-template-columns: 220px 1fr;

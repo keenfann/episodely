@@ -262,6 +262,20 @@ function App() {
     await loadShows();
   };
 
+  const handleShowRemove = async (showId) => {
+    if (!window.confirm('Remove this show from your list?')) {
+      return;
+    }
+    await apiFetch(`/api/shows/${showId}`, { method: 'DELETE' });
+    if (showDetail?.show?.id === showId) {
+      setShowDetail(null);
+    }
+    await loadShows();
+    if (location.pathname.startsWith('/shows/')) {
+      navigate('/shows', { replace: true });
+    }
+  };
+
   const preserveScroll = async (action) => {
     if (typeof window === 'undefined') {
       await action();
@@ -460,6 +474,7 @@ function App() {
                 onToggleEpisode={toggleEpisode}
                 onToggleSeason={toggleSeason}
                 onUpdateShowStatus={handleShowStatus}
+                onRemoveShow={handleShowRemove}
               />
             }
           />
@@ -735,6 +750,7 @@ function ShowDetailPage({
   onToggleEpisode,
   onToggleSeason,
   onUpdateShowStatus,
+  onRemoveShow,
 }) {
   const navigate = useNavigate();
   const params = useParams();
@@ -785,6 +801,7 @@ function ShowDetailPage({
       onToggleEpisode={onToggleEpisode}
       onToggleSeason={onToggleSeason}
       onUpdateShowStatus={onUpdateShowStatus}
+      onRemoveShow={onRemoveShow}
     />
   );
 }
@@ -1320,6 +1337,7 @@ function ShowDetailView({
   onToggleEpisode,
   onToggleSeason,
   onUpdateShowStatus,
+  onRemoveShow,
 }) {
   const [openSeasons, setOpenSeasons] = useState({});
 
@@ -1346,6 +1364,8 @@ function ShowDetailView({
   if (!show) return null;
   const stateLabel = show.state ? STATE_LABELS[show.state] || show.state : null;
   const isFinished = show.state === 'completed';
+  const canToggleStatus = !isFinished;
+  const canRemove = show.profileStatus === 'stopped';
   return (
     <section className="panel show-detail">
       <div className="panel__header show-detail__header">
@@ -1384,19 +1404,48 @@ function ShowDetailView({
             </p>
           </div>
         </div>
-        {!isFinished && (
-          <button
-            className="outline show-detail__action"
-            type="button"
-            onClick={() =>
-              onUpdateShowStatus(
-                show.id,
-                show.profileStatus === 'stopped' ? null : 'stopped'
-              )
-            }
-          >
-            {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
-          </button>
+        {(canToggleStatus || canRemove) && (
+          <div className="show-detail__actions">
+            {canToggleStatus && (
+            <button
+              className="outline show-detail__action"
+              type="button"
+              onClick={() =>
+                onUpdateShowStatus(
+                  show.id,
+                  show.profileStatus === 'stopped' ? null : 'stopped'
+                )
+              }
+            >
+              {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
+            </button>
+            )}
+            {canRemove && (
+            <button
+              className="show-detail__remove"
+              type="button"
+              aria-label={`Remove ${show.name}`}
+              title="Remove show"
+              onClick={() => onRemoveShow(show.id)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 6h18" />
+                <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
+                <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+            </button>
+            )}
+          </div>
         )}
       </div>
       <div className="show-detail__hero">

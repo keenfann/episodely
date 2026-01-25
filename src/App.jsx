@@ -69,6 +69,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
   const [loadingShows, setLoadingShows] = useState(false);
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
@@ -193,9 +194,19 @@ function App() {
     navigate('/shows', { replace: true });
   };
 
+  const handleSearchQuery = (value) => {
+    setSearchQuery(value);
+    setHasSearched(false);
+    if (!value.trim()) {
+      setSearchResults([]);
+      setSearchError('');
+    }
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setSearchError('');
+    setHasSearched(true);
     try {
       const data = await apiFetch(
         `/api/tvmaze/search?q=${encodeURIComponent(searchQuery)}`
@@ -213,6 +224,8 @@ function App() {
     });
     setSearchResults([]);
     setSearchQuery('');
+    setSearchError('');
+    setHasSearched(false);
     await loadShows();
   };
 
@@ -400,7 +413,8 @@ function App() {
                 searchQuery={searchQuery}
                 searchResults={searchResults}
                 searchError={searchError}
-                onSearchQuery={setSearchQuery}
+                hasSearched={hasSearched}
+                onSearchQuery={handleSearchQuery}
                 onSearch={handleSearch}
                 onAddShow={handleAddShow}
               />
@@ -562,6 +576,7 @@ function AddShowPage({
   searchQuery,
   searchResults,
   searchError,
+  hasSearched,
   onSearchQuery,
   onSearch,
   onAddShow,
@@ -621,6 +636,9 @@ function AddShowPage({
             </div>
           ))}
         </div>
+      )}
+      {hasSearched && !searchError && searchResults.length === 0 && (
+        <div className="empty-state">No shows found. Try another search.</div>
       )}
       {searchError && <div className="error">{searchError}</div>}
     </section>

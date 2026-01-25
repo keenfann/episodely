@@ -613,6 +613,14 @@ function AddShowPage({
   onSearch,
   onAddShow,
 }) {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <section className="panel add-show-page">
       <div className="panel__header">
@@ -628,6 +636,7 @@ function AddShowPage({
           }}
         >
           <input
+            ref={inputRef}
             type="search"
             placeholder="Search shows..."
             value={searchQuery}

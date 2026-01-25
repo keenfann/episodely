@@ -1008,6 +1008,23 @@ input:focus {
     display: none;
   }
 
+  .search-card {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+    align-items: stretch;
+  }
+
+  .search-card img,
+  .search-card .image-fallback {
+    border-radius: 12px;
+    height: 160px;
+  }
+
+  .search-card button,
+  .search-card .badge {
+    justify-self: start;
+  }
+
   .calendar-card {
     grid-template-columns: 1fr;
     gap: 0.75rem;

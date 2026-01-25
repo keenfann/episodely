@@ -1365,8 +1365,7 @@ function ShowDetailView({
               strokeLinejoin="round"
               aria-hidden="true"
             >
-              <path d="M15 18l-6-6 6-6" />
-              <path d="M21 12H9" />
+              <path d="M7.5 10l4.5 4.5 4.5-4.5" />
             </svg>
           </button>
           <div className="show-detail__title">

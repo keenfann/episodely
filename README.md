@@ -54,6 +54,8 @@ Set `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`). The serve
 
 Sessions are stored in SQLite, so logins persist across restarts as long as `DB_PATH` points to durable storage.
 
+The settings screen version string is set at build time via `APP_VERSION` (defaults to the package version). You can pass it as a Docker build arg when building images.
+
 ## Background Sync
 Episodely can refresh show/episode metadata from TVmaze on a schedule. Configure in `.env`:
 - `TVMAZE_SYNC_ENABLED` (default `true`)

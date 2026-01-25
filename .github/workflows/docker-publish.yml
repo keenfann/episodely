@@ -66,6 +66,8 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          build-args: |
+            APP_VERSION=0.0.${{ github.run_number }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -114,6 +116,8 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          build-args: |
+            APP_VERSION=pr-${{ github.event.pull_request.number }}.${{ github.run_number }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -150,5 +154,7 @@ jobs:
           context: .
           file: Dockerfile
           push: true
+          build-args: |
+            APP_VERSION=dev-${{ github.run_number }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

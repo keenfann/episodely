@@ -53,6 +53,13 @@ Set `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`). The serve
 
 Sessions are stored in SQLite, so logins persist across restarts as long as `DB_PATH` points to durable storage.
 
+## Preview Deployments (GitHub Pages)
+Pushes to `dev` and pull requests publish static previews to GitHub Pages:
+- Dev preview: `https://<org>.github.io/<repo>/dev/`
+- PR preview: `https://<org>.github.io/<repo>/pr-<number>/`
+
+These previews are frontend-only, so the UI needs a reachable API. Set the repository variable `PREVIEW_API_BASE` (Settings → Variables) to the URL of a running API, e.g. `https://your-dev-api.example.com`. The preview build will inject this as `VITE_API_BASE`.
+
 ## Background Sync
 Episodely can refresh show/episode metadata from TVmaze on a schedule. Configure in `.env`:
 - `TVMAZE_SYNC_ENABLED` (default `true`)

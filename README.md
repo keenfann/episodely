@@ -4,7 +4,7 @@
 
 Episodely is a self-hosted web app for tracking watched TV series. It aims to provide the core watch tracking flow of TV Time with a local-first setup, plus calendar views for upcoming releases and import/export to make migration easy. Episodely is created to replace TV Time and is developed primarily with OpenAI Codex.
 
-Status: early-stage repository with a working local stack. Expect changes as features expand.
+Status: v1.0 release.
 
 ## Goals
 - Simple, fast watch tracking for TV series
@@ -20,7 +20,8 @@ Status: early-stage repository with a working local stack. Expect changes as fea
 - Multi-user support with profiles
 - Change account password from settings
 - TVmaze metadata and imagery (no API key required)
-- Show lists grouped by status (watch next, not started, up to date, completed, stopped watching)
+- Show lists grouped by status (watch next, not started, up to date, finished, stopped watching)
+- IMDb link in show details when available
 
 ## Screenshots
 ![Shows dashboard](docs/screenshots/shows-dashboard.png)
@@ -57,6 +58,9 @@ Set `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`). The serve
 Sessions are stored in SQLite, so logins persist across restarts as long as `DB_PATH` points to durable storage.
 
 The settings screen version string is set at build time via `APP_VERSION` (defaults to the package version). You can pass it as a Docker build arg when building images.
+
+## Database Migrations
+Schema updates run on startup (for example, v1.0 adds `shows.imdb_id` for IMDb links).
 
 ## Background Sync
 Episodely can refresh show/episode metadata from TVmaze on a schedule. Configure in `.env`:

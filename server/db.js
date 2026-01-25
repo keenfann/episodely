@@ -1,7 +1,10 @@
-import { DatabaseSync } from 'node:sqlite';
+import { createRequire } from 'node:module';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+const require = createRequire(import.meta.url);
+const { DatabaseSync } = require('node:sqlite');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

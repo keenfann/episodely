@@ -14,8 +14,27 @@ permissions:
   packages: write
 
 jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
   build-main:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -64,6 +83,7 @@ jobs:
 
   build-pr:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -99,6 +119,7 @@ jobs:
 
   build-dev:
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    needs: tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

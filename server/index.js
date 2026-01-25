@@ -882,10 +882,6 @@ if (fs.existsSync(indexHtml)) {
   console.log('No frontend build found. Run `npm run build` to generate `dist/`.');
 }
 
-app.listen(port, () => {
-  console.log(`API running on http://localhost:${port}`);
-});
-
 function startTvmazeSync() {
   if (!tvmazeSyncEnabled) {
     return;
@@ -925,4 +921,15 @@ function startTvmazeSync() {
   }
 }
 
-startTvmazeSync();
+function startServer() {
+  app.listen(port, () => {
+    console.log(`API running on http://localhost:${port}`);
+  });
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  startTvmazeSync();
+  startServer();
+}
+
+export { app, startServer, startTvmazeSync };

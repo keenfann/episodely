@@ -37,6 +37,7 @@ Requirements: Node.js 22+
 - `npm run dev` starts Vite (web) and the Express API together
 - `npm run build` builds the UI to `dist/`
 - `npm run start` serves the API and the built UI from one process
+- `npm test` runs the Vitest suite
 
 The API is available at `http://localhost:4285/api/health` during development.
 
@@ -63,6 +64,7 @@ Episodely can refresh show/episode metadata from TVmaze on a schedule. Configure
 ## Project Structure
 - `src/` React UI
 - `server/` Express API
+- `tests/` Vitest suite
 - `db/` SQLite database files (local only)
 - `data/` Docker volume mount for SQLite
 - `vite.config.js` Vite config and API proxy

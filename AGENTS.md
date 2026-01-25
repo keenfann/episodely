@@ -4,6 +4,7 @@
 Current layout is a single Node server with a Vite-built UI:
 - `src/` React UI code
 - `server/` Express API (`server/index.js`)
+- `tests/` Vitest suites for API/UI utilities
 - `db/` local SQLite files (ignored by git)
 - `data/` Docker-mounted SQLite data
 - `scripts/` one-off helpers for imports and maintenance

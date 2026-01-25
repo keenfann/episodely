@@ -489,17 +489,33 @@ function ShowsPage({
   loadingShows,
 }) {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
   const [collapsedCategories, setCollapsedCategories] = useState(() => ({
     completed: true,
     stopped: true,
   }));
 
   const toggleCategory = (categoryId) => {
+    if (searchTerm.trim()) {
+      return;
+    }
     setCollapsedCategories((prev) => ({
       ...prev,
       [categoryId]: !prev[categoryId],
     }));
   };
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredCategories = normalizedSearch
+    ? categories
+        .map((category) => ({
+          ...category,
+          shows: category.shows.filter((show) =>
+            show.name.toLowerCase().includes(normalizedSearch)
+          ),
+        }))
+        .filter((category) => category.shows.length > 0)
+    : categories;
 
   return (
     <section className="panel">
@@ -509,10 +525,18 @@ function ShowsPage({
           <p className="muted">Your shows sorted by what to watch next.</p>
         </div>
       </div>
+      <div className="search-bar">
+        <input
+          type="search"
+          placeholder="Search your shows..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+      </div>
         {loadingShows ? (
           <div className="empty-state">Loading shows...</div>
         ) : (
-          categories.map((category) => (
+          filteredCategories.map((category) => (
             <div
               key={category.id}
               className={`category category--${category.id}`}
@@ -520,7 +544,7 @@ function ShowsPage({
               <button
                 type="button"
                 className="category__header"
-                aria-expanded={!collapsedCategories[category.id]}
+                aria-expanded={normalizedSearch ? true : !collapsedCategories[category.id]}
                 aria-controls={`category-${category.id}`}
                 onClick={() => toggleCategory(category.id)}
               >
@@ -541,11 +565,13 @@ function ShowsPage({
               <div
                 id={`category-${category.id}`}
                 className={`category__body ${
-                  collapsedCategories[category.id]
-                    ? 'category__body--closed'
-                    : 'category__body--open'
+                  normalizedSearch || !collapsedCategories[category.id]
+                    ? 'category__body--open'
+                    : 'category__body--closed'
                 }`}
-                aria-hidden={collapsedCategories[category.id]}
+                aria-hidden={
+                  normalizedSearch ? false : collapsedCategories[category.id]
+                }
               >
                 {category.shows.length === 0 ? (
                   <div className="empty-state">No shows here yet.</div>
@@ -600,6 +626,9 @@ function ShowsPage({
             </div>
           ))
         )}
+      {normalizedSearch && !loadingShows && filteredCategories.length === 0 && (
+        <div className="empty-state">No shows match your search.</div>
+      )}
     </section>
   );
 }

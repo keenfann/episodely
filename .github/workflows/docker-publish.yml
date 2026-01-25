@@ -89,6 +89,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           destination_dir: pr-${{ github.event.pull_request.number }}
+      - name: Add preview URL to summary
+        run: |
+          echo "Preview URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/pr-${{ github.event.pull_request.number }}/" >> "$GITHUB_STEP_SUMMARY"
 
   build-dev:
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
@@ -118,3 +121,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           destination_dir: dev
+      - name: Add dev preview URL to summary
+        run: |
+          echo "Dev preview URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/dev/" >> "$GITHUB_STEP_SUMMARY"

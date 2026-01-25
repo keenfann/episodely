@@ -23,6 +23,8 @@ const tvmazeSyncDelayMs =
   Number(process.env.TVMAZE_SYNC_DELAY_MS) || 500;
 const tvmazeSyncOnStartup = process.env.TVMAZE_SYNC_ON_STARTUP !== 'false';
 let tvmazeSyncInProgress = false;
+const CSRF_HEADER = 'x-csrf-token';
+const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(
@@ -38,6 +40,18 @@ app.use(
     },
   })
 );
+
+app.use((req, res, next) => {
+  if (!CSRF_METHODS.has(req.method)) {
+    return next();
+  }
+  const sessionToken = req.session?.csrfToken;
+  const headerToken = req.get(CSRF_HEADER);
+  if (!sessionToken || !headerToken || sessionToken !== headerToken) {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+  }
+  return next();
+});
 
 function resolveSessionSecret() {
   if (process.env.SESSION_SECRET) {
@@ -73,6 +87,10 @@ function resolveSessionSecret() {
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.get('/api/csrf', (req, res) => {
+  res.json({ csrfToken: getCsrfToken(req) });
 });
 
 function requireAuth(req, res, next) {
@@ -112,6 +130,62 @@ function toNumber(value) {
   return typeof value === 'bigint' ? Number(value) : value;
 }
 
+function getCsrfToken(req) {
+  if (!req.session) return null;
+  if (!req.session.csrfToken) {
+    req.session.csrfToken = crypto.randomBytes(32).toString('hex');
+  }
+  return req.session.csrfToken;
+}
+
+function computeShowState(show, showEpisodes) {
+  const releasedEpisodes = showEpisodes.filter((episode) =>
+    isReleased(episode.airdate)
+  );
+  const releasedUnwatched = releasedEpisodes.filter(
+    (episode) => !episode.watched_at
+  );
+  const watchedCount = showEpisodes.filter(
+    (episode) => episode.watched_at
+  ).length;
+  const started = watchedCount > 0;
+  const hasReleased = releasedEpisodes.length > 0;
+  const hasFuture = showEpisodes.some(
+    (episode) => episode.airdate && !isReleased(episode.airdate)
+  );
+  const isEnded = (show.status || '').toLowerCase() === 'ended';
+  const allReleasedWatched =
+    hasReleased && releasedUnwatched.length === 0;
+  const allEpisodesWatched =
+    showEpisodes.length > 0 &&
+    showEpisodes.every((episode) => episode.watched_at);
+
+  let state = 'queued';
+  if (show.profile_status === 'stopped') {
+    state = 'stopped';
+  } else if (started && releasedUnwatched.length > 0) {
+    state = 'watch-next';
+  } else if (!started && hasReleased) {
+    state = 'queued';
+  } else if (started && allReleasedWatched && !isEnded) {
+    state = 'up-to-date';
+  } else if (isEnded && allEpisodesWatched) {
+    state = 'completed';
+  } else if (!hasReleased) {
+    state = 'queued';
+  } else {
+    state = 'up-to-date';
+  }
+
+  return {
+    state,
+    releasedEpisodes,
+    releasedUnwatched,
+    watchedCount,
+    hasFuture,
+  };
+}
+
 function ensureActiveProfile(req) {
   if (req.session.profileId) {
     return req.session.profileId;
@@ -142,6 +216,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
     ended: show.ended,
     image_medium: show.image?.medium || null,
     image_original: show.image?.original || null,
+    imdb_id: show.externals?.imdb || null,
     updated_at: nowIso(),
   };
 
@@ -151,13 +226,13 @@ async function upsertShowWithEpisodes(tvmazeId) {
 
   const insertShow = db.prepare(
     `INSERT INTO shows
-      (tvmaze_id, name, summary, status, premiered, ended, image_medium, image_original, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      (tvmaze_id, name, summary, status, premiered, ended, image_medium, image_original, imdb_id, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const updateShow = db.prepare(
     `UPDATE shows
        SET name = ?, summary = ?, status = ?, premiered = ?, ended = ?,
-           image_medium = ?, image_original = ?, updated_at = ?
+           image_medium = ?, image_original = ?, imdb_id = ?, updated_at = ?
      WHERE tvmaze_id = ?`
   );
 
@@ -188,6 +263,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
         showPayload.ended,
         showPayload.image_medium,
         showPayload.image_original,
+        showPayload.imdb_id,
         showPayload.updated_at,
         showPayload.tvmaze_id
       );
@@ -201,6 +277,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
         showPayload.ended,
         showPayload.image_medium,
         showPayload.image_original,
+        showPayload.imdb_id,
         showPayload.updated_at
       );
       showId = toNumber(result.lastInsertRowid);
@@ -288,43 +365,13 @@ function listShowsForProfile(profileId) {
 
   return shows.map((show) => {
     const showEpisodes = episodesByShow.get(show.id) || [];
-    const releasedEpisodes = showEpisodes.filter((episode) =>
-      isReleased(episode.airdate)
-    );
-    const releasedUnwatched = releasedEpisodes.filter(
-      (episode) => !episode.watched_at
-    );
-    const watchedCount = showEpisodes.filter(
-      (episode) => episode.watched_at
-    ).length;
-    const started = watchedCount > 0;
-    const hasReleased = releasedEpisodes.length > 0;
-    const hasFuture = showEpisodes.some(
-      (episode) => episode.airdate && !isReleased(episode.airdate)
-    );
-    const isEnded = (show.status || '').toLowerCase() === 'ended';
-    const allReleasedWatched =
-      hasReleased && releasedUnwatched.length === 0;
-    const allEpisodesWatched =
-      showEpisodes.length > 0 &&
-      showEpisodes.every((episode) => episode.watched_at);
-
-    let state = 'queued';
-    if (show.profile_status === 'stopped') {
-      state = 'stopped';
-    } else if (started && releasedUnwatched.length > 0) {
-      state = 'watch-next';
-    } else if (!started && hasReleased) {
-      state = 'queued';
-    } else if (started && allReleasedWatched && !isEnded) {
-      state = 'up-to-date';
-    } else if (isEnded && allEpisodesWatched) {
-      state = 'completed';
-    } else if (!hasReleased) {
-      state = 'queued';
-    } else {
-      state = 'up-to-date';
-    }
+    const {
+      state,
+      releasedEpisodes,
+      releasedUnwatched,
+      watchedCount,
+      hasFuture,
+    } = computeShowState(show, showEpisodes);
 
     const nextUnwatched = releasedUnwatched
       .slice()
@@ -335,6 +382,7 @@ function listShowsForProfile(profileId) {
 
     return {
       id: show.id,
+      tvmazeId: toNumber(show.tvmaze_id),
       name: show.name,
       summary: show.summary,
       status: show.status,
@@ -357,7 +405,8 @@ function listShowsForProfile(profileId) {
 
 app.post('/api/auth/register', async (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) {
+  const normalizedUsername = typeof username === 'string' ? username.trim() : '';
+  if (!normalizedUsername || !password) {
     return res.status(400).json({ error: 'Username and password required' });
   }
   if (password.length < 6) {
@@ -365,8 +414,8 @@ app.post('/api/auth/register', async (req, res) => {
   }
 
   const existing = db
-    .prepare('SELECT id FROM users WHERE username = ?')
-    .get(username);
+    .prepare('SELECT id FROM users WHERE lower(username) = lower(?)')
+    .get(normalizedUsername);
   if (existing) {
     return res.status(409).json({ error: 'Username already exists' });
   }
@@ -376,7 +425,7 @@ app.post('/api/auth/register', async (req, res) => {
     .prepare(
       'INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)'
     )
-    .run(username, passwordHash, nowIso());
+    .run(normalizedUsername, passwordHash, nowIso());
 
   req.session.userId = toNumber(result.lastInsertRowid);
   req.session.profileId = null;
@@ -386,13 +435,14 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) {
+  const normalizedUsername = typeof username === 'string' ? username.trim() : '';
+  if (!normalizedUsername || !password) {
     return res.status(400).json({ error: 'Username and password required' });
   }
 
   const user = db
-    .prepare('SELECT * FROM users WHERE username = ?')
-    .get(username);
+    .prepare('SELECT * FROM users WHERE lower(username) = lower(?)')
+    .get(normalizedUsername);
   if (!user) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
@@ -417,6 +467,38 @@ app.post('/api/auth/login', async (req, res) => {
   return res.json({ ok: true });
 });
 
+app.post('/api/auth/password', requireAuth, async (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) {
+    return res
+      .status(400)
+      .json({ error: 'Current and new password required' });
+  }
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'Password too short' });
+  }
+
+  const user = db
+    .prepare('SELECT id, password_hash FROM users WHERE id = ?')
+    .get(req.session.userId);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const ok = await bcrypt.compare(currentPassword, user.password_hash);
+  if (!ok) {
+    return res.status(401).json({ error: 'Invalid current password' });
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(
+    passwordHash,
+    req.session.userId
+  );
+
+  return res.json({ ok: true });
+});
+
 app.post('/api/auth/logout', (req, res) => {
   req.session.destroy(() => {
     res.json({ ok: true });
@@ -424,14 +506,15 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 app.get('/api/auth/me', (req, res) => {
+  const csrfToken = getCsrfToken(req);
   if (!req.session.userId) {
-    return res.json({ user: null, profileId: null });
+    return res.json({ user: null, profileId: null, csrfToken });
   }
   const user = db
     .prepare('SELECT id, username FROM users WHERE id = ?')
     .get(req.session.userId);
   const profileId = ensureActiveProfile(req);
-  return res.json({ user, profileId: profileId || null });
+  return res.json({ user, profileId: profileId || null, csrfToken });
 });
 
 app.get('/api/profiles', requireAuth, (req, res) => {
@@ -478,14 +561,78 @@ app.post('/api/profiles/select', requireAuth, (req, res) => {
   return res.json({ ok: true });
 });
 
+app.delete('/api/profiles/:id', requireAuth, (req, res) => {
+  const requestedId = Number(req.params.id);
+  if (!requestedId) {
+    return res.status(400).json({ error: 'Profile id required' });
+  }
+  const profile = db
+    .prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?')
+    .get(requestedId, req.session.userId);
+  if (!profile) {
+    return res.status(404).json({ error: 'Profile not found' });
+  }
+
+  const user = db
+    .prepare('SELECT last_profile_id FROM users WHERE id = ?')
+    .get(req.session.userId);
+  const lastProfileId = toNumber(user?.last_profile_id);
+
+  runTransaction(() => {
+    db.prepare('DELETE FROM profiles WHERE id = ? AND user_id = ?').run(
+      requestedId,
+      req.session.userId
+    );
+
+    let replacementId = null;
+    if (req.session.profileId === requestedId) {
+      if (lastProfileId && lastProfileId !== requestedId) {
+        const lastProfile = db
+          .prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?')
+          .get(lastProfileId, req.session.userId);
+        replacementId = toNumber(lastProfile?.id) || null;
+      }
+      if (!replacementId) {
+        const nextProfile = db
+          .prepare('SELECT id FROM profiles WHERE user_id = ? ORDER BY name LIMIT 1')
+          .get(req.session.userId);
+        replacementId = toNumber(nextProfile?.id) || null;
+      }
+      req.session.profileId = replacementId;
+    }
+
+    if (lastProfileId === requestedId) {
+      let newLastId = req.session.profileId || null;
+      if (!newLastId) {
+        const nextProfile = db
+          .prepare('SELECT id FROM profiles WHERE user_id = ? ORDER BY name LIMIT 1')
+          .get(req.session.userId);
+        newLastId = toNumber(nextProfile?.id) || null;
+      }
+      db.prepare('UPDATE users SET last_profile_id = ? WHERE id = ?').run(
+        newLastId,
+        req.session.userId
+      );
+    }
+  });
+
+  return res.json({ ok: true });
+});
+
 app.get('/api/tvmaze/search', requireAuth, async (req, res) => {
   const query = req.query.q;
   if (!query) {
     return res.status(400).json({ error: 'Query required' });
   }
+  const profileId = ensureActiveProfile(req);
+  const existingShows = profileId ? listShowsForProfile(profileId) : [];
+  const existingByTvmazeId = new Map(
+    existingShows.map((show) => [show.tvmazeId, show])
+  );
   try {
     const results = await searchShows(query);
     const payload = results.map((item) => ({
+      existingState: existingByTvmazeId.get(item.show.id)?.state || null,
       id: item.show.id,
       name: item.show.name,
       summary: stripHtml(item.show.summary),
@@ -522,7 +669,7 @@ app.get('/api/shows', requireAuth, requireProfile, (req, res) => {
     { id: 'watch-next', label: 'Watch Next', shows: [] },
     { id: 'queued', label: 'Not Started', shows: [] },
     { id: 'up-to-date', label: 'Up To Date', shows: [] },
-    { id: 'completed', label: 'Completed', shows: [] },
+    { id: 'completed', label: 'Finished', shows: [] },
     { id: 'stopped', label: 'Stopped Watching', shows: [] },
   ];
 
@@ -609,6 +756,8 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       watched: season.totalCount > 0 && season.watchedCount === season.totalCount,
     }));
 
+  const { state } = computeShowState(show, episodes);
+
   return res.json({
     show: {
       id: show.id,
@@ -618,7 +767,9 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       premiered: show.premiered,
       ended: show.ended,
       image: show.image_original || show.image_medium,
+      imdbId: show.imdb_id || null,
       profileStatus: show.profile_status || null,
+      state,
     },
     seasons,
   });
@@ -647,6 +798,38 @@ app.post('/api/shows/:id/status', requireAuth, requireProfile, (req, res) => {
   db.prepare(
     'UPDATE profile_shows SET status = ? WHERE profile_id = ? AND show_id = ?'
   ).run(status, req.session.profileId, showId);
+
+  return res.json({ ok: true });
+});
+
+app.delete('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
+  const showId = Number(req.params.id);
+  if (!showId) {
+    return res.status(400).json({ error: 'Show id required' });
+  }
+
+  const row = db
+    .prepare(
+      `SELECT ps.show_id
+       FROM profile_shows ps
+       WHERE ps.profile_id = ? AND ps.show_id = ?`
+    )
+    .get(req.session.profileId, showId);
+
+  if (!row) {
+    return res.status(404).json({ error: 'Show not found' });
+  }
+
+  runTransaction(() => {
+    db.prepare(
+      `DELETE FROM profile_episodes
+       WHERE profile_id = ?
+         AND episode_id IN (SELECT id FROM episodes WHERE show_id = ?)`
+    ).run(req.session.profileId, showId);
+    db.prepare(
+      'DELETE FROM profile_shows WHERE profile_id = ? AND show_id = ?'
+    ).run(req.session.profileId, showId);
+  });
 
   return res.json({ ok: true });
 });
@@ -882,10 +1065,6 @@ if (fs.existsSync(indexHtml)) {
   console.log('No frontend build found. Run `npm run build` to generate `dist/`.');
 }
 
-app.listen(port, () => {
-  console.log(`API running on http://localhost:${port}`);
-});
-
 function startTvmazeSync() {
   if (!tvmazeSyncEnabled) {
     return;
@@ -925,4 +1104,15 @@ function startTvmazeSync() {
   }
 }
 
-startTvmazeSync();
+function startServer() {
+  app.listen(port, () => {
+    console.log(`API running on http://localhost:${port}`);
+  });
+}
+
+if (process.env.NODE_ENV !== 'test') {
+  startTvmazeSync();
+  startServer();
+}
+
+export { app, startServer, startTvmazeSync };

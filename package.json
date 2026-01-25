@@ -1,5 +1,6 @@
 {
   "name": "episodely",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +10,9 @@
     "dev:open": "node -e \"const url='http://localhost:5173';const {exec}=require('child_process');const cmds=[];if(process.platform==='darwin'){cmds.push('open -a \\\\\\\"Google Chrome\\\\\\\" '+url,'open '+url);}else if(process.platform==='win32'){cmds.push('start \\\\\\\"\\\\\\\" '+url);}else{cmds.push('xdg-open '+url);}const cmd=cmds.find(Boolean);setTimeout(()=>{if(cmd){exec(cmd);}},2000);\"",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -26,6 +29,7 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.2",
     "concurrently": "^9.2.1",
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vitest": "^1.6.0"
   }
 }

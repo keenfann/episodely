@@ -1,7 +1,10 @@
-import { DatabaseSync } from 'node:sqlite';
+import { createRequire } from 'node:module';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+const require = createRequire(import.meta.url);
+const { DatabaseSync } = require('node:sqlite');
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -109,6 +112,15 @@ const profileShowColumns = db
 
 if (!profileShowColumns.includes('status')) {
   db.exec('ALTER TABLE profile_shows ADD COLUMN status TEXT;');
+}
+
+const showColumns = db
+  .prepare('PRAGMA table_info(shows)')
+  .all()
+  .map((column) => column.name);
+
+if (!showColumns.includes('imdb_id')) {
+  db.exec('ALTER TABLE shows ADD COLUMN imdb_id TEXT;');
 }
 
 export default db;

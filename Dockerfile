@@ -2,10 +2,13 @@ FROM node:25-bookworm-slim AS build
 
 WORKDIR /app
 
+ARG APP_VERSION
+
 COPY package.json package-lock.json* ./
 RUN npm install
 
 COPY . .
+ENV APP_VERSION=$APP_VERSION
 RUN npm run build
 
 FROM node:25-bookworm-slim

@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-const appVersion = process.env.npm_package_version || '0.0.0';
+const appVersion =
+  process.env.APP_VERSION || process.env.npm_package_version || '0.0.0';
 
 export default defineConfig({
   plugins: [react()],

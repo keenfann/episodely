@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   NavLink,
   Navigate,
@@ -14,7 +14,7 @@ const STATE_LABELS = {
   'watch-next': 'Watch Next',
   queued: 'Not Started',
   'up-to-date': 'Up To Date',
-  completed: 'Completed',
+  completed: 'Finished',
   stopped: 'Stopped Watching',
 };
 
@@ -69,10 +69,13 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState('');
+  const [hasSearched, setHasSearched] = useState(false);
   const [loadingShows, setLoadingShows] = useState(false);
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
   const [importing, setImporting] = useState(false);
+  const scrollRestoreRef = useRef(null);
+  const [scrollRestoreTick, setScrollRestoreTick] = useState(0);
 
   useEffect(() => {
     const init = async () => {
@@ -88,6 +91,14 @@ function App() {
     };
     init();
   }, []);
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (scrollRestoreRef.current == null) return;
+    const top = scrollRestoreRef.current;
+    scrollRestoreRef.current = null;
+    window.scrollTo({ top, left: 0, behavior: 'auto' });
+  }, [scrollRestoreTick]);
 
   useEffect(() => {
     if (activeProfile) {
@@ -136,15 +147,20 @@ function App() {
     }
   };
 
-  const loadShowDetail = useCallback(async (showId) => {
+  const loadShowDetail = useCallback(async (showId, options = {}) => {
     if (!showId || Number.isNaN(showId)) return;
-    setLoadingShowDetail(true);
-    setShowDetail(null);
+    const silent = Boolean(options.silent);
+    if (!silent) {
+      setLoadingShowDetail(true);
+      setShowDetail((prev) => (prev?.show?.id === showId ? prev : null));
+    }
     try {
       const data = await apiFetch(`/api/shows/${showId}`);
       setShowDetail(data);
     } finally {
-      setLoadingShowDetail(false);
+      if (!silent) {
+        setLoadingShowDetail(false);
+      }
     }
   }, []);
 
@@ -193,9 +209,28 @@ function App() {
     navigate('/shows', { replace: true });
   };
 
+  const handleProfileDelete = async (profile) => {
+    if (!profile) return;
+    await apiFetch(`/api/profiles/${profile.id}`, { method: 'DELETE' });
+    if (activeProfile?.id === profile.id) {
+      setShowDetail(null);
+    }
+    await loadProfiles();
+  };
+
+  const handleSearchQuery = (value) => {
+    setSearchQuery(value);
+    setHasSearched(false);
+    if (!value.trim()) {
+      setSearchResults([]);
+      setSearchError('');
+    }
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
     setSearchError('');
+    setHasSearched(true);
     try {
       const data = await apiFetch(
         `/api/tvmaze/search?q=${encodeURIComponent(searchQuery)}`
@@ -213,6 +248,8 @@ function App() {
     });
     setSearchResults([]);
     setSearchQuery('');
+    setSearchError('');
+    setHasSearched(false);
     await loadShows();
   };
 
@@ -221,32 +258,63 @@ function App() {
       method: 'POST',
       body: JSON.stringify({ status }),
     });
-    await loadShowDetail(showId);
+    await loadShowDetail(showId, { silent: true });
     await loadShows();
   };
 
-  const toggleEpisode = async (episodeId, watched) => {
-    await apiFetch(`/api/episodes/${episodeId}/watch`, {
-      method: 'POST',
-      body: JSON.stringify({ watched }),
-    });
-    if (showDetail?.show?.id) {
-      await loadShowDetail(showDetail.show.id);
+  const handleShowRemove = async (showId) => {
+    if (!window.confirm('Remove this show from your list?')) {
+      return;
+    }
+    await apiFetch(`/api/shows/${showId}`, { method: 'DELETE' });
+    if (showDetail?.show?.id === showId) {
+      setShowDetail(null);
     }
     await loadShows();
+    if (location.pathname.startsWith('/shows/')) {
+      navigate('/shows', { replace: true });
+    }
+  };
+
+  const preserveScroll = async (action) => {
+    if (typeof window === 'undefined') {
+      await action();
+      return;
+    }
+    scrollRestoreRef.current = window.scrollY;
+    try {
+      await action();
+    } finally {
+      setScrollRestoreTick((prev) => prev + 1);
+    }
+  };
+
+  const toggleEpisode = async (episodeId, watched) => {
+    await preserveScroll(async () => {
+      await apiFetch(`/api/episodes/${episodeId}/watch`, {
+        method: 'POST',
+        body: JSON.stringify({ watched }),
+      });
+      if (showDetail?.show?.id) {
+        await loadShowDetail(showDetail.show.id, { silent: true });
+      }
+      await loadShows();
+    });
   };
 
   const toggleSeason = async (seasonNumber, watched) => {
     if (!showDetail?.show?.id) return;
-    await apiFetch(
-      `/api/shows/${showDetail.show.id}/seasons/${seasonNumber}/watch`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ watched }),
-      }
-    );
-    await loadShowDetail(showDetail.show.id);
-    await loadShows();
+    await preserveScroll(async () => {
+      await apiFetch(
+        `/api/shows/${showDetail.show.id}/seasons/${seasonNumber}/watch`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ watched }),
+        }
+      );
+      await loadShowDetail(showDetail.show.id, { silent: true });
+      await loadShows();
+    });
   };
 
   const handleExport = async () => {
@@ -366,16 +434,6 @@ function App() {
           </button>
           <div className="profile-chip">
             <span>{activeProfile.name}</span>
-            <button
-              className="text-button"
-              onClick={() => {
-                setActiveProfile(null);
-                setShowDetail(null);
-                navigate('/profiles');
-              }}
-            >
-              Switch
-            </button>
           </div>
         </div>
       </header>
@@ -389,7 +447,6 @@ function App() {
               <ShowsPage
                 categories={categories}
                 loadingShows={loadingShows}
-                onRefresh={loadShows}
               />
             }
           />
@@ -400,7 +457,8 @@ function App() {
                 searchQuery={searchQuery}
                 searchResults={searchResults}
                 searchError={searchError}
-                onSearchQuery={setSearchQuery}
+                hasSearched={hasSearched}
+                onSearchQuery={handleSearchQuery}
                 onSearch={handleSearch}
                 onAddShow={handleAddShow}
               />
@@ -416,13 +474,14 @@ function App() {
                 onToggleEpisode={toggleEpisode}
                 onToggleSeason={toggleSeason}
                 onUpdateShowStatus={handleShowStatus}
+                onRemoveShow={handleShowRemove}
               />
             }
           />
           <Route
             path="/calendar"
             element={
-              <CalendarPage calendar={calendar} onRefresh={loadCalendar} />
+              <CalendarPage calendar={calendar} />
             }
           />
           <Route
@@ -436,6 +495,7 @@ function App() {
                 appVersion={APP_VERSION}
                 onProfileSelect={handleProfileSelect}
                 onProfileCreate={handleProfileCreate}
+                onProfileDelete={handleProfileDelete}
                 onExport={handleExport}
                 onImport={handleImport}
                 onLogout={handleLogout}
@@ -452,36 +512,56 @@ function App() {
 function ShowsPage({
   categories,
   loadingShows,
-  onRefresh,
 }) {
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
   const [collapsedCategories, setCollapsedCategories] = useState(() => ({
     completed: true,
     stopped: true,
   }));
 
   const toggleCategory = (categoryId) => {
+    if (searchTerm.trim()) {
+      return;
+    }
     setCollapsedCategories((prev) => ({
       ...prev,
       [categoryId]: !prev[categoryId],
     }));
   };
 
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredCategories = normalizedSearch
+    ? categories
+        .map((category) => ({
+          ...category,
+          shows: category.shows.filter((show) =>
+            show.name.toLowerCase().includes(normalizedSearch)
+          ),
+        }))
+        .filter((category) => category.shows.length > 0)
+    : categories;
+
   return (
     <section className="panel">
       <div className="panel__header">
         <div>
-            <h2>Watch Queue</h2>
-            <p className="muted">Your shows sorted by what to watch next.</p>
-          </div>
-          <button className="outline" onClick={onRefresh} disabled={loadingShows}>
-            Refresh
-          </button>
+          <h2>Your Shows</h2>
+          <p className="muted">Your shows sorted by what to watch next.</p>
         </div>
+      </div>
+      <div className="search-bar">
+        <input
+          type="search"
+          placeholder="Search your shows..."
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+        />
+      </div>
         {loadingShows ? (
           <div className="empty-state">Loading shows...</div>
         ) : (
-          categories.map((category) => (
+          filteredCategories.map((category) => (
             <div
               key={category.id}
               className={`category category--${category.id}`}
@@ -489,71 +569,94 @@ function ShowsPage({
               <button
                 type="button"
                 className="category__header"
-                aria-expanded={!collapsedCategories[category.id]}
+                aria-expanded={normalizedSearch ? true : !collapsedCategories[category.id]}
                 aria-controls={`category-${category.id}`}
                 onClick={() => toggleCategory(category.id)}
               >
-                <div className="category__title">{category.label}</div>
-                <span className="text-button category__toggle">
-                  {collapsedCategories[category.id] ? 'Show' : 'Hide'}
+                <div className="category__title">
+                  {category.id === 'completed' ? 'Finished' : category.label}
+                  <span className="category__count">({category.shows.length})</span>
+                </div>
+                <span className="category__toggle" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path
+                      d="M6 9l6 6 6-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </span>
               </button>
-              {!collapsedCategories[category.id] && (
-                <div id={`category-${category.id}`} className="category__body">
-                  {category.shows.length === 0 ? (
-                    <div className="empty-state">No shows here yet.</div>
-                  ) : (
-                    <div className="show-grid">
-                      {category.shows.map((show) => (
-                        <button
-                          key={show.id}
-                          type="button"
-                          className="show-card"
-                          onClick={() => navigate(`/shows/${show.id}`)}
-                        >
-                          <div className="show-card__art">
-                            {show.image ? (
-                              <img src={show.image} alt={show.name} />
-                            ) : (
-                              <div className="image-fallback" />
-                            )}
+              <div
+                id={`category-${category.id}`}
+                className={`category__body ${
+                  normalizedSearch || !collapsedCategories[category.id]
+                    ? 'category__body--open'
+                    : 'category__body--closed'
+                }`}
+                aria-hidden={
+                  normalizedSearch ? false : collapsedCategories[category.id]
+                }
+              >
+                {category.shows.length === 0 ? (
+                  <div className="empty-state">No shows here yet.</div>
+                ) : (
+                  <div className="show-grid">
+                    {category.shows.map((show) => (
+                      <button
+                        key={show.id}
+                        type="button"
+                        className="show-card"
+                        onClick={() => navigate(`/shows/${show.id}`)}
+                      >
+                        <div className="show-card__art">
+                          {show.image ? (
+                            <img src={show.image} alt={show.name} />
+                          ) : (
+                            <div className="image-fallback" />
+                          )}
+                        </div>
+                        <div className="show-card__body">
+                          <div className="show-card__title">
+                            <span className="tag">{STATE_LABELS[show.state]}</span>
+                            <h3>{show.name}</h3>
                           </div>
-                          <div className="show-card__body">
-                            <div>
-                              <h3>{show.name}</h3>
-                              <span className="tag">{STATE_LABELS[show.state]}</span>
-                            </div>
-                            {show.nextEpisode && (
-                              <div className="show-card__meta">
-                                <span>
-                                  Next: {formatEpisodeCode(show.nextEpisode)}
-                                </span>
-                                <span className="muted">
-                                  {show.nextEpisode.name || 'Upcoming episode'}
-                                </span>
-                              </div>
-                            )}
-                            <div className="show-card__stats">
+                          {show.nextEpisode && (
+                            <div className="show-card__meta">
                               <span>
-                                Watched {show.stats.watchedEpisodes}/
-                                {show.stats.totalEpisodes}
+                                Next: {formatEpisodeCode(show.nextEpisode)}
                               </span>
-                              {show.stats.releasedUnwatched > 0 && (
-                                <span className="highlight">
-                                  {show.stats.releasedUnwatched} released left
-                                </span>
-                              )}
+                              <span className="muted">
+                                {show.nextEpisode.name || 'Upcoming episode'}
+                              </span>
                             </div>
+                          )}
+                          <div className="show-card__stats">
+                            <span>
+                              Watched {show.stats.watchedEpisodes}/
+                              {show.stats.totalEpisodes}
+                            </span>
+                            {show.stats.releasedUnwatched > 0 && (
+                              <span className="highlight">
+                                {show.stats.releasedUnwatched} released left
+                              </span>
+                            )}
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))
         )}
+      {normalizedSearch && !loadingShows && filteredCategories.length === 0 && (
+        <div className="empty-state">No shows match your search.</div>
+      )}
     </section>
   );
 }
@@ -562,10 +665,19 @@ function AddShowPage({
   searchQuery,
   searchResults,
   searchError,
+  hasSearched,
   onSearchQuery,
   onSearch,
   onAddShow,
 }) {
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
   return (
     <section className="panel add-show-page">
       <div className="panel__header">
@@ -581,6 +693,7 @@ function AddShowPage({
           }}
         >
           <input
+            ref={inputRef}
             type="search"
             placeholder="Search shows..."
             value={searchQuery}
@@ -606,12 +719,24 @@ function AddShowPage({
                   {result.summary || 'No summary available.'}
                 </p>
               </div>
-              <button className="outline" onClick={() => onAddShow(result.id)}>
-                Add
-              </button>
+              {result.existingState ? (
+                <span className="badge badge--muted">
+                  {STATE_LABELS[result.existingState] || 'Added'}
+                </span>
+              ) : (
+                <button
+                  className="outline"
+                  onClick={() => onAddShow(result.id)}
+                >
+                  Add
+                </button>
+              )}
             </div>
           ))}
         </div>
+      )}
+      {hasSearched && !searchError && searchResults.length === 0 && (
+        <div className="empty-state">No shows found. Try another search.</div>
       )}
       {searchError && <div className="error">{searchError}</div>}
     </section>
@@ -625,6 +750,7 @@ function ShowDetailPage({
   onToggleEpisode,
   onToggleSeason,
   onUpdateShowStatus,
+  onRemoveShow,
 }) {
   const navigate = useNavigate();
   const params = useParams();
@@ -675,11 +801,12 @@ function ShowDetailPage({
       onToggleEpisode={onToggleEpisode}
       onToggleSeason={onToggleSeason}
       onUpdateShowStatus={onUpdateShowStatus}
+      onRemoveShow={onRemoveShow}
     />
   );
 }
 
-function CalendarPage({ calendar, onRefresh }) {
+function CalendarPage({ calendar }) {
   return (
     <section className="panel">
       <div className="panel__header">
@@ -687,9 +814,6 @@ function CalendarPage({ calendar, onRefresh }) {
           <h2>Upcoming Episodes</h2>
           <p className="muted">Next {calendar.days} days across your shows.</p>
         </div>
-        <button className="outline" onClick={onRefresh}>
-          Refresh
-        </button>
       </div>
       {calendar.episodes.length === 0 ? (
         <div className="empty-state">No upcoming episodes found.</div>
@@ -735,10 +859,38 @@ function SettingsPage({
   appVersion,
   onProfileSelect,
   onProfileCreate,
+  onProfileDelete,
   onExport,
   onImport,
   onLogout,
 }) {
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
+
+  const handleDeleteRequest = (profileId) => {
+    setDeleteError('');
+    setPendingDeleteId(profileId);
+  };
+
+  const handleDeleteCancel = () => {
+    setPendingDeleteId(null);
+  };
+
+  const handleDeleteConfirm = async (profile) => {
+    setDeleteError('');
+    try {
+      await onProfileDelete(profile);
+      setPendingDeleteId(null);
+    } catch (error) {
+      setDeleteError(error.message);
+    }
+  };
+
+  const handleSelect = (profileId) => {
+    setPendingDeleteId(null);
+    onProfileSelect(profileId);
+  };
+
   return (
     <section className="panel">
       <div className="panel__header">
@@ -753,51 +905,229 @@ function SettingsPage({
       </div>
       <div className="settings-grid">
         <div className="settings-card">
-          <h3>Profiles</h3>
-          <p className="muted">Switch or add a profile for another viewer.</p>
-          <div className="profile-list">
-            {profiles.map((profile) => (
-              <button
-                key={profile.id}
-                className={
-                  profile.id === activeProfile.id ? 'chip chip--active' : 'chip'
-                }
-                onClick={() => onProfileSelect(profile.id)}
-              >
-                {profile.name}
-              </button>
-            ))}
+          <div className="settings-card__header">
+            <h3>Profiles</h3>
           </div>
-          <ProfileCreateInline onCreate={onProfileCreate} />
+          <div className="settings-card__body">
+            <p className="muted">Switch or add a profile for another viewer.</p>
+            <div className="settings-profile-list">
+              {profiles.map((profile) => {
+                const initial = profile.name?.trim()?.[0]?.toUpperCase() || '?';
+                const isActive = profile.id === activeProfile?.id;
+                const isPendingDelete = pendingDeleteId === profile.id;
+                return (
+                  <div
+                    key={profile.id}
+                    className={
+                      [
+                        'settings-profile-item',
+                        isActive ? 'settings-profile-item--active' : '',
+                        isPendingDelete ? 'settings-profile-item--confirming' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+                    }
+                  >
+                    <button
+                      className="settings-profile-main"
+                      type="button"
+                      disabled={isPendingDelete}
+                      onClick={() => handleSelect(profile.id)}
+                    >
+                      <span className="settings-profile-avatar">{initial}</span>
+                      <span className="settings-profile-name">{profile.name}</span>
+                      <span className="settings-profile-status">
+                        {isActive ? 'Active' : 'Switch'}
+                      </span>
+                    </button>
+                    {!isActive && !isPendingDelete && (
+                      <button
+                        className="settings-profile-delete"
+                        type="button"
+                        aria-label={`Delete ${profile.name} profile`}
+                        title="Delete profile"
+                        onClick={() => handleDeleteRequest(profile.id)}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
+                          <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <path d="M10 11v6" />
+                          <path d="M14 11v6" />
+                        </svg>
+                      </button>
+                    )}
+                    {!isActive && isPendingDelete && (
+                      <div className="settings-profile-confirm">
+                        <span>Delete?</span>
+                        <button
+                          className="settings-profile-cancel"
+                          type="button"
+                          onClick={handleDeleteCancel}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="settings-profile-confirm-button"
+                          type="button"
+                          onClick={() => handleDeleteConfirm(profile)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {deleteError && <p className="error">{deleteError}</p>}
+          </div>
+          <div className="settings-card__footer">
+            <ProfileCreateInline onCreate={onProfileCreate} />
+          </div>
         </div>
         <div className="settings-card">
-          <h3>Import / Export</h3>
-          <p className="muted">Download a JSON backup or import JSON/CSV TVmaze IDs.</p>
-          <div className="button-row">
-            <button className="primary" onClick={onExport}>
-              Export data
-            </button>
-            <label className={isImporting ? 'outline is-disabled' : 'outline'}>
-              Import file
-              <input
-                type="file"
-                accept=".json,.csv,application/json,text/csv"
-                onChange={onImport}
-                disabled={isImporting}
-              />
-            </label>
+          <div className="settings-card__header">
+            <h3>Import / Export</h3>
           </div>
-          {notice && <p className="notice">{notice}</p>}
-          {isImporting && (
-            <div className="import-status" aria-live="polite">
-              <div className="progress-bar" role="progressbar" aria-valuetext="Importing">
-                <span className="progress-bar__fill" />
-              </div>
+          <div className="settings-card__body">
+            <p className="muted">Download a JSON backup or import JSON/CSV TVmaze IDs.</p>
+          </div>
+          <div className="settings-card__footer">
+            <div className="button-row">
+              <button className="outline" onClick={onExport}>
+                Export
+              </button>
+              <label className={isImporting ? 'outline is-disabled' : 'outline'}>
+                Import
+                <input
+                  type="file"
+                  accept=".json,.csv,application/json,text/csv"
+                  onChange={onImport}
+                  disabled={isImporting}
+                />
+              </label>
             </div>
-          )}
+            {notice && <p className="notice">{notice}</p>}
+            {isImporting && (
+              <div className="import-status" aria-live="polite">
+                <div className="progress-bar" role="progressbar" aria-valuetext="Importing">
+                  <span className="progress-bar__fill" />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+        <ChangePasswordCard />
       </div>
     </section>
+  );
+}
+
+function ChangePasswordCard() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [notice, setNotice] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+    setNotice('');
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError('Complete all password fields.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New passwords do not match.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await apiFetch('/api/auth/password', {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setNotice('Password updated.');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="settings-card">
+      <div className="settings-card__header">
+        <h3>Change password</h3>
+      </div>
+      <div className="settings-card__body">
+        <p className="muted">Update your account password.</p>
+        <form className="settings-form" onSubmit={handleSubmit}>
+          <label>
+            Current password
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)}
+            />
+          </label>
+          <label>
+            New password
+            <input
+              type="password"
+              autoComplete="new-password"
+              minLength={6}
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+            />
+          </label>
+          <label>
+            Confirm new password
+            <input
+              type="password"
+              autoComplete="new-password"
+              minLength={6}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          </label>
+          <button
+            className={isSubmitting ? 'outline is-disabled' : 'outline'}
+            type="submit"
+            disabled={isSubmitting}
+          >
+            Update password
+          </button>
+        </form>
+      </div>
+      {(error || notice) && (
+        <div className="settings-card__footer">
+          {error && <p className="error">{error}</p>}
+          {notice && <p className="notice">{notice}</p>}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -912,6 +1242,7 @@ function ProfileView({ profiles, onCreate, onSelect, onLogout }) {
 function ProfileCreateInline({ onCreate }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -919,10 +1250,24 @@ function ProfileCreateInline({ onCreate }) {
     try {
       await onCreate(name.trim());
       setName('');
+      setIsOpen(false);
     } catch (err) {
       setError(err.message);
     }
   };
+
+  const handleOpen = () => {
+    setError('');
+    setIsOpen(true);
+  };
+
+  if (!isOpen) {
+    return (
+      <button className="outline" type="button" onClick={handleOpen}>
+        Add
+      </button>
+    );
+  }
 
   return (
     <form className="inline-form" onSubmit={handleSubmit}>
@@ -930,6 +1275,7 @@ function ProfileCreateInline({ onCreate }) {
         placeholder="New profile name"
         value={name}
         onChange={(event) => setName(event.target.value)}
+        autoFocus
       />
       <button className="outline" type="submit">
         Add
@@ -940,10 +1286,31 @@ function ProfileCreateInline({ onCreate }) {
 }
 
 function CheckButton({ active, label, onClick }) {
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (!animate) return;
+    const timeout = setTimeout(() => setAnimate(false), 220);
+    return () => clearTimeout(timeout);
+  }, [animate]);
+
+  const handleClick = (event) => {
+    if (!active) {
+      setAnimate(true);
+    }
+    onClick(event);
+  };
+
   return (
     <button
-      className={active ? 'check-button check-button--active' : 'check-button'}
-      onClick={onClick}
+      className={[
+        'check-button',
+        active ? 'check-button--active' : '',
+        animate ? 'check-button--animate' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onClick={handleClick}
       type="button"
       aria-label={label}
       title={label}
@@ -970,6 +1337,7 @@ function ShowDetailView({
   onToggleEpisode,
   onToggleSeason,
   onUpdateShowStatus,
+  onRemoveShow,
 }) {
   const [openSeasons, setOpenSeasons] = useState({});
 
@@ -994,39 +1362,107 @@ function ShowDetailView({
   };
 
   if (!show) return null;
+  const stateLabel = show.state ? STATE_LABELS[show.state] || show.state : null;
+  const isFinished = show.state === 'completed';
+  const canToggleStatus = !isFinished;
+  const canRemove = show.profileStatus === 'stopped';
+  const imdbUrl = show.imdbId
+    ? `https://www.imdb.com/title/${show.imdbId}/`
+    : null;
   return (
     <section className="panel show-detail">
-      <div className="panel__header">
+      <div className="panel__header show-detail__header">
         <div className="show-detail__heading">
-          <button className="outline" onClick={onBack}>
-            Back to shows
+          <button
+            className="icon-button icon-button--back"
+            type="button"
+            onClick={onBack}
+            aria-label="Back to shows"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M7.5 10l4.5 4.5 4.5-4.5" />
+            </svg>
           </button>
           <div className="show-detail__title">
             <div className="show-detail__title-row">
               <h2>{show.name}</h2>
-              {show.profileStatus === 'stopped' && (
-                <span className="badge badge--muted">Stopped Watching</span>
+              {stateLabel && (
+                <span className="badge badge--muted show-detail__badge">
+                  {stateLabel}
+                </span>
               )}
             </div>
-            <p className="muted">
+            <p className="muted show-detail__meta">
               {show.status || 'Unknown status'}
               {show.premiered ? ` - Premiered ${show.premiered}` : ''}
               {show.ended ? ` - Ended ${show.ended}` : ''}
+              {imdbUrl && (
+                <>
+                  {' · '}
+                  <a
+                    className="show-detail__imdb-link"
+                    href={imdbUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    IMDb
+                  </a>
+                </>
+              )}
             </p>
           </div>
         </div>
-        <button
-          className="outline"
-          type="button"
-          onClick={() =>
-            onUpdateShowStatus(
-              show.id,
-              show.profileStatus === 'stopped' ? null : 'stopped'
-            )
-          }
-        >
-          {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
-        </button>
+        {(canToggleStatus || canRemove) && (
+          <div className="show-detail__actions">
+            {canToggleStatus && (
+            <button
+              className="outline show-detail__action"
+              type="button"
+              onClick={() =>
+                onUpdateShowStatus(
+                  show.id,
+                  show.profileStatus === 'stopped' ? null : 'stopped'
+                )
+              }
+            >
+              {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
+            </button>
+            )}
+            {canRemove && (
+            <button
+              className="show-detail__remove"
+              type="button"
+              aria-label={`Remove ${show.name}`}
+              title="Remove show"
+              onClick={() => onRemoveShow(show.id)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 6h18" />
+                <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
+                <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6" />
+                <path d="M14 11v6" />
+              </svg>
+            </button>
+            )}
+          </div>
+        )}
       </div>
       <div className="show-detail__hero">
         <div className="show-detail__image">
@@ -1049,75 +1485,110 @@ function ShowDetailView({
               openSeasons[String(season.season)] ?? !season.watched;
             return (
               <div key={season.season} className="season-card">
-                <div className="season-card__header">
+                <div
+                  className="season-card__header"
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={isOpen}
+                  aria-controls={`season-${season.season}`}
+                  onClick={() => toggleSeasonOpen(season.season)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      toggleSeasonOpen(season.season);
+                    }
+                  }}
+                >
                   <div>
                     <h3>Season {season.season}</h3>
                     <p className="muted">
                       Watched {season.watchedCount}/{season.totalCount}
                     </p>
                   </div>
-                <div className="season-actions">
-                  <button
-                    className="season-toggle"
-                    onClick={() => toggleSeasonOpen(season.season)}
-                    type="button"
-                  >
-                    {isOpen ? 'Hide episodes' : 'Show episodes'}
-                  </button>
-                  <CheckButton
-                    active={season.watched}
-                    label={
-                      season.watched ? 'Mark season unwatched' : 'Mark season watched'
-                    }
-                    onClick={() => onToggleSeason(season.season, !season.watched)}
-                  />
-                </div>
-                </div>
-                {isOpen && (
-                  <div className="episode-list">
-                    {season.episodes.map((episode) => {
-                      return (
-                        <div
-                          key={episode.id}
-                          className={`episode-row ${episode.watched ? 'is-watched' : ''}`}
-                        >
-                          <div className="episode-row__meta">
-                            <div>
-                              <span className="tag">
-                                {formatEpisodeCode(episode)}
-                              </span>
-                              <h4>{episode.name || 'Untitled episode'}</h4>
-                            </div>
-                            <div className="episode-row__actions">
-                              <div className="episode-row__details">
-                                <AirdateBadge airdate={episode.airdate} />
-                                {episode.runtime && (
-                                  <span className="badge badge--muted">
-                                    {episode.runtime}m
-                                  </span>
-                                )}
-                              </div>
-                              <CheckButton
-                                active={episode.watched}
-                                label={
-                                  episode.watched
-                                    ? 'Mark episode unwatched'
-                                    : 'Mark episode watched'
-                                }
-                                onClick={() =>
-                                  onToggleEpisode(episode.id, !episode.watched)
-                                }
-                              />
-                            </div>
-                          </div>
-                          <p className="muted">
-                            {episode.summary || 'No episode summary available.'}
-                          </p>
-                        </div>
-                      );
-                    })}
+                  <div className="season-actions">
+                    <button
+                      className="season-toggle"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleSeasonOpen(season.season);
+                      }}
+                      type="button"
+                      aria-label={isOpen ? 'Collapse season' : 'Expand season'}
+                      aria-expanded={isOpen}
+                      title={isOpen ? 'Collapse season' : 'Expand season'}
+                    >
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <path
+                          d="M6 9l6 6 6-6"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
+                    <CheckButton
+                      active={season.watched}
+                      label={
+                        season.watched
+                          ? 'Mark season unwatched'
+                          : 'Mark season watched'
+                      }
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onToggleSeason(season.season, !season.watched);
+                      }}
+                    />
                   </div>
-                )}
+                </div>
+                <div
+                  id={`season-${season.season}`}
+                  className={`episode-list ${
+                    isOpen ? 'episode-list--open' : 'episode-list--closed'
+                  }`}
+                  aria-hidden={!isOpen}
+                >
+                  {season.episodes.map((episode) => {
+                    return (
+                      <div
+                        key={episode.id}
+                        className={`episode-row ${episode.watched ? 'is-watched' : ''}`}
+                      >
+                        <div className="episode-row__meta">
+                          <div className="episode-row__badges">
+                            <span className="tag">
+                              {formatEpisodeCode(episode)}
+                            </span>
+                            <AirdateBadge airdate={episode.airdate} />
+                            {episode.runtime && (
+                              <span className="badge badge--muted">
+                                {episode.runtime}m
+                              </span>
+                            )}
+                          </div>
+                          <div className="episode-row__title-row">
+                            <h4>{episode.name || 'Untitled episode'}</h4>
+                            <CheckButton
+                              active={episode.watched}
+                              label={
+                                episode.watched
+                                  ? 'Mark episode unwatched'
+                                  : 'Mark episode watched'
+                              }
+                              onClick={() =>
+                                onToggleEpisode(episode.id, !episode.watched)
+                              }
+                            />
+                          </div>
+                        </div>
+                        <p className="muted">
+                          {episode.summary || 'No episode summary available.'}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}

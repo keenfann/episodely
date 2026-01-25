@@ -960,6 +960,20 @@ input:focus {
     display: none;
   }
 
+  .inline-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inline-form input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .inline-form button {
+    width: 100%;
+  }
+
   .season-card__header {
     flex-direction: column;
     align-items: stretch;

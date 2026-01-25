@@ -379,16 +379,6 @@ function App() {
           </button>
           <div className="profile-chip">
             <span>{activeProfile.name}</span>
-            <button
-              className="text-button"
-              onClick={() => {
-                setActiveProfile(null);
-                setShowDetail(null);
-                navigate('/profiles');
-              }}
-            >
-              Switch
-            </button>
           </div>
         </div>
       </header>
@@ -811,10 +801,10 @@ function SettingsPage({
           <p className="muted">Download a JSON backup or import JSON/CSV TVmaze IDs.</p>
           <div className="button-row">
             <button className="primary" onClick={onExport}>
-              Export data
+              Export
             </button>
             <label className={isImporting ? 'outline is-disabled' : 'outline'}>
-              Import file
+              Import
               <input
                 type="file"
                 accept=".json,.csv,application/json,text/csv"

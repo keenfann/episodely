@@ -1233,21 +1233,19 @@ function ShowDetailView({
                           className={`episode-row ${episode.watched ? 'is-watched' : ''}`}
                         >
                           <div className="episode-row__meta">
-                            <div>
+                            <div className="episode-row__badges">
                               <span className="tag">
                                 {formatEpisodeCode(episode)}
                               </span>
-                              <h4>{episode.name || 'Untitled episode'}</h4>
+                              <AirdateBadge airdate={episode.airdate} />
+                              {episode.runtime && (
+                                <span className="badge badge--muted">
+                                  {episode.runtime}m
+                                </span>
+                              )}
                             </div>
-                            <div className="episode-row__actions">
-                              <div className="episode-row__details">
-                                <AirdateBadge airdate={episode.airdate} />
-                                {episode.runtime && (
-                                  <span className="badge badge--muted">
-                                    {episode.runtime}m
-                                  </span>
-                                )}
-                              </div>
+                            <div className="episode-row__title-row">
+                              <h4>{episode.name || 'Untitled episode'}</h4>
                               <CheckButton
                                 active={episode.watched}
                                 label={

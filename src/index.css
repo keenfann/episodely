@@ -634,23 +634,29 @@ input:focus {
 
 .episode-row__meta {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
+  gap: 0.5rem;
+  flex-direction: column;
+  align-items: stretch;
 }
 
-.episode-row__details {
+.episode-row__badges {
   display: flex;
   gap: 0.5rem;
   align-items: center;
   flex-wrap: wrap;
 }
 
-.episode-row__actions {
+.episode-row__title-row {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  justify-content: flex-end;
+  justify-content: space-between;
+}
+
+.episode-row__title-row h4 {
+  margin: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .badge {

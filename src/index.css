@@ -970,6 +970,34 @@ input:focus {
     display: none;
   }
 
+  .calendar-card {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding: 0.9rem;
+  }
+
+  .calendar-card__image {
+    width: 100%;
+    height: 160px;
+  }
+
+  .calendar-card__body {
+    min-width: 0;
+  }
+
+  .calendar-card__meta {
+    flex-wrap: wrap;
+    margin-bottom: 0.35rem;
+  }
+
+  .calendar-card__show {
+    font-size: 0.95rem;
+  }
+
+  .calendar-card__episode {
+    font-size: 1.05rem;
+  }
+
   .profile-chip {
     display: none;
   }

@@ -358,7 +358,8 @@ function listShowsForProfile(profileId) {
 
 app.post('/api/auth/register', async (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) {
+  const normalizedUsername = typeof username === 'string' ? username.trim() : '';
+  if (!normalizedUsername || !password) {
     return res.status(400).json({ error: 'Username and password required' });
   }
   if (password.length < 6) {
@@ -366,8 +367,8 @@ app.post('/api/auth/register', async (req, res) => {
   }
 
   const existing = db
-    .prepare('SELECT id FROM users WHERE username = ?')
-    .get(username);
+    .prepare('SELECT id FROM users WHERE lower(username) = lower(?)')
+    .get(normalizedUsername);
   if (existing) {
     return res.status(409).json({ error: 'Username already exists' });
   }
@@ -377,7 +378,7 @@ app.post('/api/auth/register', async (req, res) => {
     .prepare(
       'INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)'
     )
-    .run(username, passwordHash, nowIso());
+    .run(normalizedUsername, passwordHash, nowIso());
 
   req.session.userId = toNumber(result.lastInsertRowid);
   req.session.profileId = null;
@@ -387,13 +388,14 @@ app.post('/api/auth/register', async (req, res) => {
 
 app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body || {};
-  if (!username || !password) {
+  const normalizedUsername = typeof username === 'string' ? username.trim() : '';
+  if (!normalizedUsername || !password) {
     return res.status(400).json({ error: 'Username and password required' });
   }
 
   const user = db
-    .prepare('SELECT * FROM users WHERE username = ?')
-    .get(username);
+    .prepare('SELECT * FROM users WHERE lower(username) = lower(?)')
+    .get(normalizedUsername);
   if (!user) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }

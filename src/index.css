@@ -312,6 +312,7 @@ input:focus {
   height: 100%;
   object-fit: cover;
   border-radius: 12px;
+  max-width: 100%;
 }
 
 .image-fallback {
@@ -487,10 +488,12 @@ input:focus {
 .show-detail {
   display: grid;
   gap: 1.5rem;
+  min-width: 0;
 }
 
 .show-detail__title h2 {
   font-size: 1.8rem;
+  overflow-wrap: anywhere;
 }
 
 .show-detail__heading {
@@ -498,6 +501,12 @@ input:focus {
   align-items: flex-start;
   gap: 1rem;
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.show-detail__title {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .show-detail__title-row {
@@ -505,6 +514,7 @@ input:focus {
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .show-detail__hero {
@@ -512,10 +522,14 @@ input:focus {
   grid-template-columns: 240px 1fr;
   gap: 1.5rem;
   align-items: start;
+  min-width: 0;
 }
 
 .show-detail__image {
   height: 320px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .show-detail__summary {
@@ -523,6 +537,8 @@ input:focus {
   gap: 0.75rem;
   font-size: 0.95rem;
   color: var(--text-muted);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .season-list {
@@ -626,6 +642,7 @@ input:focus {
   background: rgba(15, 18, 28, 0.7);
   display: grid;
   gap: 0.75rem;
+  min-width: 0;
 }
 
 .episode-row.is-watched {
@@ -644,6 +661,7 @@ input:focus {
   gap: 0.5rem;
   align-items: center;
   flex-wrap: wrap;
+  min-width: 0;
 }
 
 .episode-row__title-row {
@@ -651,12 +669,20 @@ input:focus {
   align-items: center;
   gap: 0.75rem;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .episode-row__title-row h4 {
   margin: 0;
   flex: 1;
   min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.episode-row .muted {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .badge {
@@ -945,6 +971,17 @@ input:focus {
 
   .show-detail__hero {
     grid-template-columns: 1fr;
+  }
+
+  .show-detail__heading {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .show-detail__title-row {
+    width: 100%;
+    align-items: flex-start;
   }
 
   .search-bar {

@@ -871,7 +871,7 @@ function SettingsPage({
           <h3>Import / Export</h3>
           <p className="muted">Download a JSON backup or import JSON/CSV TVmaze IDs.</p>
           <div className="button-row">
-            <button className="primary" onClick={onExport}>
+            <button className="outline" onClick={onExport}>
               Export
             </button>
             <label className={isImporting ? 'outline is-disabled' : 'outline'}>
@@ -977,7 +977,7 @@ function ChangePasswordCard() {
           />
         </label>
         <button
-          className={isSubmitting ? 'primary is-disabled' : 'primary'}
+          className={isSubmitting ? 'outline is-disabled' : 'outline'}
           type="submit"
           disabled={isSubmitting}
         >

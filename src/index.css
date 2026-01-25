@@ -951,6 +951,12 @@ input:focus {
   align-items: center;
 }
 
+.button-row label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .button-row input[type='file'] {
   display: none;
 }

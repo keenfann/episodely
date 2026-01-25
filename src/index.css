@@ -29,6 +29,7 @@ body {
     radial-gradient(circle at 20% 20%, rgba(79, 209, 197, 0.12), transparent 40%),
     radial-gradient(circle at 80% 10%, rgba(249, 115, 22, 0.12), transparent 45%),
     var(--bg);
+  overflow-x: hidden;
 }
 
 @keyframes fadeUp {

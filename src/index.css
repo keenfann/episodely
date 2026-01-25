@@ -559,8 +559,13 @@ input:focus {
 
 .show-detail {
   display: grid;
-  gap: 1.5rem;
+  gap: 1.25rem;
   min-width: 0;
+}
+
+.show-detail__header {
+  align-items: center;
+  gap: 1.25rem;
 }
 
 .show-detail__title h2 {
@@ -570,35 +575,53 @@ input:focus {
 
 .show-detail__heading {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: nowrap;
+  flex: 1;
   min-width: 0;
 }
 
 .show-detail__title {
+  display: grid;
+  gap: 0.35rem;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .show-detail__title-row {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: baseline;
+  gap: 0.6rem;
   flex-wrap: wrap;
   min-width: 0;
 }
 
+.show-detail__badge {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.show-detail__meta {
+  font-size: 0.9rem;
+}
+
+.show-detail__action {
+  align-self: center;
+  white-space: nowrap;
+}
+
 .show-detail__hero {
   display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 220px 1fr;
+  gap: 1.25rem;
   align-items: start;
   min-width: 0;
 }
 
 .show-detail__image {
-  height: 320px;
+  height: 300px;
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -606,8 +629,8 @@ input:focus {
 
 .show-detail__summary {
   display: grid;
-  gap: 0.75rem;
-  font-size: 0.95rem;
+  gap: 0.6rem;
+  font-size: 0.94rem;
   color: var(--text-muted);
   min-width: 0;
   overflow-wrap: anywhere;
@@ -1308,6 +1331,7 @@ input:focus {
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
+    flex-wrap: wrap;
   }
 
   .show-detail__title-row {

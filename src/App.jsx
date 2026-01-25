@@ -1348,7 +1348,7 @@ function ShowDetailView({
   const isFinished = show.state === 'completed';
   return (
     <section className="panel show-detail">
-      <div className="panel__header">
+      <div className="panel__header show-detail__header">
         <div className="show-detail__heading">
           <button
             className="icon-button icon-button--back"
@@ -1373,10 +1373,12 @@ function ShowDetailView({
             <div className="show-detail__title-row">
               <h2>{show.name}</h2>
               {stateLabel && (
-                <span className="badge badge--muted">{stateLabel}</span>
+                <span className="badge badge--muted show-detail__badge">
+                  {stateLabel}
+                </span>
               )}
             </div>
-            <p className="muted">
+            <p className="muted show-detail__meta">
               {show.status || 'Unknown status'}
               {show.premiered ? ` - Premiered ${show.premiered}` : ''}
               {show.ended ? ` - Ended ${show.ended}` : ''}
@@ -1385,7 +1387,7 @@ function ShowDetailView({
         </div>
         {!isFinished && (
           <button
-            className="outline"
+            className="outline show-detail__action"
             type="button"
             onClick={() =>
               onUpdateShowStatus(

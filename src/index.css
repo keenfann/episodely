@@ -397,6 +397,21 @@ input:focus {
   color: #f8fafc;
 }
 
+.category__body {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
+  will-change: max-height, opacity, transform;
+}
+
+.category__body--open {
+  max-height: 5000px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .category--watch-next {
   --category-accent: #f97316;
   --category-bg: rgba(249, 115, 22, 0.12);
@@ -623,6 +638,7 @@ input:focus {
 .check-button svg {
   width: 18px;
   height: 18px;
+  transform-origin: center;
 }
 
 .check-button--active {
@@ -630,9 +646,53 @@ input:focus {
   color: #0a0f14;
 }
 
+.check-button--animate.check-button--active svg {
+  animation: check-pop 0.2s ease;
+}
+
+.check-button--animate.check-button--active {
+  animation: check-pulse 0.2s ease;
+}
+
+@keyframes check-pop {
+  0% {
+    transform: scale(0.7);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes check-pulse {
+  0% {
+    transform: scale(1);
+  }
+  60% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 .episode-list {
   display: grid;
   gap: 0.9rem;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
+  will-change: max-height, opacity, transform;
+}
+
+.episode-list--open {
+  max-height: 4000px;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .episode-row {

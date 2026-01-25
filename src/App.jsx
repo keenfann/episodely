@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   NavLink,
   Navigate,
@@ -74,6 +74,8 @@ function App() {
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
   const [importing, setImporting] = useState(false);
+  const scrollRestoreRef = useRef(null);
+  const [scrollRestoreTick, setScrollRestoreTick] = useState(0);
 
   useEffect(() => {
     const init = async () => {
@@ -89,6 +91,14 @@ function App() {
     };
     init();
   }, []);
+
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (scrollRestoreRef.current == null) return;
+    const top = scrollRestoreRef.current;
+    scrollRestoreRef.current = null;
+    window.scrollTo({ top, left: 0, behavior: 'auto' });
+  }, [scrollRestoreTick]);
 
   useEffect(() => {
     if (activeProfile) {
@@ -137,15 +147,20 @@ function App() {
     }
   };
 
-  const loadShowDetail = useCallback(async (showId) => {
+  const loadShowDetail = useCallback(async (showId, options = {}) => {
     if (!showId || Number.isNaN(showId)) return;
-    setLoadingShowDetail(true);
-    setShowDetail(null);
+    const silent = Boolean(options.silent);
+    if (!silent) {
+      setLoadingShowDetail(true);
+      setShowDetail((prev) => (prev?.show?.id === showId ? prev : null));
+    }
     try {
       const data = await apiFetch(`/api/shows/${showId}`);
       setShowDetail(data);
     } finally {
-      setLoadingShowDetail(false);
+      if (!silent) {
+        setLoadingShowDetail(false);
+      }
     }
   }, []);
 
@@ -234,32 +249,49 @@ function App() {
       method: 'POST',
       body: JSON.stringify({ status }),
     });
-    await loadShowDetail(showId);
+    await loadShowDetail(showId, { silent: true });
     await loadShows();
   };
 
-  const toggleEpisode = async (episodeId, watched) => {
-    await apiFetch(`/api/episodes/${episodeId}/watch`, {
-      method: 'POST',
-      body: JSON.stringify({ watched }),
-    });
-    if (showDetail?.show?.id) {
-      await loadShowDetail(showDetail.show.id);
+  const preserveScroll = async (action) => {
+    if (typeof window === 'undefined') {
+      await action();
+      return;
     }
-    await loadShows();
+    scrollRestoreRef.current = window.scrollY;
+    try {
+      await action();
+    } finally {
+      setScrollRestoreTick((prev) => prev + 1);
+    }
+  };
+
+  const toggleEpisode = async (episodeId, watched) => {
+    await preserveScroll(async () => {
+      await apiFetch(`/api/episodes/${episodeId}/watch`, {
+        method: 'POST',
+        body: JSON.stringify({ watched }),
+      });
+      if (showDetail?.show?.id) {
+        await loadShowDetail(showDetail.show.id, { silent: true });
+      }
+      await loadShows();
+    });
   };
 
   const toggleSeason = async (seasonNumber, watched) => {
     if (!showDetail?.show?.id) return;
-    await apiFetch(
-      `/api/shows/${showDetail.show.id}/seasons/${seasonNumber}/watch`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ watched }),
-      }
-    );
-    await loadShowDetail(showDetail.show.id);
-    await loadShows();
+    await preserveScroll(async () => {
+      await apiFetch(
+        `/api/shows/${showDetail.show.id}/seasons/${seasonNumber}/watch`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ watched }),
+        }
+      );
+      await loadShowDetail(showDetail.show.id, { silent: true });
+      await loadShows();
+    });
   };
 
   const handleExport = async () => {
@@ -506,59 +538,65 @@ function ShowsPage({
                   </svg>
                 </span>
               </button>
-              {!collapsedCategories[category.id] && (
-                <div id={`category-${category.id}`} className="category__body">
-                  {category.shows.length === 0 ? (
-                    <div className="empty-state">No shows here yet.</div>
-                  ) : (
-                    <div className="show-grid">
-                      {category.shows.map((show) => (
-                        <button
-                          key={show.id}
-                          type="button"
-                          className="show-card"
-                          onClick={() => navigate(`/shows/${show.id}`)}
-                        >
-                          <div className="show-card__art">
-                            {show.image ? (
-                              <img src={show.image} alt={show.name} />
-                            ) : (
-                              <div className="image-fallback" />
-                            )}
+              <div
+                id={`category-${category.id}`}
+                className={`category__body ${
+                  collapsedCategories[category.id]
+                    ? 'category__body--closed'
+                    : 'category__body--open'
+                }`}
+                aria-hidden={collapsedCategories[category.id]}
+              >
+                {category.shows.length === 0 ? (
+                  <div className="empty-state">No shows here yet.</div>
+                ) : (
+                  <div className="show-grid">
+                    {category.shows.map((show) => (
+                      <button
+                        key={show.id}
+                        type="button"
+                        className="show-card"
+                        onClick={() => navigate(`/shows/${show.id}`)}
+                      >
+                        <div className="show-card__art">
+                          {show.image ? (
+                            <img src={show.image} alt={show.name} />
+                          ) : (
+                            <div className="image-fallback" />
+                          )}
+                        </div>
+                        <div className="show-card__body">
+                          <div>
+                            <h3>{show.name}</h3>
+                            <span className="tag">{STATE_LABELS[show.state]}</span>
                           </div>
-                          <div className="show-card__body">
-                            <div>
-                              <h3>{show.name}</h3>
-                              <span className="tag">{STATE_LABELS[show.state]}</span>
-                            </div>
-                            {show.nextEpisode && (
-                              <div className="show-card__meta">
-                                <span>
-                                  Next: {formatEpisodeCode(show.nextEpisode)}
-                                </span>
-                                <span className="muted">
-                                  {show.nextEpisode.name || 'Upcoming episode'}
-                                </span>
-                              </div>
-                            )}
-                            <div className="show-card__stats">
+                          {show.nextEpisode && (
+                            <div className="show-card__meta">
                               <span>
-                                Watched {show.stats.watchedEpisodes}/
-                                {show.stats.totalEpisodes}
+                                Next: {formatEpisodeCode(show.nextEpisode)}
                               </span>
-                              {show.stats.releasedUnwatched > 0 && (
-                                <span className="highlight">
-                                  {show.stats.releasedUnwatched} released left
-                                </span>
-                              )}
+                              <span className="muted">
+                                {show.nextEpisode.name || 'Upcoming episode'}
+                              </span>
                             </div>
+                          )}
+                          <div className="show-card__stats">
+                            <span>
+                              Watched {show.stats.watchedEpisodes}/
+                              {show.stats.totalEpisodes}
+                            </span>
+                            {show.stats.releasedUnwatched > 0 && (
+                              <span className="highlight">
+                                {show.stats.releasedUnwatched} released left
+                              </span>
+                            )}
                           </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))
         )}
@@ -1050,10 +1088,31 @@ function ProfileCreateInline({ onCreate }) {
 }
 
 function CheckButton({ active, label, onClick }) {
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    if (!animate) return;
+    const timeout = setTimeout(() => setAnimate(false), 220);
+    return () => clearTimeout(timeout);
+  }, [animate]);
+
+  const handleClick = (event) => {
+    if (!active) {
+      setAnimate(true);
+    }
+    onClick(event);
+  };
+
   return (
     <button
-      className={active ? 'check-button check-button--active' : 'check-button'}
-      onClick={onClick}
+      className={[
+        'check-button',
+        active ? 'check-button--active' : '',
+        animate ? 'check-button--animate' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      onClick={handleClick}
       type="button"
       aria-label={label}
       title={label}
@@ -1216,49 +1275,53 @@ function ShowDetailView({
                     />
                   </div>
                 </div>
-                {isOpen && (
-                  <div id={`season-${season.season}`} className="episode-list">
-                    {season.episodes.map((episode) => {
-                      return (
-                        <div
-                          key={episode.id}
-                          className={`episode-row ${episode.watched ? 'is-watched' : ''}`}
-                        >
-                          <div className="episode-row__meta">
-                            <div className="episode-row__badges">
-                              <span className="tag">
-                                {formatEpisodeCode(episode)}
+                <div
+                  id={`season-${season.season}`}
+                  className={`episode-list ${
+                    isOpen ? 'episode-list--open' : 'episode-list--closed'
+                  }`}
+                  aria-hidden={!isOpen}
+                >
+                  {season.episodes.map((episode) => {
+                    return (
+                      <div
+                        key={episode.id}
+                        className={`episode-row ${episode.watched ? 'is-watched' : ''}`}
+                      >
+                        <div className="episode-row__meta">
+                          <div className="episode-row__badges">
+                            <span className="tag">
+                              {formatEpisodeCode(episode)}
+                            </span>
+                            <AirdateBadge airdate={episode.airdate} />
+                            {episode.runtime && (
+                              <span className="badge badge--muted">
+                                {episode.runtime}m
                               </span>
-                              <AirdateBadge airdate={episode.airdate} />
-                              {episode.runtime && (
-                                <span className="badge badge--muted">
-                                  {episode.runtime}m
-                                </span>
-                              )}
-                            </div>
-                            <div className="episode-row__title-row">
-                              <h4>{episode.name || 'Untitled episode'}</h4>
-                              <CheckButton
-                                active={episode.watched}
-                                label={
-                                  episode.watched
-                                    ? 'Mark episode unwatched'
-                                    : 'Mark episode watched'
-                                }
-                                onClick={() =>
-                                  onToggleEpisode(episode.id, !episode.watched)
-                                }
-                              />
-                            </div>
+                            )}
                           </div>
-                          <p className="muted">
-                            {episode.summary || 'No episode summary available.'}
-                          </p>
+                          <div className="episode-row__title-row">
+                            <h4>{episode.name || 'Untitled episode'}</h4>
+                            <CheckButton
+                              active={episode.watched}
+                              label={
+                                episode.watched
+                                  ? 'Mark episode unwatched'
+                                  : 'Mark episode watched'
+                              }
+                              onClick={() =>
+                                onToggleEpisode(episode.id, !episode.watched)
+                              }
+                            />
+                          </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+                        <p className="muted">
+                          {episode.summary || 'No episode summary available.'}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}

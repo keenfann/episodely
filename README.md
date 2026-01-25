@@ -60,6 +60,8 @@ Pushes to `dev` and pull requests publish static previews to GitHub Pages:
 
 These previews are frontend-only, so the UI needs a reachable API. Set the repository variable `PREVIEW_API_BASE` (Settings → Variables) to the URL of a running API, e.g. `https://your-dev-api.example.com`. The preview build will inject this as `VITE_API_BASE`.
 
+Example dev preview for this repo: `https://keenfann.github.io/episodely/dev/`
+
 ## Background Sync
 Episodely can refresh show/episode metadata from TVmaze on a schedule. Configure in `.env`:
 - `TVMAZE_SYNC_ENABLED` (default `true`)

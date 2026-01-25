@@ -37,6 +37,21 @@ describe('tvmaze, import/export, calendar', () => {
   });
 
   it('searches tvmaze and strips HTML', async () => {
+    const existingShowId = createShow({
+      tvmazeId: 1,
+      name: 'Example',
+      status: 'Running',
+    });
+    linkProfileShow({ profileId, showId: existingShowId });
+    createEpisode({
+      showId: existingShowId,
+      tvmazeId: 1101,
+      season: 1,
+      number: 1,
+      name: 'Pilot',
+      airdate: '2000-01-01',
+    });
+
     tvmaze.searchShows.mockResolvedValue([
       {
         show: {
@@ -54,6 +69,7 @@ describe('tvmaze, import/export, calendar', () => {
     expect(response.status).toBe(200);
     expect(response.body.results).toHaveLength(1);
     expect(response.body.results[0].summary).toBe('Summary');
+    expect(response.body.results[0].existingState).toBe('queued');
   });
 
   it('returns tvmaze errors and validates query', async () => {

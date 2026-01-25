@@ -606,9 +606,18 @@ function AddShowPage({
                   {result.summary || 'No summary available.'}
                 </p>
               </div>
-              <button className="outline" onClick={() => onAddShow(result.id)}>
-                Add
-              </button>
+              {result.existingState ? (
+                <span className="badge badge--muted">
+                  {STATE_LABELS[result.existingState] || 'Added'}
+                </span>
+              ) : (
+                <button
+                  className="outline"
+                  onClick={() => onAddShow(result.id)}
+                >
+                  Add
+                </button>
+              )}
             </div>
           ))}
         </div>

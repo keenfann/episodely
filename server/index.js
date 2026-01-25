@@ -335,6 +335,7 @@ function listShowsForProfile(profileId) {
 
     return {
       id: show.id,
+      tvmazeId: toNumber(show.tvmaze_id),
       name: show.name,
       summary: show.summary,
       status: show.status,
@@ -483,9 +484,15 @@ app.get('/api/tvmaze/search', requireAuth, async (req, res) => {
   if (!query) {
     return res.status(400).json({ error: 'Query required' });
   }
+  const profileId = ensureActiveProfile(req);
+  const existingShows = profileId ? listShowsForProfile(profileId) : [];
+  const existingByTvmazeId = new Map(
+    existingShows.map((show) => [show.tvmazeId, show])
+  );
   try {
     const results = await searchShows(query);
     const payload = results.map((item) => ({
+      existingState: existingByTvmazeId.get(item.show.id)?.state || null,
       id: item.show.id,
       name: item.show.name,
       summary: stripHtml(item.show.summary),

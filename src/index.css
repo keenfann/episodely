@@ -377,10 +377,18 @@ input:focus {
 
 .category__title {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.6rem;
   font-weight: 600;
   color: #f2f5f9;
+}
+
+.category__count {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  align-self: baseline;
+  white-space: nowrap;
 }
 
 .category__title::before {
@@ -390,6 +398,7 @@ input:focus {
   border-radius: 999px;
   background: var(--category-accent, var(--accent));
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.12);
+  align-self: center;
 }
 
 .category__toggle {

@@ -521,7 +521,7 @@ function ShowsPage({
     <section className="panel">
       <div className="panel__header">
         <div>
-          <h2>Watch Queue</h2>
+          <h2>Your Shows</h2>
           <p className="muted">Your shows sorted by what to watch next.</p>
         </div>
       </div>
@@ -548,7 +548,10 @@ function ShowsPage({
                 aria-controls={`category-${category.id}`}
                 onClick={() => toggleCategory(category.id)}
               >
-                <div className="category__title">{category.label}</div>
+                <div className="category__title">
+                  {category.label}
+                  <span className="category__count">({category.shows.length})</span>
+                </div>
                 <span className="category__toggle" aria-hidden="true">
                   <svg viewBox="0 0 24 24" focusable="false">
                     <path

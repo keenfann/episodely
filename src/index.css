@@ -893,6 +893,7 @@ input:focus {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    width: 100%;
   }
 
   .top-bar__right {
@@ -901,8 +902,45 @@ input:focus {
     flex-direction: column;
   }
 
+  .nav {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 100%;
+  }
+
+  .tab {
+    min-width: 0;
+    width: 100%;
+    justify-content: center;
+    padding: 0.4rem 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .profile-chip {
     display: none;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-card {
+    min-width: 0;
+  }
+
+  .button-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-row .primary,
+  .button-row .outline {
+    width: 100%;
+    justify-content: center;
   }
 
   .show-detail__hero {

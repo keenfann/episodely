@@ -263,9 +263,6 @@ function App() {
   };
 
   const handleShowRemove = async (showId) => {
-    if (!window.confirm('Remove this show from your list?')) {
-      return;
-    }
     await apiFetch(`/api/shows/${showId}`, { method: 'DELETE' });
     if (showDetail?.show?.id === showId) {
       setShowDetail(null);
@@ -1340,6 +1337,7 @@ function ShowDetailView({
   onRemoveShow,
 }) {
   const [openSeasons, setOpenSeasons] = useState({});
+  const [confirmingRemove, setConfirmingRemove] = useState(false);
 
   useEffect(() => {
     setOpenSeasons((prev) => {
@@ -1356,9 +1354,18 @@ function ShowDetailView({
     });
   }, [seasons]);
 
+  useEffect(() => {
+    setConfirmingRemove(false);
+  }, [show?.id]);
+
   const toggleSeasonOpen = (seasonNumber) => {
     const key = String(seasonNumber);
     setOpenSeasons((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleRemoveConfirm = async () => {
+    await onRemoveShow(show.id);
+    setConfirmingRemove(false);
   };
 
   if (!show) return null;
@@ -1423,44 +1430,63 @@ function ShowDetailView({
         {(canToggleStatus || canRemove) && (
           <div className="show-detail__actions">
             {canToggleStatus && (
-            <button
-              className="outline show-detail__action"
-              type="button"
-              onClick={() =>
-                onUpdateShowStatus(
-                  show.id,
-                  show.profileStatus === 'stopped' ? null : 'stopped'
-                )
-              }
-            >
-              {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
-            </button>
-            )}
-            {canRemove && (
-            <button
-              className="show-detail__remove"
-              type="button"
-              aria-label={`Remove ${show.name}`}
-              title="Remove show"
-              onClick={() => onRemoveShow(show.id)}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+              <button
+                className="outline show-detail__action"
+                type="button"
+                onClick={() =>
+                  onUpdateShowStatus(
+                    show.id,
+                    show.profileStatus === 'stopped' ? null : 'stopped'
+                  )
+                }
               >
-                <path d="M3 6h18" />
-                <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
-                <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                <path d="M10 11v6" />
-                <path d="M14 11v6" />
-              </svg>
-            </button>
+                {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
+              </button>
             )}
+            {canRemove &&
+              (confirmingRemove ? (
+                <div className="settings-profile-confirm">
+                  <span>Delete?</span>
+                  <button
+                    className="settings-profile-cancel"
+                    type="button"
+                    onClick={() => setConfirmingRemove(false)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="settings-profile-confirm-button"
+                    type="button"
+                    onClick={handleRemoveConfirm}
+                  >
+                    Delete
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="settings-profile-delete"
+                  type="button"
+                  aria-label={`Remove ${show.name}`}
+                  title="Remove show"
+                  onClick={() => setConfirmingRemove(true)}
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
+                    <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <path d="M10 11v6" />
+                    <path d="M14 11v6" />
+                  </svg>
+                </button>
+              ))}
           </div>
         )}
       </div>

@@ -68,6 +68,25 @@ button {
   cursor: pointer;
 }
 
+button,
+a,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus,
+a:focus,
+[role='button']:focus {
+  outline: none;
+}
+
+button:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.35);
+}
+
 img {
   max-width: 100%;
   display: block;
@@ -351,6 +370,8 @@ input:focus {
   border: none;
   padding: 0;
   text-align: left;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .category__title {
@@ -395,6 +416,11 @@ input:focus {
 .category__header:hover .category__toggle {
   background: rgba(255, 255, 255, 0.12);
   color: #f8fafc;
+}
+
+.category__header:focus-visible {
+  box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.45);
+  border-radius: 14px;
 }
 
 .category__body {
@@ -597,6 +623,8 @@ input:focus {
   color: var(--text-muted);
   border: 1px solid rgba(255, 255, 255, 0.12);
   transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .season-toggle svg {
@@ -615,8 +643,7 @@ input:focus {
 }
 
 .season-card__header:focus-visible {
-  outline: 2px solid rgba(79, 209, 197, 0.45);
-  outline-offset: 4px;
+  box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.45);
   border-radius: 14px;
 }
 
@@ -630,6 +657,9 @@ input:focus {
   border: 1px solid rgba(79, 209, 197, 0.4);
   background: transparent;
   color: var(--accent);
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
   display: grid;
   place-items: center;
   transition: transform 0.15s ease, background 0.15s ease;
@@ -644,6 +674,10 @@ input:focus {
 .check-button--active {
   background: var(--accent);
   color: #0a0f14;
+}
+
+.check-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.35);
 }
 
 .check-button--animate.check-button--active svg {

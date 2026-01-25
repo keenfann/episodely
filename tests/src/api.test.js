@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { apiFetch } from '../../src/api.js';
 
 describe('apiFetch', () => {
   let fetchMock;
+  let apiFetch;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fetchMock = vi.fn();
     vi.stubGlobal('fetch', fetchMock);
+    vi.resetModules();
+    ({ apiFetch } = await import('../../src/api.js'));
   });
 
   afterEach(() => {
@@ -26,14 +28,22 @@ describe('apiFetch', () => {
   });
 
   it('returns null for 204 responses', async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      status: 204,
-      json: () => Promise.resolve({}),
-    });
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ csrfToken: 'token' }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+        json: () => Promise.resolve({}),
+      });
 
     const data = await apiFetch('/api/empty', { method: 'DELETE' });
     expect(data).toBeNull();
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/csrf');
+    expect(fetchMock.mock.calls[1][0]).toBe('/api/empty');
   });
 
   it('throws an error with API-provided message', async () => {
@@ -47,11 +57,17 @@ describe('apiFetch', () => {
   });
 
   it('sends JSON headers and credentials by default', async () => {
-    fetchMock.mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: () => Promise.resolve({ ok: true }),
-    });
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ csrfToken: 'token' }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ ok: true }),
+      });
 
     await apiFetch('/api/test', {
       method: 'POST',
@@ -59,6 +75,7 @@ describe('apiFetch', () => {
       headers: { 'X-Test': 'true' },
     });
 
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/csrf');
     expect(fetchMock).toHaveBeenCalledWith('/api/test', {
       method: 'POST',
       body: JSON.stringify({ ok: true }),
@@ -66,6 +83,7 @@ describe('apiFetch', () => {
       headers: {
         'Content-Type': 'application/json',
         'X-Test': 'true',
+        'X-CSRF-Token': 'token',
       },
     });
   });

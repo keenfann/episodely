@@ -23,6 +23,8 @@ const tvmazeSyncDelayMs =
   Number(process.env.TVMAZE_SYNC_DELAY_MS) || 500;
 const tvmazeSyncOnStartup = process.env.TVMAZE_SYNC_ON_STARTUP !== 'false';
 let tvmazeSyncInProgress = false;
+const CSRF_HEADER = 'x-csrf-token';
+const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(
@@ -38,6 +40,18 @@ app.use(
     },
   })
 );
+
+app.use((req, res, next) => {
+  if (!CSRF_METHODS.has(req.method)) {
+    return next();
+  }
+  const sessionToken = req.session?.csrfToken;
+  const headerToken = req.get(CSRF_HEADER);
+  if (!sessionToken || !headerToken || sessionToken !== headerToken) {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+  }
+  return next();
+});
 
 function resolveSessionSecret() {
   if (process.env.SESSION_SECRET) {
@@ -75,6 +89,10 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+app.get('/api/csrf', (req, res) => {
+  res.json({ csrfToken: getCsrfToken(req) });
+});
+
 function requireAuth(req, res, next) {
   if (!req.session.userId) {
     return res.status(401).json({ error: 'Unauthenticated' });
@@ -110,6 +128,14 @@ function runTransaction(fn) {
 
 function toNumber(value) {
   return typeof value === 'bigint' ? Number(value) : value;
+}
+
+function getCsrfToken(req) {
+  if (!req.session) return null;
+  if (!req.session.csrfToken) {
+    req.session.csrfToken = crypto.randomBytes(32).toString('hex');
+  }
+  return req.session.csrfToken;
 }
 
 function computeShowState(show, showEpisodes) {
@@ -480,14 +506,15 @@ app.post('/api/auth/logout', (req, res) => {
 });
 
 app.get('/api/auth/me', (req, res) => {
+  const csrfToken = getCsrfToken(req);
   if (!req.session.userId) {
-    return res.json({ user: null, profileId: null });
+    return res.json({ user: null, profileId: null, csrfToken });
   }
   const user = db
     .prepare('SELECT id, username FROM users WHERE id = ?')
     .get(req.session.userId);
   const profileId = ensureActiveProfile(req);
-  return res.json({ user, profileId: profileId || null });
+  return res.json({ user, profileId: profileId || null, csrfToken });
 });
 
 app.get('/api/profiles', requireAuth, (req, res) => {

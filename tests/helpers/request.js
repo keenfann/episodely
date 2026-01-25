@@ -123,8 +123,19 @@ function createResponse() {
 
 export function createTestClient(app) {
   let cookieHeader = '';
+  let csrfToken = '';
+  const safeMethods = new Set(['GET', 'HEAD', 'OPTIONS']);
 
-  async function request(method, path, { body, headers = {} } = {}) {
+  async function request(
+    method,
+    path,
+    { body, headers = {}, skipCsrf = false, retry = false } = {}
+  ) {
+    const methodUpper = method.toUpperCase();
+    const needsCsrf = !skipCsrf && !safeMethods.has(methodUpper);
+    if (needsCsrf && !csrfToken) {
+      await request('GET', '/api/csrf', { skipCsrf: true });
+    }
     const normalizedHeaders = Object.fromEntries(
       Object.entries(headers).map(([key, value]) => [
         key.toLowerCase(),
@@ -134,6 +145,10 @@ export function createTestClient(app) {
 
     if (cookieHeader) {
       normalizedHeaders.cookie = cookieHeader;
+    }
+
+    if (needsCsrf && csrfToken && !normalizedHeaders['x-csrf-token']) {
+      normalizedHeaders['x-csrf-token'] = csrfToken;
     }
 
     if (body !== undefined && !normalizedHeaders['content-type']) {
@@ -177,6 +192,21 @@ export function createTestClient(app) {
       }
     } else if (responseBody === '') {
       responseBody = null;
+    }
+
+    if (responseBody?.csrfToken) {
+      csrfToken = responseBody.csrfToken;
+    }
+
+    if (
+      !retry &&
+      responseBody?.error === 'Invalid CSRF token' &&
+      res.statusCode === 403 &&
+      !skipCsrf &&
+      !safeMethods.has(methodUpper)
+    ) {
+      csrfToken = '';
+      return request(method, path, { body, headers, skipCsrf, retry: true });
     }
 
     return {

@@ -901,6 +901,10 @@ input:focus {
     flex-direction: column;
   }
 
+  .profile-chip {
+    display: none;
+  }
+
   .show-detail__hero {
     grid-template-columns: 1fr;
   }
@@ -963,6 +967,10 @@ input:focus {
   .show-card__body .tag,
   .show-card__meta,
   .show-card__stats {
+    display: none;
+  }
+
+  .profile-chip {
     display: none;
   }
 

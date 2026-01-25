@@ -998,8 +998,7 @@ input:focus {
   }
 
   .show-card__body h3 {
-    font-size: 0.75rem;
-    line-height: 1.2;
+    display: none;
   }
 
   .show-card__body .tag,

@@ -6,6 +6,11 @@
   padding: 0;
 }
 
+html {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 :root {
   color-scheme: dark;
   font-family: 'Space Grotesk', 'Segoe UI', sans-serif;
@@ -24,11 +29,17 @@
 }
 
 body {
+  width: 100%;
   min-height: 100vh;
   background:
     radial-gradient(circle at 20% 20%, rgba(79, 209, 197, 0.12), transparent 40%),
     radial-gradient(circle at 80% 10%, rgba(249, 115, 22, 0.12), transparent 45%),
     var(--bg);
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
   overflow-x: hidden;
 }
 

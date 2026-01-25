@@ -14,7 +14,7 @@ const STATE_LABELS = {
   'watch-next': 'Watch Next',
   queued: 'Not Started',
   'up-to-date': 'Up To Date',
-  completed: 'Completed',
+  completed: 'Finished',
   stopped: 'Stopped Watching',
 };
 
@@ -559,7 +559,7 @@ function ShowsPage({
                 onClick={() => toggleCategory(category.id)}
               >
                 <div className="category__title">
-                  {category.label}
+                  {category.id === 'completed' ? 'Finished' : category.label}
                   <span className="category__count">({category.shows.length})</span>
                 </div>
                 <span className="category__toggle" aria-hidden="true">
@@ -1344,18 +1344,36 @@ function ShowDetailView({
   };
 
   if (!show) return null;
+  const stateLabel = show.state ? STATE_LABELS[show.state] || show.state : null;
+  const isFinished = show.state === 'completed';
   return (
     <section className="panel show-detail">
       <div className="panel__header">
         <div className="show-detail__heading">
-          <button className="outline" onClick={onBack}>
-            Back to shows
+          <button
+            className="icon-button icon-button--back"
+            type="button"
+            onClick={onBack}
+            aria-label="Back to shows"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M15 18l-6-6 6-6" />
+              <path d="M21 12H9" />
+            </svg>
           </button>
           <div className="show-detail__title">
             <div className="show-detail__title-row">
               <h2>{show.name}</h2>
-              {show.profileStatus === 'stopped' && (
-                <span className="badge badge--muted">Stopped Watching</span>
+              {stateLabel && (
+                <span className="badge badge--muted">{stateLabel}</span>
               )}
             </div>
             <p className="muted">
@@ -1365,18 +1383,20 @@ function ShowDetailView({
             </p>
           </div>
         </div>
-        <button
-          className="outline"
-          type="button"
-          onClick={() =>
-            onUpdateShowStatus(
-              show.id,
-              show.profileStatus === 'stopped' ? null : 'stopped'
-            )
-          }
-        >
-          {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
-        </button>
+        {!isFinished && (
+          <button
+            className="outline"
+            type="button"
+            onClick={() =>
+              onUpdateShowStatus(
+                show.id,
+                show.profileStatus === 'stopped' ? null : 'stopped'
+              )
+            }
+          >
+            {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
+          </button>
+        )}
       </div>
       <div className="show-detail__hero">
         <div className="show-detail__image">

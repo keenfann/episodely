@@ -112,6 +112,54 @@ function toNumber(value) {
   return typeof value === 'bigint' ? Number(value) : value;
 }
 
+function computeShowState(show, showEpisodes) {
+  const releasedEpisodes = showEpisodes.filter((episode) =>
+    isReleased(episode.airdate)
+  );
+  const releasedUnwatched = releasedEpisodes.filter(
+    (episode) => !episode.watched_at
+  );
+  const watchedCount = showEpisodes.filter(
+    (episode) => episode.watched_at
+  ).length;
+  const started = watchedCount > 0;
+  const hasReleased = releasedEpisodes.length > 0;
+  const hasFuture = showEpisodes.some(
+    (episode) => episode.airdate && !isReleased(episode.airdate)
+  );
+  const isEnded = (show.status || '').toLowerCase() === 'ended';
+  const allReleasedWatched =
+    hasReleased && releasedUnwatched.length === 0;
+  const allEpisodesWatched =
+    showEpisodes.length > 0 &&
+    showEpisodes.every((episode) => episode.watched_at);
+
+  let state = 'queued';
+  if (show.profile_status === 'stopped') {
+    state = 'stopped';
+  } else if (started && releasedUnwatched.length > 0) {
+    state = 'watch-next';
+  } else if (!started && hasReleased) {
+    state = 'queued';
+  } else if (started && allReleasedWatched && !isEnded) {
+    state = 'up-to-date';
+  } else if (isEnded && allEpisodesWatched) {
+    state = 'completed';
+  } else if (!hasReleased) {
+    state = 'queued';
+  } else {
+    state = 'up-to-date';
+  }
+
+  return {
+    state,
+    releasedEpisodes,
+    releasedUnwatched,
+    watchedCount,
+    hasFuture,
+  };
+}
+
 function ensureActiveProfile(req) {
   if (req.session.profileId) {
     return req.session.profileId;
@@ -288,43 +336,13 @@ function listShowsForProfile(profileId) {
 
   return shows.map((show) => {
     const showEpisodes = episodesByShow.get(show.id) || [];
-    const releasedEpisodes = showEpisodes.filter((episode) =>
-      isReleased(episode.airdate)
-    );
-    const releasedUnwatched = releasedEpisodes.filter(
-      (episode) => !episode.watched_at
-    );
-    const watchedCount = showEpisodes.filter(
-      (episode) => episode.watched_at
-    ).length;
-    const started = watchedCount > 0;
-    const hasReleased = releasedEpisodes.length > 0;
-    const hasFuture = showEpisodes.some(
-      (episode) => episode.airdate && !isReleased(episode.airdate)
-    );
-    const isEnded = (show.status || '').toLowerCase() === 'ended';
-    const allReleasedWatched =
-      hasReleased && releasedUnwatched.length === 0;
-    const allEpisodesWatched =
-      showEpisodes.length > 0 &&
-      showEpisodes.every((episode) => episode.watched_at);
-
-    let state = 'queued';
-    if (show.profile_status === 'stopped') {
-      state = 'stopped';
-    } else if (started && releasedUnwatched.length > 0) {
-      state = 'watch-next';
-    } else if (!started && hasReleased) {
-      state = 'queued';
-    } else if (started && allReleasedWatched && !isEnded) {
-      state = 'up-to-date';
-    } else if (isEnded && allEpisodesWatched) {
-      state = 'completed';
-    } else if (!hasReleased) {
-      state = 'queued';
-    } else {
-      state = 'up-to-date';
-    }
+    const {
+      state,
+      releasedEpisodes,
+      releasedUnwatched,
+      watchedCount,
+      hasFuture,
+    } = computeShowState(show, showEpisodes);
 
     const nextUnwatched = releasedUnwatched
       .slice()
@@ -621,7 +639,7 @@ app.get('/api/shows', requireAuth, requireProfile, (req, res) => {
     { id: 'watch-next', label: 'Watch Next', shows: [] },
     { id: 'queued', label: 'Not Started', shows: [] },
     { id: 'up-to-date', label: 'Up To Date', shows: [] },
-    { id: 'completed', label: 'Completed', shows: [] },
+    { id: 'completed', label: 'Finished', shows: [] },
     { id: 'stopped', label: 'Stopped Watching', shows: [] },
   ];
 
@@ -708,6 +726,8 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       watched: season.totalCount > 0 && season.watchedCount === season.totalCount,
     }));
 
+  const { state } = computeShowState(show, episodes);
+
   return res.json({
     show: {
       id: show.id,
@@ -718,6 +738,7 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       ended: show.ended,
       image: show.image_original || show.image_medium,
       profileStatus: show.profile_status || null,
+      state,
     },
     seasons,
   });

@@ -392,7 +392,6 @@ function App() {
               <ShowsPage
                 categories={categories}
                 loadingShows={loadingShows}
-                onRefresh={loadShows}
               />
             }
           />
@@ -426,7 +425,7 @@ function App() {
           <Route
             path="/calendar"
             element={
-              <CalendarPage calendar={calendar} onRefresh={loadCalendar} />
+              <CalendarPage calendar={calendar} />
             }
           />
           <Route
@@ -456,7 +455,6 @@ function App() {
 function ShowsPage({
   categories,
   loadingShows,
-  onRefresh,
 }) {
   const navigate = useNavigate();
   const [collapsedCategories, setCollapsedCategories] = useState(() => ({
@@ -475,13 +473,10 @@ function ShowsPage({
     <section className="panel">
       <div className="panel__header">
         <div>
-            <h2>Watch Queue</h2>
-            <p className="muted">Your shows sorted by what to watch next.</p>
-          </div>
-          <button className="outline" onClick={onRefresh} disabled={loadingShows}>
-            Refresh
-          </button>
+          <h2>Watch Queue</h2>
+          <p className="muted">Your shows sorted by what to watch next.</p>
         </div>
+      </div>
         {loadingShows ? (
           <div className="empty-state">Loading shows...</div>
         ) : (
@@ -705,7 +700,7 @@ function ShowDetailPage({
   );
 }
 
-function CalendarPage({ calendar, onRefresh }) {
+function CalendarPage({ calendar }) {
   return (
     <section className="panel">
       <div className="panel__header">
@@ -713,9 +708,6 @@ function CalendarPage({ calendar, onRefresh }) {
           <h2>Upcoming Episodes</h2>
           <p className="muted">Next {calendar.days} days across your shows.</p>
         </div>
-        <button className="outline" onClick={onRefresh}>
-          Refresh
-        </button>
       </div>
       {calendar.episodes.length === 0 ? (
         <div className="empty-state">No upcoming episodes found.</div>

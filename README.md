@@ -15,6 +15,7 @@ Status: early-stage repository with a working local stack. Expect changes as fea
 ## Features
 - Track watched/unwatched status, seasons, and episodes
 - Release calendar for upcoming episodes
+- Data refreshes automatically (daily) for show and episode updates
 - Import/export for backups and migration
 - Multi-user support with profiles
 - Change account password from settings

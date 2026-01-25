@@ -855,12 +855,192 @@ input:focus {
 }
 
 .settings-card {
-  padding: 1.25rem;
-  border-radius: 16px;
+  position: relative;
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 18px;
   background: var(--surface-muted);
   border: 1px solid var(--border);
-  display: grid;
+  box-shadow: none;
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
+  overflow: hidden;
+}
+
+.settings-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.settings-card__header h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.settings-card__body {
+  display: grid;
+  gap: 0.85rem;
+  flex: 1 1 auto;
+}
+
+.settings-card__body .muted {
+  line-height: 1.45;
+}
+
+.settings-card__footer {
+  margin-top: auto;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.settings-card__footer .button-row {
+  justify-content: flex-start;
+}
+
+.settings-profile-list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.settings-profile-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 18, 30, 0.55);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.settings-profile-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(79, 209, 197, 0.35);
+  background: rgba(21, 25, 38, 0.7);
+}
+
+.settings-profile-item--active {
+  border-color: rgba(79, 209, 197, 0.4);
+  background: rgba(79, 209, 197, 0.12);
+}
+
+.settings-profile-main {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+}
+
+.settings-profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: rgba(79, 209, 197, 0.18);
+  border: 1px solid rgba(79, 209, 197, 0.35);
+  color: #dff8f4;
+}
+
+.settings-profile-name {
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-profile-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.settings-profile-item--active .settings-profile-status {
+  color: #dff8f4;
+}
+
+.settings-profile-item--confirming {
+  border-color: rgba(255, 122, 122, 0.4);
+}
+
+.settings-profile-item--confirming .settings-profile-status {
+  display: none;
+}
+
+.settings-profile-main:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.settings-profile-delete {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.02);
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.settings-profile-delete:hover {
+  color: #ff9c9c;
+  border-color: rgba(255, 122, 122, 0.5);
+  background: rgba(255, 122, 122, 0.15);
+}
+
+.settings-profile-delete svg {
+  width: 16px;
+  height: 16px;
+}
+
+.settings-profile-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
+.settings-profile-confirm span {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffb3b3;
+}
+
+.settings-profile-cancel,
+.settings-profile-confirm-button {
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.settings-profile-cancel {
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.settings-profile-confirm-button {
+  color: #0a0f14;
+  border-color: rgba(255, 122, 122, 0.6);
+  background: linear-gradient(130deg, rgba(255, 122, 122, 0.9), rgba(255, 92, 92, 0.9));
 }
 
 .settings-form {
@@ -877,6 +1057,26 @@ input:focus {
 
 .settings-form input {
   width: 100%;
+}
+
+.settings-card .inline-form {
+  flex-wrap: wrap;
+  align-items: stretch;
+  width: 100%;
+}
+
+.settings-card .inline-form input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.settings-card .inline-form .outline,
+.settings-card .inline-form .primary {
+  flex: 0 0 auto;
+}
+
+.settings-card .inline-form .error {
+  flex-basis: 100%;
 }
 
 .profile-list {

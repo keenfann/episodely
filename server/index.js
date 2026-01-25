@@ -513,6 +513,64 @@ app.post('/api/profiles/select', requireAuth, (req, res) => {
   return res.json({ ok: true });
 });
 
+app.delete('/api/profiles/:id', requireAuth, (req, res) => {
+  const requestedId = Number(req.params.id);
+  if (!requestedId) {
+    return res.status(400).json({ error: 'Profile id required' });
+  }
+  const profile = db
+    .prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?')
+    .get(requestedId, req.session.userId);
+  if (!profile) {
+    return res.status(404).json({ error: 'Profile not found' });
+  }
+
+  const user = db
+    .prepare('SELECT last_profile_id FROM users WHERE id = ?')
+    .get(req.session.userId);
+  const lastProfileId = toNumber(user?.last_profile_id);
+
+  runTransaction(() => {
+    db.prepare('DELETE FROM profiles WHERE id = ? AND user_id = ?').run(
+      requestedId,
+      req.session.userId
+    );
+
+    let replacementId = null;
+    if (req.session.profileId === requestedId) {
+      if (lastProfileId && lastProfileId !== requestedId) {
+        const lastProfile = db
+          .prepare('SELECT id FROM profiles WHERE id = ? AND user_id = ?')
+          .get(lastProfileId, req.session.userId);
+        replacementId = toNumber(lastProfile?.id) || null;
+      }
+      if (!replacementId) {
+        const nextProfile = db
+          .prepare('SELECT id FROM profiles WHERE user_id = ? ORDER BY name LIMIT 1')
+          .get(req.session.userId);
+        replacementId = toNumber(nextProfile?.id) || null;
+      }
+      req.session.profileId = replacementId;
+    }
+
+    if (lastProfileId === requestedId) {
+      let newLastId = req.session.profileId || null;
+      if (!newLastId) {
+        const nextProfile = db
+          .prepare('SELECT id FROM profiles WHERE user_id = ? ORDER BY name LIMIT 1')
+          .get(req.session.userId);
+        newLastId = toNumber(nextProfile?.id) || null;
+      }
+      db.prepare('UPDATE users SET last_profile_id = ? WHERE id = ?').run(
+        newLastId,
+        req.session.userId
+      );
+    }
+  });
+
+  return res.json({ ok: true });
+});
+
 app.get('/api/tvmaze/search', requireAuth, async (req, res) => {
   const query = req.query.q;
   if (!query) {

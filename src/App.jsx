@@ -209,6 +209,15 @@ function App() {
     navigate('/shows', { replace: true });
   };
 
+  const handleProfileDelete = async (profile) => {
+    if (!profile) return;
+    await apiFetch(`/api/profiles/${profile.id}`, { method: 'DELETE' });
+    if (activeProfile?.id === profile.id) {
+      setShowDetail(null);
+    }
+    await loadProfiles();
+  };
+
   const handleSearchQuery = (value) => {
     setSearchQuery(value);
     setHasSearched(false);
@@ -471,6 +480,7 @@ function App() {
                 appVersion={APP_VERSION}
                 onProfileSelect={handleProfileSelect}
                 onProfileCreate={handleProfileCreate}
+                onProfileDelete={handleProfileDelete}
                 onExport={handleExport}
                 onImport={handleImport}
                 onLogout={handleLogout}
@@ -832,10 +842,38 @@ function SettingsPage({
   appVersion,
   onProfileSelect,
   onProfileCreate,
+  onProfileDelete,
   onExport,
   onImport,
   onLogout,
 }) {
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
+
+  const handleDeleteRequest = (profileId) => {
+    setDeleteError('');
+    setPendingDeleteId(profileId);
+  };
+
+  const handleDeleteCancel = () => {
+    setPendingDeleteId(null);
+  };
+
+  const handleDeleteConfirm = async (profile) => {
+    setDeleteError('');
+    try {
+      await onProfileDelete(profile);
+      setPendingDeleteId(null);
+    } catch (error) {
+      setDeleteError(error.message);
+    }
+  };
+
+  const handleSelect = (profileId) => {
+    setPendingDeleteId(null);
+    onProfileSelect(profileId);
+  };
+
   return (
     <section className="panel">
       <div className="panel__header">
@@ -850,48 +888,126 @@ function SettingsPage({
       </div>
       <div className="settings-grid">
         <div className="settings-card">
-          <h3>Profiles</h3>
-          <p className="muted">Switch or add a profile for another viewer.</p>
-          <div className="profile-list">
-            {profiles.map((profile) => (
-              <button
-                key={profile.id}
-                className={
-                  profile.id === activeProfile.id ? 'chip chip--active' : 'chip'
-                }
-                onClick={() => onProfileSelect(profile.id)}
-              >
-                {profile.name}
-              </button>
-            ))}
+          <div className="settings-card__header">
+            <h3>Profiles</h3>
           </div>
-          <ProfileCreateInline onCreate={onProfileCreate} />
+          <div className="settings-card__body">
+            <p className="muted">Switch or add a profile for another viewer.</p>
+            <div className="settings-profile-list">
+              {profiles.map((profile) => {
+                const initial = profile.name?.trim()?.[0]?.toUpperCase() || '?';
+                const isActive = profile.id === activeProfile?.id;
+                const isPendingDelete = pendingDeleteId === profile.id;
+                return (
+                  <div
+                    key={profile.id}
+                    className={
+                      [
+                        'settings-profile-item',
+                        isActive ? 'settings-profile-item--active' : '',
+                        isPendingDelete ? 'settings-profile-item--confirming' : '',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
+                    }
+                  >
+                    <button
+                      className="settings-profile-main"
+                      type="button"
+                      disabled={isPendingDelete}
+                      onClick={() => handleSelect(profile.id)}
+                    >
+                      <span className="settings-profile-avatar">{initial}</span>
+                      <span className="settings-profile-name">{profile.name}</span>
+                      <span className="settings-profile-status">
+                        {isActive ? 'Active' : 'Switch'}
+                      </span>
+                    </button>
+                    {!isActive && !isPendingDelete && (
+                      <button
+                        className="settings-profile-delete"
+                        type="button"
+                        aria-label={`Delete ${profile.name} profile`}
+                        title="Delete profile"
+                        onClick={() => handleDeleteRequest(profile.id)}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
+                          <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                          <path d="M10 11v6" />
+                          <path d="M14 11v6" />
+                        </svg>
+                      </button>
+                    )}
+                    {!isActive && isPendingDelete && (
+                      <div className="settings-profile-confirm">
+                        <span>Delete?</span>
+                        <button
+                          className="settings-profile-cancel"
+                          type="button"
+                          onClick={handleDeleteCancel}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          className="settings-profile-confirm-button"
+                          type="button"
+                          onClick={() => handleDeleteConfirm(profile)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            {deleteError && <p className="error">{deleteError}</p>}
+          </div>
+          <div className="settings-card__footer">
+            <ProfileCreateInline onCreate={onProfileCreate} />
+          </div>
         </div>
         <div className="settings-card">
-          <h3>Import / Export</h3>
-          <p className="muted">Download a JSON backup or import JSON/CSV TVmaze IDs.</p>
-          <div className="button-row">
-            <button className="outline" onClick={onExport}>
-              Export
-            </button>
-            <label className={isImporting ? 'outline is-disabled' : 'outline'}>
-              Import
-              <input
-                type="file"
-                accept=".json,.csv,application/json,text/csv"
-                onChange={onImport}
-                disabled={isImporting}
-              />
-            </label>
+          <div className="settings-card__header">
+            <h3>Import / Export</h3>
           </div>
-          {notice && <p className="notice">{notice}</p>}
-          {isImporting && (
-            <div className="import-status" aria-live="polite">
-              <div className="progress-bar" role="progressbar" aria-valuetext="Importing">
-                <span className="progress-bar__fill" />
-              </div>
+          <div className="settings-card__body">
+            <p className="muted">Download a JSON backup or import JSON/CSV TVmaze IDs.</p>
+          </div>
+          <div className="settings-card__footer">
+            <div className="button-row">
+              <button className="outline" onClick={onExport}>
+                Export
+              </button>
+              <label className={isImporting ? 'outline is-disabled' : 'outline'}>
+                Import
+                <input
+                  type="file"
+                  accept=".json,.csv,application/json,text/csv"
+                  onChange={onImport}
+                  disabled={isImporting}
+                />
+              </label>
             </div>
-          )}
+            {notice && <p className="notice">{notice}</p>}
+            {isImporting && (
+              <div className="import-status" aria-live="polite">
+                <div className="progress-bar" role="progressbar" aria-valuetext="Importing">
+                  <span className="progress-bar__fill" />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         <ChangePasswordCard />
       </div>
@@ -944,48 +1060,56 @@ function ChangePasswordCard() {
 
   return (
     <div className="settings-card">
-      <h3>Change password</h3>
-      <p className="muted">Update your account password.</p>
-      <form className="settings-form" onSubmit={handleSubmit}>
-        <label>
-          Current password
-          <input
-            type="password"
-            autoComplete="current-password"
-            value={currentPassword}
-            onChange={(event) => setCurrentPassword(event.target.value)}
-          />
-        </label>
-        <label>
-          New password
-          <input
-            type="password"
-            autoComplete="new-password"
-            minLength={6}
-            value={newPassword}
-            onChange={(event) => setNewPassword(event.target.value)}
-          />
-        </label>
-        <label>
-          Confirm new password
-          <input
-            type="password"
-            autoComplete="new-password"
-            minLength={6}
-            value={confirmPassword}
-            onChange={(event) => setConfirmPassword(event.target.value)}
-          />
-        </label>
-        <button
-          className={isSubmitting ? 'outline is-disabled' : 'outline'}
-          type="submit"
-          disabled={isSubmitting}
-        >
-          Update password
-        </button>
-      </form>
-      {error && <p className="error">{error}</p>}
-      {notice && <p className="notice">{notice}</p>}
+      <div className="settings-card__header">
+        <h3>Change password</h3>
+      </div>
+      <div className="settings-card__body">
+        <p className="muted">Update your account password.</p>
+        <form className="settings-form" onSubmit={handleSubmit}>
+          <label>
+            Current password
+            <input
+              type="password"
+              autoComplete="current-password"
+              value={currentPassword}
+              onChange={(event) => setCurrentPassword(event.target.value)}
+            />
+          </label>
+          <label>
+            New password
+            <input
+              type="password"
+              autoComplete="new-password"
+              minLength={6}
+              value={newPassword}
+              onChange={(event) => setNewPassword(event.target.value)}
+            />
+          </label>
+          <label>
+            Confirm new password
+            <input
+              type="password"
+              autoComplete="new-password"
+              minLength={6}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          </label>
+          <button
+            className={isSubmitting ? 'outline is-disabled' : 'outline'}
+            type="submit"
+            disabled={isSubmitting}
+          >
+            Update password
+          </button>
+        </form>
+      </div>
+      {(error || notice) && (
+        <div className="settings-card__footer">
+          {error && <p className="error">{error}</p>}
+          {notice && <p className="notice">{notice}</p>}
+        </div>
+      )}
     </div>
   );
 }
@@ -1101,6 +1225,7 @@ function ProfileView({ profiles, onCreate, onSelect, onLogout }) {
 function ProfileCreateInline({ onCreate }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -1108,10 +1233,24 @@ function ProfileCreateInline({ onCreate }) {
     try {
       await onCreate(name.trim());
       setName('');
+      setIsOpen(false);
     } catch (err) {
       setError(err.message);
     }
   };
+
+  const handleOpen = () => {
+    setError('');
+    setIsOpen(true);
+  };
+
+  if (!isOpen) {
+    return (
+      <button className="outline" type="button" onClick={handleOpen}>
+        Add
+      </button>
+    );
+  }
 
   return (
     <form className="inline-form" onSubmit={handleSubmit}>
@@ -1119,6 +1258,7 @@ function ProfileCreateInline({ onCreate }) {
         placeholder="New profile name"
         value={name}
         onChange={(event) => setName(event.target.value)}
+        autoFocus
       />
       <button className="outline" type="submit">
         Add

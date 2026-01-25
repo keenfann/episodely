@@ -620,9 +620,9 @@ function ShowsPage({
                           )}
                         </div>
                         <div className="show-card__body">
-                          <div>
-                            <h3>{show.name}</h3>
+                          <div className="show-card__title">
                             <span className="tag">{STATE_LABELS[show.state]}</span>
+                            <h3>{show.name}</h3>
                           </div>
                           {show.nextEpisode && (
                             <div className="show-card__meta">

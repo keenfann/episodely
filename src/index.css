@@ -528,6 +528,17 @@ input:focus {
   gap: 0.6rem;
 }
 
+.show-card__title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.show-card__title .tag {
+  width: 100%;
+  justify-content: center;
+}
+
 .show-card__meta {
   display: grid;
   gap: 0.35rem;

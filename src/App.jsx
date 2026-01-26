@@ -38,6 +38,204 @@ function daysUntil(airdate) {
   return diff;
 }
 
+function countWatchedEpisodes(episodes) {
+  return episodes.reduce((count, episode) => count + (episode.watched ? 1 : 0), 0);
+}
+
+function updateSeasonFromEpisodes(season, episodes) {
+  const watchedCount = countWatchedEpisodes(episodes);
+  const totalCount = season.totalCount ?? episodes.length;
+  return {
+    ...season,
+    episodes,
+    watchedCount,
+    totalCount,
+    watched: totalCount > 0 && watchedCount === totalCount,
+  };
+}
+
+function applyEpisodeToggle(detail, episodeId, watched) {
+  if (!detail) return detail;
+  let updated = false;
+  const seasons = detail.seasons.map((season) => {
+    let seasonUpdated = false;
+    const episodes = season.episodes.map((episode) => {
+      if (episode.id !== episodeId) return episode;
+      if (episode.watched === watched) return episode;
+      seasonUpdated = true;
+      updated = true;
+      return { ...episode, watched };
+    });
+    if (!seasonUpdated) return season;
+    return updateSeasonFromEpisodes(season, episodes);
+  });
+  if (!updated) return detail;
+  return { ...detail, seasons };
+}
+
+function applySeasonToggle(detail, seasonNumber, watched) {
+  if (!detail) return detail;
+  let updated = false;
+  const seasons = detail.seasons.map((season) => {
+    if (season.season !== seasonNumber) return season;
+    updated = true;
+    const episodes = season.episodes.map((episode) =>
+      episode.watched === watched ? episode : { ...episode, watched }
+    );
+    const totalCount = season.totalCount ?? episodes.length;
+    return {
+      ...season,
+      episodes,
+      watchedCount: watched ? totalCount : 0,
+      totalCount,
+      watched: watched && totalCount > 0,
+    };
+  });
+  if (!updated) return detail;
+  return { ...detail, seasons };
+}
+
+function getTodayDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function isReleased(airdate) {
+  if (!airdate) return false;
+  return airdate <= getTodayDate();
+}
+
+function flattenEpisodes(seasons) {
+  return seasons.flatMap((season) => season.episodes || []);
+}
+
+function computeShowStats(show, episodes) {
+  const releasedEpisodes = episodes.filter((episode) =>
+    isReleased(episode.airdate)
+  );
+  const releasedUnwatched = releasedEpisodes.filter(
+    (episode) => !episode.watched
+  );
+  const watchedCount = episodes.filter((episode) => episode.watched).length;
+  const started = watchedCount > 0;
+  const hasReleased = releasedEpisodes.length > 0;
+  const hasFuture = episodes.some(
+    (episode) => episode.airdate && !isReleased(episode.airdate)
+  );
+  const isEnded = (show.status || '').toLowerCase() === 'ended';
+  const allReleasedWatched = hasReleased && releasedUnwatched.length === 0;
+  const allEpisodesWatched =
+    episodes.length > 0 && episodes.every((episode) => episode.watched);
+
+  let state = 'queued';
+  if (show.profileStatus === 'stopped') {
+    state = 'stopped';
+  } else if (started && releasedUnwatched.length > 0) {
+    state = 'watch-next';
+  } else if (!started && hasReleased) {
+    state = 'queued';
+  } else if (started && allReleasedWatched && !isEnded) {
+    state = 'up-to-date';
+  } else if (isEnded && allEpisodesWatched) {
+    state = 'completed';
+  } else if (!hasReleased) {
+    state = 'queued';
+  } else {
+    state = 'up-to-date';
+  }
+
+  const nextUnwatched = releasedUnwatched
+    .slice()
+    .sort((a, b) => (a.airdate || '').localeCompare(b.airdate || ''))[0];
+  const nextFuture = episodes
+    .filter((episode) => episode.airdate && !isReleased(episode.airdate))
+    .slice()
+    .sort((a, b) => (a.airdate || '').localeCompare(b.airdate || ''))[0];
+
+  return {
+    state,
+    stats: {
+      totalEpisodes: episodes.length,
+      watchedEpisodes: watchedCount,
+      releasedEpisodes: releasedEpisodes.length,
+      releasedUnwatched: releasedUnwatched.length,
+      hasFuture,
+    },
+    nextEpisode: nextUnwatched || nextFuture || null,
+  };
+}
+
+function getCategoryId(state) {
+  if (state === 'stopped') return 'stopped';
+  if (state === 'watch-next') return 'watch-next';
+  if (state === 'queued') return 'queued';
+  if (state === 'up-to-date') return 'up-to-date';
+  return 'completed';
+}
+
+function insertShowSorted(shows, show) {
+  const next = [...shows, show];
+  next.sort((a, b) => a.name.localeCompare(b.name));
+  return next;
+}
+
+function buildOptimisticShowDetail(detail) {
+  if (!detail) return null;
+  const episodes = flattenEpisodes(detail.seasons || []);
+  const computed = computeShowStats(detail.show, episodes);
+  return {
+    detail: {
+      ...detail,
+      show: {
+        ...detail.show,
+        state: computed.state,
+      },
+    },
+    computed,
+  };
+}
+
+function updateCategoriesWithOptimisticShow(categories, detail, computed) {
+  if (!detail?.show?.id || !Array.isArray(categories)) return categories;
+  const showId = detail.show.id;
+  let existingShow = null;
+
+  const strippedCategories = categories.map((category) => {
+    const filtered = category.shows.filter((show) => {
+      if (show.id === showId) {
+        existingShow = show;
+        return false;
+      }
+      return true;
+    });
+    return { ...category, shows: filtered };
+  });
+
+  if (!existingShow) return categories;
+
+  const updatedShow = {
+    ...existingShow,
+    ...detail.show,
+    profileStatus:
+      detail.show.profileStatus ?? existingShow.profileStatus ?? null,
+    state: computed.state,
+    stats: computed.stats,
+    nextEpisode: computed.nextEpisode,
+  };
+
+  const targetId = getCategoryId(computed.state);
+  return strippedCategories.map((category) => {
+    if (category.id !== targetId) return category;
+    return {
+      ...category,
+      shows: insertShowSorted(category.shows, updatedShow),
+    };
+  });
+}
+
 function AirdateBadge({ airdate }) {
   if (!airdate) {
     return <span className="badge badge--muted">TBD</span>;
@@ -287,30 +485,74 @@ function App() {
   };
 
   const toggleEpisode = async (episodeId, watched) => {
-    await preserveScroll(async () => {
-      await apiFetch(`/api/episodes/${episodeId}/watch`, {
-        method: 'POST',
-        body: JSON.stringify({ watched }),
-      });
-      if (showDetail?.show?.id) {
-        await loadShowDetail(showDetail.show.id, { silent: true });
+    const previousDetail = showDetail;
+    const previousCategories = categories;
+    const showId = previousDetail?.show?.id;
+    if (previousDetail) {
+      const optimisticDetail = applyEpisodeToggle(previousDetail, episodeId, watched);
+      const optimisticPayload = buildOptimisticShowDetail(optimisticDetail);
+      if (optimisticPayload) {
+        setShowDetail(optimisticPayload.detail);
+        setCategories((prev) =>
+          updateCategoriesWithOptimisticShow(
+            prev,
+            optimisticPayload.detail,
+            optimisticPayload.computed
+          )
+        );
       }
-      await loadShows();
+    }
+    await preserveScroll(async () => {
+      try {
+        await apiFetch(`/api/episodes/${episodeId}/watch`, {
+          method: 'POST',
+          body: JSON.stringify({ watched }),
+        });
+        if (showId) {
+          await loadShowDetail(showId, { silent: true });
+        }
+        await loadShows();
+      } catch (error) {
+        setShowDetail(previousDetail);
+        setCategories(previousCategories);
+        throw error;
+      }
     });
   };
 
   const toggleSeason = async (seasonNumber, watched) => {
     if (!showDetail?.show?.id) return;
-    await preserveScroll(async () => {
-      await apiFetch(
-        `/api/shows/${showDetail.show.id}/seasons/${seasonNumber}/watch`,
-        {
-          method: 'POST',
-          body: JSON.stringify({ watched }),
-        }
+    const previousDetail = showDetail;
+    const previousCategories = categories;
+    const showId = previousDetail.show.id;
+    const optimisticDetail = applySeasonToggle(previousDetail, seasonNumber, watched);
+    const optimisticPayload = buildOptimisticShowDetail(optimisticDetail);
+    if (optimisticPayload) {
+      setShowDetail(optimisticPayload.detail);
+      setCategories((prev) =>
+        updateCategoriesWithOptimisticShow(
+          prev,
+          optimisticPayload.detail,
+          optimisticPayload.computed
+        )
       );
-      await loadShowDetail(showDetail.show.id, { silent: true });
-      await loadShows();
+    }
+    await preserveScroll(async () => {
+      try {
+        await apiFetch(
+          `/api/shows/${showId}/seasons/${seasonNumber}/watch`,
+          {
+            method: 'POST',
+            body: JSON.stringify({ watched }),
+          }
+        );
+        await loadShowDetail(showId, { silent: true });
+        await loadShows();
+      } catch (error) {
+        setShowDetail(previousDetail);
+        setCategories(previousCategories);
+        throw error;
+      }
     });
   };
 

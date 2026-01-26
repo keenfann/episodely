@@ -442,14 +442,16 @@ function App() {
     await loadProfiles(auth.profileId);
   };
 
-  const handleProfileSelect = async (profileId) => {
+  const handleProfileSelect = async (profileId, { stayOnPage } = {}) => {
     await apiFetch('/api/profiles/select', {
       method: 'POST',
       body: JSON.stringify({ profileId }),
     });
     await loadProfiles(profileId);
     setShowDetail(null);
-    navigate('/shows', { replace: true });
+    if (!stayOnPage) {
+      navigate('/shows', { replace: true });
+    }
   };
 
   const handleProfileDelete = async (profile) => {
@@ -1392,7 +1394,7 @@ function SettingsPage({
 
   const handleSelect = (profileId) => {
     setPendingDeleteId(null);
-    onProfileSelect(profileId);
+    onProfileSelect(profileId, { stayOnPage: true });
   };
 
   return (
@@ -1405,7 +1407,7 @@ function SettingsPage({
         </div>
       </div>
       <div className="settings-grid">
-        <div className="settings-card">
+        <div className="settings-card settings-card--profiles">
           <div className="settings-card__header">
             <h3>Profiles</h3>
           </div>

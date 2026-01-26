@@ -275,6 +275,7 @@ input:focus {
   grid-template-areas:
     'icon name caret'
     'icon meta caret';
+  row-gap: 0.2rem;
 }
 
 .user-menu__avatar {
@@ -1236,6 +1237,11 @@ input:focus {
   display: grid;
   gap: 0.75rem;
 }
+
+.settings-card--profiles .settings-card__body {
+  flex: 0 0 auto;
+}
+
 
 .settings-card__footer .button-row {
   justify-content: flex-start;

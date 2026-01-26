@@ -1141,6 +1141,8 @@ input:focus {
 .settings-profile-list {
   display: grid;
   gap: 0.6rem;
+  align-content: start;
+  grid-auto-rows: max-content;
 }
 
 .settings-profile-item {
@@ -1152,6 +1154,7 @@ input:focus {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(31, 31, 31, 0.8);
   transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  min-width: 0;
 }
 
 .settings-profile-item:hover {
@@ -1204,14 +1207,25 @@ input:focus {
   letter-spacing: 0.08em;
   color: var(--text-muted);
   margin-left: auto;
+  display: inline-flex;
+  align-items: center;
 }
 
 .settings-profile-item--active .settings-profile-status {
   color: #e8eaed;
 }
 
+.settings-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+}
+
 .settings-profile-item--confirming {
   border-color: rgba(255, 122, 122, 0.4);
+  flex-wrap: wrap;
+  row-gap: 0.4rem;
 }
 
 .settings-profile-item--confirming .settings-profile-status {
@@ -1223,7 +1237,7 @@ input:focus {
   opacity: 0.6;
 }
 
-.settings-profile-delete {
+.settings-profile-action {
   width: 34px;
   height: 34px;
   border-radius: 999px;
@@ -1235,15 +1249,25 @@ input:focus {
   transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.settings-profile-delete:hover {
+.settings-profile-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.settings-profile-action:hover {
+  border-color: rgba(138, 180, 248, 0.35);
+  background: rgba(35, 36, 39, 0.9);
+  color: #e8eaed;
+}
+
+.settings-profile-action--danger {
+  color: var(--text-muted);
+}
+
+.settings-profile-action--danger:hover {
   color: #ff9c9c;
   border-color: rgba(255, 122, 122, 0.5);
   background: rgba(255, 122, 122, 0.15);
-}
-
-.settings-profile-delete svg {
-  width: 16px;
-  height: 16px;
 }
 
 .settings-profile-confirm {
@@ -1251,6 +1275,9 @@ input:focus {
   align-items: center;
   gap: 0.35rem;
   margin-left: auto;
+  flex-wrap: wrap;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .settings-profile-confirm span {
@@ -1763,5 +1790,10 @@ input:focus {
 
   .user-menu__caret {
     font-size: 0.85rem;
+  }
+
+  .settings-profile-confirm {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

@@ -1416,38 +1416,66 @@ function SettingsPage({
                       className="settings-profile-main"
                       type="button"
                       disabled={isPendingDelete}
+                      aria-label={
+                        isActive
+                          ? `${profile.name} profile (active)`
+                          : `Switch to ${profile.name} profile`
+                      }
                       onClick={() => handleSelect(profile.id)}
                     >
                       <span className="settings-profile-avatar">{initial}</span>
                       <span className="settings-profile-name">{profile.name}</span>
-                      <span className="settings-profile-status">
-                        {isActive ? 'Active' : 'Switch'}
-                      </span>
+                      {isActive && (
+                        <span className="settings-profile-status">Active</span>
+                      )}
                     </button>
                     {!isActive && !isPendingDelete && (
-                      <button
-                        className="settings-profile-delete"
-                        type="button"
-                        aria-label={`Delete ${profile.name} profile`}
-                        title="Delete profile"
-                        onClick={() => handleDeleteRequest(profile.id)}
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
+                      <div className="settings-profile-actions">
+                        <button
+                          className="settings-profile-action"
+                          type="button"
+                          aria-label={`Switch to ${profile.name} profile`}
+                          title="Switch profile"
+                          onClick={() => handleSelect(profile.id)}
                         >
-                          <polyline points="3 6 5 6 21 6" />
-                          <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                          <path d="M10 11v6" />
-                          <path d="M14 11v6" />
-                          <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                        </svg>
-                      </button>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M8.5 12h7" />
+                            <path d="M12 8.5l3.5 3.5-3.5 3.5" />
+                          </svg>
+                        </button>
+                        <button
+                          className="settings-profile-action settings-profile-action--danger"
+                          type="button"
+                          aria-label={`Delete ${profile.name} profile`}
+                          title="Delete profile"
+                          onClick={() => handleDeleteRequest(profile.id)}
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                          </svg>
+                        </button>
+                      </div>
                     )}
                     {!isActive && isPendingDelete && (
                       <div className="settings-profile-confirm">
@@ -1988,7 +2016,7 @@ function ShowDetailView({
                 </div>
               ) : (
                 <button
-                  className="settings-profile-delete"
+                  className="settings-profile-action settings-profile-action--danger"
                   type="button"
                   aria-label={`Remove ${show.name}`}
                   title="Remove show"

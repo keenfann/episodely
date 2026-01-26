@@ -9,6 +9,7 @@ import {
   useParams,
 } from 'react-router-dom';
 import { apiFetch } from './api.js';
+import logo from './assets/episodely-logo.svg';
 
 const STATE_LABELS = {
   'watch-next': 'Watch Next',
@@ -640,7 +641,7 @@ function App() {
     <div className="app-shell">
       <header className="top-bar">
         <div className="brand">
-          <div className="brand__dot" />
+          <img className="brand__logo" src={logo} alt="Episodely logo" />
           <span>Episodely</span>
         </div>
         <nav className="nav">
@@ -1390,7 +1391,7 @@ function AuthView({ onSubmit }) {
     <div className="auth-shell">
       <div className="auth-card">
         <div className="brand brand--large">
-          <div className="brand__dot" />
+          <img className="brand__logo" src={logo} alt="Episodely logo" />
           <span>Episodely</span>
         </div>
         <p className="muted">Track TV series with a focused, self-hosted setup.</p>

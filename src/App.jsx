@@ -719,6 +719,23 @@ function App() {
         </nav>
         <div className="top-bar__right">
           <button
+            className="add-show-icon"
+            type="button"
+            onClick={() => navigate('/add')}
+            aria-label="Add show"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 5v14M5 12h14"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+          </button>
+          <button
             className="primary primary--with-icon"
             type="button"
             onClick={() => navigate('/add')}

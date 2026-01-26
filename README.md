@@ -28,7 +28,10 @@ Status: v1.0 release.
 ## Screenshots
 ![Shows dashboard](docs/screenshots/shows-dashboard.png)
 ![Calendar view](docs/screenshots/calendar-view.png)
-![Add shows view](docs/screenshots/add-shows-view.png)
+![Show detail view](docs/screenshots/show-detail-view.png)
+![Shows mobile view](docs/screenshots/shows-mobile.png)
+![Calendar mobile view](docs/screenshots/calendar-mobile.png)
+![Show detail mobile view](docs/screenshots/show-detail-mobile.png)
 
 ## Stack
 - UI: React + Vite

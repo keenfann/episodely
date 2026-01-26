@@ -732,7 +732,6 @@ input:focus {
 }
 
 .show-card:hover {
-  transform: translateY(-4px);
   border-color: rgba(138, 180, 248, 0.4);
 }
 

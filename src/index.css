@@ -218,10 +218,8 @@ input:focus {
 
 .user-menu__trigger {
   display: grid;
-  grid-template-columns: auto auto;
-  grid-template-areas:
-    'name caret'
-    'meta caret';
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas: 'icon name caret';
   column-gap: 0.6rem;
   align-items: center;
   background: var(--surface-muted);
@@ -233,6 +231,19 @@ input:focus {
   text-align: left;
   cursor: pointer;
   min-width: 0;
+}
+
+.user-menu__trigger--stacked {
+  grid-template-areas:
+    'icon name caret'
+    'icon meta caret';
+}
+
+.user-menu__avatar {
+  grid-area: icon;
+  width: 18px;
+  height: 18px;
+  color: var(--text-muted);
 }
 
 .user-menu__name {
@@ -1453,16 +1464,27 @@ input:focus {
 
 @media (max-width: 900px) {
   .top-bar {
-    flex-direction: column;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'brand user'
+      'nav nav';
+    align-items: center;
     gap: 1rem;
     width: 100%;
   }
 
+  .brand {
+    grid-area: brand;
+    min-width: 0;
+  }
+
   .top-bar__right {
-    width: 100%;
-    align-items: stretch;
-    flex-direction: column;
+    grid-area: user;
+    width: auto;
+    align-items: center;
+    flex-direction: row;
+    justify-self: end;
   }
 
   .top-bar__right .primary {
@@ -1470,6 +1492,7 @@ input:focus {
   }
 
   .nav {
+    grid-area: nav;
     width: 100%;
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1493,12 +1516,13 @@ input:focus {
   }
 
   .user-menu {
-    width: 100%;
+    width: auto;
   }
 
   .user-menu__trigger {
-    width: 100%;
-    grid-template-columns: 1fr auto;
+    width: auto;
+    max-width: min(45vw, 220px);
+    grid-template-columns: auto 1fr auto;
   }
 
   .user-menu__dropdown {
@@ -1721,5 +1745,23 @@ input:focus {
 
   .check-button {
     justify-self: end;
+  }
+}
+
+@media (max-width: 520px) {
+  .user-menu__trigger {
+    padding: 0.35rem 0.65rem;
+    max-width: none;
+    grid-template-columns: auto auto;
+    grid-template-areas: 'icon caret';
+  }
+
+  .user-menu__name,
+  .user-menu__meta {
+    display: none;
+  }
+
+  .user-menu__caret {
+    font-size: 0.85rem;
   }
 }

@@ -681,6 +681,13 @@ function App() {
     );
   }
 
+  const username = auth.user?.username?.trim() || '';
+  const profileName = activeProfile.name?.trim() || '';
+  const showProfile =
+    profileName &&
+    username &&
+    profileName.toLowerCase() !== username.toLowerCase();
+
   return (
     <div className="app-shell">
       <header className="top-bar">
@@ -735,26 +742,44 @@ function App() {
           <div className="user-menu" ref={userMenuRef}>
             <button
               type="button"
-              className="user-menu__trigger"
+              className={`user-menu__trigger ${
+                showProfile ? 'user-menu__trigger--stacked' : 'user-menu__trigger--single'
+              }`}
               aria-haspopup="menu"
+              aria-label={`${auth.user?.username || 'Account'} menu`}
               aria-expanded={userMenuOpen}
               onClick={() => setUserMenuOpen((open) => !open)}
             >
+              <svg
+                className="user-menu__avatar"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.8"
+                />
+                <circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.8"
+                />
+              </svg>
               <span className="user-menu__name">
                 {auth.user?.username || 'Account'}
               </span>
-              {(() => {
-                const username = auth.user?.username?.trim() || '';
-                const profileName = activeProfile.name?.trim() || '';
-                const showProfile =
-                  profileName &&
-                  username &&
-                  profileName.toLowerCase() !== username.toLowerCase();
-                if (!showProfile) return null;
-                return (
-                  <span className="user-menu__meta">{activeProfile.name}</span>
-                );
-              })()}
+              {showProfile && (
+                <span className="user-menu__meta">{activeProfile.name}</span>
+              )}
               <span className="user-menu__caret">▾</span>
             </button>
             {userMenuOpen && (

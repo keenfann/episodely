@@ -29,6 +29,7 @@ Keep formatting consistent and easy to scan:
 - File and directory names: `kebab-case` (e.g., `release-calendar.ts`).
 - Types/components: `PascalCase` (e.g., `EpisodeCard.tsx`).
 - Variables/functions: `camelCase`; constants: `UPPER_SNAKE_CASE`.
+- Icons: prefer Lucide icons when adding new UI glyphs.
 
 If a formatter or linter is added (e.g., Prettier, ESLint), run it before opening a PR and note deviations.
 

@@ -23,6 +23,9 @@ const tvmazeSyncDelayMs =
   Number(process.env.TVMAZE_SYNC_DELAY_MS) || 500;
 const tvmazeSyncOnStartup = process.env.TVMAZE_SYNC_ON_STARTUP !== 'false';
 let tvmazeSyncInProgress = false;
+const exportBackupIntervalMs = 7 * 24 * 60 * 60 * 1000;
+const exportBackupRetentionMs = 52 * exportBackupIntervalMs;
+let exportBackupInProgress = false;
 const CSRF_HEADER = 'x-csrf-token';
 const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -53,14 +56,19 @@ app.use((req, res, next) => {
   return next();
 });
 
+function resolveDbPath() {
+  return (
+    process.env.DB_PATH ||
+    path.resolve(__dirname, '..', 'db', 'episodely.sqlite')
+  );
+}
+
 function resolveSessionSecret() {
   if (process.env.SESSION_SECRET) {
     return process.env.SESSION_SECRET;
   }
 
-  const dbPath =
-    process.env.DB_PATH ||
-    path.resolve(__dirname, '..', 'db', 'episodely.sqlite');
+  const dbPath = resolveDbPath();
   const secretPath = path.join(
     path.dirname(dbPath),
     '.episodely-session-secret'
@@ -109,6 +117,137 @@ function requireProfile(req, res, next) {
 
 function nowIso() {
   return new Date().toISOString();
+}
+
+function buildProfileExport(profileId, exportedAt = nowIso()) {
+  const shows = db
+    .prepare(
+      `SELECT s.id, s.tvmaze_id, s.name, ps.created_at
+       FROM shows s
+       JOIN profile_shows ps ON ps.show_id = s.id
+       WHERE ps.profile_id = ?`
+    )
+    .all(profileId);
+
+  const episodes = db
+    .prepare(
+      `SELECT e.tvmaze_id, e.show_id, pe.watched_at
+       FROM profile_episodes pe
+       JOIN episodes e ON e.id = pe.episode_id
+       WHERE pe.profile_id = ?`
+    )
+    .all(profileId);
+
+  const watchedByShow = new Map();
+  episodes.forEach((episode) => {
+    if (!watchedByShow.has(episode.show_id)) {
+      watchedByShow.set(episode.show_id, []);
+    }
+    watchedByShow.get(episode.show_id).push({
+      tvmazeEpisodeId: episode.tvmaze_id,
+      watchedAt: episode.watched_at,
+    });
+  });
+
+  return {
+    version: 1,
+    exportedAt,
+    shows: shows.map((show) => ({
+      tvmazeId: show.tvmaze_id,
+      name: show.name,
+      addedAt: show.created_at,
+      watchedEpisodes: watchedByShow.get(show.id) || [],
+    })),
+  };
+}
+
+function getExportRoot() {
+  const dbPath = resolveDbPath();
+  return path.join(path.dirname(dbPath), 'exports');
+}
+
+function listJsonFiles(dir) {
+  try {
+    return fs.readdirSync(dir).filter((file) => file.endsWith('.json'));
+  } catch (error) {
+    if (error?.code === 'ENOENT') return [];
+    throw error;
+  }
+}
+
+function hasRecentBackup(dir, nowMs) {
+  const cutoffMs = nowMs - exportBackupIntervalMs;
+  const files = listJsonFiles(dir);
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    try {
+      const stats = fs.statSync(filePath);
+      if (stats.mtimeMs >= cutoffMs) {
+        return true;
+      }
+    } catch (error) {
+      if (error?.code !== 'ENOENT') {
+        throw error;
+      }
+    }
+  }
+  return false;
+}
+
+function pruneOldBackups(dir, cutoffMs) {
+  const files = listJsonFiles(dir);
+  for (const file of files) {
+    const filePath = path.join(dir, file);
+    try {
+      const stats = fs.statSync(filePath);
+      if (stats.mtimeMs < cutoffMs) {
+        fs.unlinkSync(filePath);
+      }
+    } catch (error) {
+      if (error?.code !== 'ENOENT') {
+        throw error;
+      }
+    }
+  }
+}
+
+function writeExportFile(dir, payload, exportedAt) {
+  fs.mkdirSync(dir, { recursive: true });
+  const safeStamp = exportedAt.replace(/[:.]/g, '-');
+  const filename = `export-${safeStamp}.json`;
+  const filePath = path.join(dir, filename);
+  const tempPath = path.join(dir, `.${filename}.tmp`);
+  fs.writeFileSync(tempPath, `${JSON.stringify(payload, null, 2)}\n`);
+  fs.renameSync(tempPath, filePath);
+}
+
+function runExportBackupsOnce() {
+  const profiles = db.prepare('SELECT id, user_id FROM profiles').all();
+  const nowMs = Date.now();
+  const retentionCutoffMs = nowMs - exportBackupRetentionMs;
+
+  profiles.forEach((profile) => {
+    const profileId = toNumber(profile.id);
+    const userId = toNumber(profile.user_id);
+    const profileDir = path.join(
+      getExportRoot(),
+      `user-${userId}`,
+      `profile-${profileId}`
+    );
+
+    try {
+      if (!hasRecentBackup(profileDir, nowMs)) {
+        const exportedAt = nowIso();
+        const payload = buildProfileExport(profileId, exportedAt);
+        writeExportFile(profileDir, payload, exportedAt);
+      }
+      pruneOldBackups(profileDir, retentionCutoffMs);
+    } catch (error) {
+      console.warn(
+        `Failed to write export backup for profile ${profileId}: ${error.message}`
+      );
+    }
+  });
 }
 
 function sleep(ms) {
@@ -964,47 +1103,7 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
 });
 
 app.get('/api/export', requireAuth, requireProfile, (req, res) => {
-  const profileId = req.session.profileId;
-  const shows = db
-    .prepare(
-      `SELECT s.id, s.tvmaze_id, s.name, ps.created_at
-       FROM shows s
-       JOIN profile_shows ps ON ps.show_id = s.id
-       WHERE ps.profile_id = ?`
-    )
-    .all(profileId);
-
-  const episodes = db
-    .prepare(
-      `SELECT e.tvmaze_id, e.show_id, pe.watched_at
-       FROM profile_episodes pe
-       JOIN episodes e ON e.id = pe.episode_id
-       WHERE pe.profile_id = ?`
-    )
-    .all(profileId);
-
-  const watchedByShow = new Map();
-  episodes.forEach((episode) => {
-    if (!watchedByShow.has(episode.show_id)) {
-      watchedByShow.set(episode.show_id, []);
-    }
-    watchedByShow.get(episode.show_id).push({
-      tvmazeEpisodeId: episode.tvmaze_id,
-      watchedAt: episode.watched_at,
-    });
-  });
-
-  const payload = {
-    version: 1,
-    exportedAt: nowIso(),
-    shows: shows.map((show) => ({
-      tvmazeId: show.tvmaze_id,
-      name: show.name,
-      addedAt: show.created_at,
-      watchedEpisodes: watchedByShow.get(show.id) || [],
-    })),
-  };
-
+  const payload = buildProfileExport(req.session.profileId);
   res.json(payload);
 });
 
@@ -1104,6 +1203,26 @@ function startTvmazeSync() {
   }
 }
 
+function startExportBackups() {
+  const runBackups = () => {
+    if (exportBackupInProgress) {
+      return;
+    }
+    exportBackupInProgress = true;
+    try {
+      runExportBackupsOnce();
+    } finally {
+      exportBackupInProgress = false;
+    }
+  };
+
+  runBackups();
+
+  if (exportBackupIntervalMs > 0) {
+    setInterval(runBackups, exportBackupIntervalMs);
+  }
+}
+
 function startServer() {
   app.listen(port, () => {
     console.log(`API running on http://localhost:${port}`);
@@ -1112,7 +1231,8 @@ function startServer() {
 
 if (process.env.NODE_ENV !== 'test') {
   startTvmazeSync();
+  startExportBackups();
   startServer();
 }
 
-export { app, startServer, startTvmazeSync };
+export { app, runExportBackupsOnce, startExportBackups, startServer, startTvmazeSync };

@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import db from '../../server/db.js';
 import { createAgent, createProfile, registerUser } from '../helpers/api.js';
@@ -16,11 +18,12 @@ vi.mock('../../server/tvmaze.js', () => ({
 }));
 
 let app;
+let runExportBackupsOnce;
 let tvmaze;
 
 beforeAll(async () => {
   tvmaze = await import('../../server/tvmaze.js');
-  ({ app } = await import('../../server/index.js'));
+  ({ app, runExportBackupsOnce } = await import('../../server/index.js'));
 });
 
 describe('tvmaze, import/export, calendar', () => {
@@ -158,6 +161,35 @@ describe('tvmaze, import/export, calendar', () => {
     expect(response.body.shows).toHaveLength(1);
     expect(response.body.shows[0].tvmazeId).toBe(7001);
     expect(response.body.shows[0].watchedEpisodes[0].tvmazeEpisodeId).toBe(7101);
+  });
+
+  it('writes profile export backups that match the importable shape', () => {
+    const showId = createShow({ tvmazeId: 7201, name: 'Backup Show' });
+    linkProfileShow({ profileId, showId });
+
+    runExportBackupsOnce();
+
+    const userRow = db
+      .prepare('SELECT id FROM users WHERE username = ?')
+      .get('importer');
+    const exportRoot = path.join(path.dirname(process.env.DB_PATH), 'exports');
+    const profileDir = path.join(
+      exportRoot,
+      `user-${userRow.id}`,
+      `profile-${profileId}`
+    );
+    const files = fs
+      .readdirSync(profileDir)
+      .filter((file) => file.endsWith('.json'));
+
+    expect(files.length).toBe(1);
+
+    const payload = JSON.parse(
+      fs.readFileSync(path.join(profileDir, files[0]), 'utf8')
+    );
+    expect(payload.version).toBe(1);
+    expect(Array.isArray(payload.shows)).toBe(true);
+    expect(payload.shows[0].tvmazeId).toBe(7201);
   });
 
   it('imports shows and watched episodes', async () => {

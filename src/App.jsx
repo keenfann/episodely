@@ -260,8 +260,10 @@ function App() {
     user: null,
     profileId: null,
   });
+  const [booting, setBooting] = useState(true);
   const [profiles, setProfiles] = useState([]);
   const [activeProfile, setActiveProfile] = useState(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [showDetail, setShowDetail] = useState(null);
   const [calendar, setCalendar] = useState({ days: 45, episodes: [] });
@@ -275,20 +277,33 @@ function App() {
   const [importing, setImporting] = useState(false);
   const scrollRestoreRef = useRef(null);
   const [scrollRestoreTick, setScrollRestoreTick] = useState(0);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
+    let cancelled = false;
     const init = async () => {
       try {
         const data = await apiFetch('/api/auth/me');
-        setAuth({ loading: false, user: data.user, profileId: data.profileId });
-        if (data.user) {
+        if (!cancelled) {
+          setAuth({ loading: false, user: data.user, profileId: data.profileId });
+        }
+        if (data.user && !cancelled) {
           await loadProfiles(data.profileId);
         }
       } catch (error) {
-        setAuth({ loading: false, user: null, profileId: null });
+        if (!cancelled) {
+          setAuth({ loading: false, user: null, profileId: null });
+        }
+      } finally {
+        if (!cancelled) {
+          setBooting(false);
+        }
       }
     };
     init();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -307,7 +322,28 @@ function App() {
   }, [activeProfile]);
 
   useEffect(() => {
-    if (auth.loading) return;
+    if (!userMenuOpen) return;
+    const handleClickOutside = (event) => {
+      if (!userMenuRef.current) return;
+      if (!userMenuRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [userMenuOpen]);
+
+  useEffect(() => {
+    if (auth.loading || booting) return;
     if (!auth.user) {
       if (location.pathname !== '/login') {
         navigate('/login', { replace: true });
@@ -323,7 +359,14 @@ function App() {
     if (location.pathname === '/login' || location.pathname === '/profiles') {
       navigate('/shows', { replace: true });
     }
-  }, [auth.loading, auth.user, activeProfile, location.pathname, navigate]);
+  }, [
+    auth.loading,
+    auth.user,
+    activeProfile,
+    booting,
+    location.pathname,
+    navigate,
+  ]);
 
   const loadProfiles = async (profileId) => {
     const data = await apiFetch('/api/profiles');
@@ -381,6 +424,7 @@ function App() {
   };
 
   const handleLogout = async () => {
+    setUserMenuOpen(false);
     await apiFetch('/api/auth/logout', { method: 'POST' });
     setAuth({ loading: false, user: null, profileId: null });
     setProfiles([]);
@@ -398,14 +442,16 @@ function App() {
     await loadProfiles(auth.profileId);
   };
 
-  const handleProfileSelect = async (profileId) => {
+  const handleProfileSelect = async (profileId, { stayOnPage } = {}) => {
     await apiFetch('/api/profiles/select', {
       method: 'POST',
       body: JSON.stringify({ profileId }),
     });
     await loadProfiles(profileId);
     setShowDetail(null);
-    navigate('/shows', { replace: true });
+    if (!stayOnPage) {
+      navigate('/shows', { replace: true });
+    }
   };
 
   const handleProfileDelete = async (profile) => {
@@ -614,7 +660,7 @@ function App() {
     }
   };
 
-  if (auth.loading) {
+  if (auth.loading || booting) {
     return (
       <div className="app-shell">
         <div className="panel panel--center">Loading...</div>
@@ -637,6 +683,13 @@ function App() {
     );
   }
 
+  const username = auth.user?.username?.trim() || '';
+  const profileName = activeProfile.name?.trim() || '';
+  const showProfile =
+    profileName &&
+    username &&
+    profileName.toLowerCase() !== username.toLowerCase();
+
   return (
     <div className="app-shell">
       <header className="top-bar">
@@ -658,22 +711,173 @@ function App() {
             Calendar
           </NavLink>
           <NavLink
-            to="/settings"
-            className={({ isActive }) => (isActive ? 'tab tab--active' : 'tab')}
+            to="/add"
+            className={({ isActive }) =>
+              isActive ? 'tab tab--active tab--add' : 'tab tab--add'
+            }
           >
-            Settings
+            Add Show
           </NavLink>
         </nav>
         <div className="top-bar__right">
           <button
-            className="primary"
+            className="add-show-icon"
+            type="button"
+            onClick={() => navigate('/add')}
+            aria-label="Add show"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M12 5v14M5 12h14"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+          </button>
+          <button
+            className="primary primary--with-icon add-show-button"
             type="button"
             onClick={() => navigate('/add')}
           >
-            Add show
+            <svg
+              className="button-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 5v14M5 12h14"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
+            Add Show
           </button>
-          <div className="profile-chip">
-            <span>{activeProfile.name}</span>
+          <div className="user-menu" ref={userMenuRef}>
+            <button
+              type="button"
+              className={`user-menu__trigger ${
+                showProfile ? 'user-menu__trigger--stacked' : 'user-menu__trigger--single'
+              }`}
+              aria-haspopup="menu"
+              aria-label={`${auth.user?.username || 'Account'} menu`}
+              aria-expanded={userMenuOpen}
+              onClick={() => setUserMenuOpen((open) => !open)}
+            >
+              <svg
+                className="user-menu__avatar"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.8"
+                />
+                <circle
+                  cx="12"
+                  cy="7"
+                  r="4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1.8"
+                />
+              </svg>
+              <span className="user-menu__name">
+                {auth.user?.username || 'Account'}
+              </span>
+              {showProfile && (
+                <span className="user-menu__meta">{activeProfile.name}</span>
+              )}
+              <span className="user-menu__caret">▾</span>
+            </button>
+            {userMenuOpen && (
+              <div className="user-menu__dropdown" role="menu">
+                <button
+                  type="button"
+                  className="user-menu__item"
+                  role="menuitem"
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    navigate('/settings');
+                  }}
+                >
+                  <svg
+                    className="user-menu__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="3"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                    <path
+                      d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h.09a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h.09a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v.09a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                  </svg>
+                  Settings
+                </button>
+                <button
+                  type="button"
+                  className="user-menu__item user-menu__item--danger"
+                  role="menuitem"
+                  onClick={handleLogout}
+                >
+                  <svg
+                    className="user-menu__icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                    <path
+                      d="M16 17l5-5-5-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                    <path
+                      d="M21 12H9"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                    />
+                  </svg>
+                  Log out
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -738,7 +942,6 @@ function App() {
                 onProfileDelete={handleProfileDelete}
                 onExport={handleExport}
                 onImport={handleImport}
-                onLogout={handleLogout}
               />
             }
           />
@@ -791,12 +994,38 @@ function ShowsPage({
         </div>
       </div>
       <div className="search-bar">
-        <input
-          type="search"
-          placeholder="Search your shows..."
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-        />
+        <div className="search-field">
+          <svg
+            className="search-field__icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="7"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            />
+            <path
+              d="M20 20l-3.5-3.5"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+            />
+          </svg>
+          <input
+            type="search"
+            placeholder="Search your shows..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
       </div>
         {loadingShows ? (
           <div className="empty-state">Loading shows...</div>
@@ -939,7 +1168,31 @@ function AddShowPage({
             value={searchQuery}
             onChange={(event) => onSearchQuery(event.target.value)}
           />
-          <button className="primary" type="submit">
+          <button className="primary primary--with-icon" type="submit">
+            <svg
+              className="button-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="7"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+              <path
+                d="M20 20l-3.5-3.5"
+                fill="none"
+                stroke="currentColor"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+              />
+            </svg>
             Search
           </button>
         </form>
@@ -965,9 +1218,23 @@ function AddShowPage({
                 </span>
               ) : (
                 <button
-                  className="outline"
+                  className="outline outline--with-icon"
                   onClick={() => onAddShow(result.id)}
                 >
+                  <svg
+                    className="button-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M12 5v14M5 12h14"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    />
+                  </svg>
                   Add
                 </button>
               )}
@@ -1102,7 +1369,6 @@ function SettingsPage({
   onProfileDelete,
   onExport,
   onImport,
-  onLogout,
 }) {
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [deleteError, setDeleteError] = useState('');
@@ -1128,7 +1394,7 @@ function SettingsPage({
 
   const handleSelect = (profileId) => {
     setPendingDeleteId(null);
-    onProfileSelect(profileId);
+    onProfileSelect(profileId, { stayOnPage: true });
   };
 
   return (
@@ -1139,12 +1405,9 @@ function SettingsPage({
           <p className="muted">Manage profiles, exports, and account access.</p>
           <p className="muted settings-version">Version {appVersion}</p>
         </div>
-        <button className="outline" onClick={onLogout}>
-          Log out
-        </button>
       </div>
       <div className="settings-grid">
-        <div className="settings-card">
+        <div className="settings-card settings-card--profiles">
           <div className="settings-card__header">
             <h3>Profiles</h3>
           </div>
@@ -1172,38 +1435,66 @@ function SettingsPage({
                       className="settings-profile-main"
                       type="button"
                       disabled={isPendingDelete}
+                      aria-label={
+                        isActive
+                          ? `${profile.name} profile (active)`
+                          : `Switch to ${profile.name} profile`
+                      }
                       onClick={() => handleSelect(profile.id)}
                     >
                       <span className="settings-profile-avatar">{initial}</span>
                       <span className="settings-profile-name">{profile.name}</span>
-                      <span className="settings-profile-status">
-                        {isActive ? 'Active' : 'Switch'}
-                      </span>
+                      {isActive && (
+                        <span className="settings-profile-status">Active</span>
+                      )}
                     </button>
                     {!isActive && !isPendingDelete && (
-                      <button
-                        className="settings-profile-delete"
-                        type="button"
-                        aria-label={`Delete ${profile.name} profile`}
-                        title="Delete profile"
-                        onClick={() => handleDeleteRequest(profile.id)}
-                      >
-                        <svg
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
+                      <div className="settings-profile-actions">
+                        <button
+                          className="settings-profile-action"
+                          type="button"
+                          aria-label={`Switch to ${profile.name} profile`}
+                          title="Switch profile"
+                          onClick={() => handleSelect(profile.id)}
                         >
-                          <path d="M3 6h18" />
-                          <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
-                          <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                          <path d="M10 11v6" />
-                          <path d="M14 11v6" />
-                        </svg>
-                      </button>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M8.5 12h7" />
+                            <path d="M12 8.5l3.5 3.5-3.5 3.5" />
+                          </svg>
+                        </button>
+                        <button
+                          className="settings-profile-action settings-profile-action--danger"
+                          type="button"
+                          aria-label={`Delete ${profile.name} profile`}
+                          title="Delete profile"
+                          onClick={() => handleDeleteRequest(profile.id)}
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6" />
+                            <path d="M14 11v6" />
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                          </svg>
+                        </button>
+                      </div>
                     )}
                     {!isActive && isPendingDelete && (
                       <div className="settings-profile-confirm">
@@ -1674,7 +1965,7 @@ function ShowDetailView({
           <div className="show-detail__actions">
             {canToggleStatus && (
               <button
-                className="outline show-detail__action"
+                className="outline outline--with-icon show-detail__action"
                 type="button"
                 onClick={() =>
                   onUpdateShowStatus(
@@ -1683,7 +1974,44 @@ function ShowDetailView({
                   )
                 }
               >
-                {show.profileStatus === 'stopped' ? 'Resume Watching' : 'Stop Watching'}
+                {show.profileStatus === 'stopped' ? (
+                  <svg
+                    className="button-icon resume-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M7 5v14l11-7z"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="button-icon stop-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="6"
+                      y="6"
+                      width="12"
+                      height="12"
+                      rx="2"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                    />
+                  </svg>
+                )}
+                {show.profileStatus === 'stopped'
+                  ? 'Resume Watching'
+                  : 'Stop Watching'}
               </button>
             )}
             {canRemove &&
@@ -1707,7 +2035,7 @@ function ShowDetailView({
                 </div>
               ) : (
                 <button
-                  className="settings-profile-delete"
+                  className="settings-profile-action settings-profile-action--danger show-detail__delete"
                   type="button"
                   aria-label={`Remove ${show.name}`}
                   title="Remove show"
@@ -1722,11 +2050,11 @@ function ShowDetailView({
                     strokeLinejoin="round"
                     aria-hidden="true"
                   >
-                    <path d="M3 6h18" />
-                    <path d="M8 6v-1a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1" />
-                    <path d="M19 6l-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
                     <path d="M10 11v6" />
                     <path d="M14 11v6" />
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
                   </svg>
                 </button>
               ))}
@@ -1768,7 +2096,7 @@ function ShowDetailView({
                     }
                   }}
                 >
-                  <div>
+                  <div className="season-card__info">
                     <h3>Season {season.season}</h3>
                     <p className="muted">
                       Watched {season.watchedCount}/{season.totalCount}

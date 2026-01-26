@@ -81,12 +81,7 @@ Episodely can refresh show/episode metadata from TVmaze on a schedule. Configure
 
 ## Import and Export
 Import and export are available in Settings. Exports are JSON backups that can be imported into another instance. Imports also accept a CSV of TVmaze IDs (one per line).
-
-## Roadmap
-- MVP watch tracking
-- Calendar views
-- Import/export workflows
-- Polish and integrations
+The server also writes automatic weekly JSON exports per profile next to the database (for example `db/exports/user-1/profile-1/`) and retains 52 weeks of backups.
 
 ## Contributing
 Issues and PRs are welcome. If you plan to work on a larger change, open an issue first to align on scope.

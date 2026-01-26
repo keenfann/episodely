@@ -27,11 +27,21 @@ Status: v1.0 release.
 
 ## Screenshots
 ![Shows dashboard](docs/screenshots/shows-dashboard.png)
+<br />
+
 ![Calendar view](docs/screenshots/calendar-view.png)
+<br />
+
 ![Show detail view](docs/screenshots/show-detail-view.png)
-![Shows mobile view](docs/screenshots/shows-mobile.png)
-![Calendar mobile view](docs/screenshots/calendar-mobile.png)
-![Show detail mobile view](docs/screenshots/show-detail-mobile.png)
+<br />
+
+<table cellpadding="8">
+  <tr>
+    <td><img src="docs/screenshots/shows-mobile.png" alt="Shows mobile view" width="240" /></td>
+    <td><img src="docs/screenshots/calendar-mobile.png" alt="Calendar mobile view" width="240" /></td>
+    <td><img src="docs/screenshots/show-detail-mobile.png" alt="Show detail mobile view" width="240" /></td>
+  </tr>
+</table>
 
 ## Stack
 - UI: React + Vite

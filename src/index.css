@@ -192,6 +192,18 @@ input:focus {
   align-items: center;
 }
 
+.top-bar .tab,
+.top-bar__right .primary,
+.user-menu__trigger {
+  height: 40px;
+}
+
+.top-bar .tab,
+.top-bar__right .primary {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .tab--add {
   display: none;
 }

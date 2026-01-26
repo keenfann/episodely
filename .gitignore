@@ -23,6 +23,7 @@ db/*.sqlite-wal
 db/*.sqlite-shm
 db/*.db
 db/*.db-journal
+db/exports
 .vscode
 docker-compose.override.yml
 docker-compose.override.yaml

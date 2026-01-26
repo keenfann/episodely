@@ -504,6 +504,7 @@ input:focus {
 }
 
 .category {
+  --show-card-max: 280px;
   margin-bottom: 1.5rem;
   padding: 1rem;
   border-radius: 16px;
@@ -632,13 +633,17 @@ input:focus {
 
 .show-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, var(--show-card-max)));
   gap: 1.25rem;
+  justify-content: start;
 }
 
 .show-card {
   display: grid;
   gap: 0.75rem;
+  width: 100%;
+  max-width: var(--show-card-max, 520px);
+  justify-self: start;
   text-align: left;
   background: var(--surface-muted);
   border: 1px solid var(--border);

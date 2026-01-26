@@ -794,6 +794,7 @@ input:focus {
 .show-detail__action {
   align-self: center;
   white-space: nowrap;
+  justify-content: center;
 }
 
 .show-detail__actions {

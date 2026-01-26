@@ -1721,6 +1721,10 @@ input:focus {
     align-items: stretch;
   }
 
+  .search-bar .search-field {
+    width: 100%;
+  }
+
   .panel__header {
     flex-direction: column;
     align-items: flex-start;

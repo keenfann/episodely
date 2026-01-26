@@ -1034,6 +1034,17 @@ input:focus {
   display: grid;
   gap: 0.75rem;
   min-width: 0;
+  position: relative;
+}
+
+.episode-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: -0.45rem;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .episode-row.is-watched {

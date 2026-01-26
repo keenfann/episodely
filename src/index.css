@@ -192,6 +192,10 @@ input:focus {
   align-items: center;
 }
 
+.tab--add {
+  display: none;
+}
+
 .tab--active {
   border-color: rgba(138, 180, 248, 0.4);
   background: rgba(138, 180, 248, 0.12);
@@ -228,17 +232,24 @@ input:focus {
   font: inherit;
   text-align: left;
   cursor: pointer;
+  min-width: 0;
 }
 
 .user-menu__name {
   grid-area: name;
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-menu__meta {
   grid-area: meta;
   font-size: 0.8rem;
   color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-menu__caret {
@@ -1454,10 +1465,14 @@ input:focus {
     flex-direction: column;
   }
 
+  .top-bar__right .primary {
+    display: none;
+  }
+
   .nav {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.5rem;
     max-width: 100%;
   }
@@ -1472,12 +1487,18 @@ input:focus {
     white-space: nowrap;
   }
 
+  .tab--add {
+    display: inline-flex;
+    justify-content: center;
+  }
+
   .user-menu {
     width: 100%;
   }
 
   .user-menu__trigger {
     width: 100%;
+    grid-template-columns: 1fr auto;
   }
 
   .user-menu__dropdown {

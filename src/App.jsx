@@ -701,6 +701,14 @@ function App() {
           >
             Calendar
           </NavLink>
+          <NavLink
+            to="/add"
+            className={({ isActive }) =>
+              isActive ? 'tab tab--active tab--add' : 'tab tab--add'
+            }
+          >
+            Add Show
+          </NavLink>
         </nav>
         <div className="top-bar__right">
           <button

@@ -1,5 +1,7 @@
 # Episodely
 
+![Episodely logo](src/assets/episodely-logo.svg)
+
 [![Build and Publish Docker Image](https://github.com/keenfann/episodely/actions/workflows/docker-publish.yml/badge.svg?branch=main)](https://github.com/keenfann/episodely/actions/workflows/docker-publish.yml)
 
 Episodely is a self-hosted web app for tracking watched TV series. It aims to provide the core watch tracking flow of TV Time with a local-first setup, plus calendar views for upcoming releases and import/export to make migration easy. Episodely is created to replace TV Time and is developed primarily with OpenAI Codex.

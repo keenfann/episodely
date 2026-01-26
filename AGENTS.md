@@ -7,6 +7,7 @@ Current layout is a single Node server with a Vite-built UI:
 - `tests/` Vitest suites for API/UI utilities
 - `db/` local SQLite files (ignored by git)
 - `data/` Docker-mounted SQLite data
+- `public/` static assets served by Vite (favicons)
 - `scripts/` one-off helpers for imports and maintenance
 - `index.html`, `vite.config.js`, `package.json` at repo root
 

@@ -1048,7 +1048,7 @@ input:focus {
 }
 
 .episode-row.is-watched {
-  border-color: rgba(138, 180, 248, 0.25);
+  border-color: transparent;
 }
 
 .episode-row__meta {

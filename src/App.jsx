@@ -2016,7 +2016,7 @@ function ShowDetailView({
                 </div>
               ) : (
                 <button
-                  className="settings-profile-action settings-profile-action--danger"
+                  className="settings-profile-action settings-profile-action--danger show-detail__delete"
                   type="button"
                   aria-label={`Remove ${show.name}`}
                   title="Remove show"

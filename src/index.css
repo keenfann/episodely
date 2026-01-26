@@ -799,6 +799,7 @@ input:focus {
   align-self: center;
   white-space: nowrap;
   justify-content: center;
+  height: 44px;
 }
 
 .show-detail__actions {
@@ -809,6 +810,16 @@ input:focus {
 
 .show-detail__actions .settings-profile-confirm {
   margin-left: 0;
+}
+
+.show-detail__delete {
+  width: 44px;
+  height: 44px;
+}
+
+.show-detail__delete svg {
+  width: 18px;
+  height: 18px;
 }
 
 .show-detail__hero {
@@ -1275,6 +1286,25 @@ input:focus {
   background: rgba(255, 122, 122, 0.15);
 }
 
+.show-detail__delete {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(138, 180, 248, 0.35);
+  background: rgba(138, 180, 248, 0.08);
+  color: #e8eaed;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.show-detail__delete:hover {
+  background: rgba(138, 180, 248, 0.16);
+  border-color: rgba(138, 180, 248, 0.6);
+}
+
+.show-detail__delete svg {
+  width: 18px;
+  height: 18px;
+}
+
 .settings-profile-confirm {
   display: flex;
   align-items: center;
@@ -1600,6 +1630,16 @@ input:focus {
     flex-direction: column;
     align-items: flex-start;
     flex-wrap: wrap;
+  }
+
+  .show-detail__header {
+    position: relative;
+  }
+
+  .show-detail__actions .settings-profile-action--danger {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 
   .show-detail__actions {

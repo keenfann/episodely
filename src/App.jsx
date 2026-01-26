@@ -260,6 +260,7 @@ function App() {
     user: null,
     profileId: null,
   });
+  const [booting, setBooting] = useState(true);
   const [profiles, setProfiles] = useState([]);
   const [activeProfile, setActiveProfile] = useState(null);
   const [categories, setCategories] = useState([]);
@@ -277,18 +278,30 @@ function App() {
   const [scrollRestoreTick, setScrollRestoreTick] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     const init = async () => {
       try {
         const data = await apiFetch('/api/auth/me');
-        setAuth({ loading: false, user: data.user, profileId: data.profileId });
-        if (data.user) {
+        if (!cancelled) {
+          setAuth({ loading: false, user: data.user, profileId: data.profileId });
+        }
+        if (data.user && !cancelled) {
           await loadProfiles(data.profileId);
         }
       } catch (error) {
-        setAuth({ loading: false, user: null, profileId: null });
+        if (!cancelled) {
+          setAuth({ loading: false, user: null, profileId: null });
+        }
+      } finally {
+        if (!cancelled) {
+          setBooting(false);
+        }
       }
     };
     init();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useLayoutEffect(() => {
@@ -307,7 +320,7 @@ function App() {
   }, [activeProfile]);
 
   useEffect(() => {
-    if (auth.loading) return;
+    if (auth.loading || booting) return;
     if (!auth.user) {
       if (location.pathname !== '/login') {
         navigate('/login', { replace: true });
@@ -323,7 +336,14 @@ function App() {
     if (location.pathname === '/login' || location.pathname === '/profiles') {
       navigate('/shows', { replace: true });
     }
-  }, [auth.loading, auth.user, activeProfile, location.pathname, navigate]);
+  }, [
+    auth.loading,
+    auth.user,
+    activeProfile,
+    booting,
+    location.pathname,
+    navigate,
+  ]);
 
   const loadProfiles = async (profileId) => {
     const data = await apiFetch('/api/profiles');
@@ -614,7 +634,7 @@ function App() {
     }
   };
 
-  if (auth.loading) {
+  if (auth.loading || booting) {
     return (
       <div className="app-shell">
         <div className="panel panel--center">Loading...</div>

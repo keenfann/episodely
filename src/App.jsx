@@ -986,7 +986,7 @@ function ShowsPage({
     : categories;
 
   return (
-    <section className="panel">
+    <section className="panel shows-panel">
       <div className="panel__header">
         <div>
           <h2>Your Shows</h2>

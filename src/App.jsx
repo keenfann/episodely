@@ -2077,7 +2077,7 @@ function ShowDetailView({
                     }
                   }}
                 >
-                  <div>
+                  <div className="season-card__info">
                     <h3>Season {season.season}</h3>
                     <p className="muted">
                       Watched {season.watchedCount}/{season.totalCount}

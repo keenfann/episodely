@@ -1974,7 +1974,7 @@ function ShowDetailView({
               >
                 {show.profileStatus === 'stopped' ? (
                   <svg
-                    className="button-icon"
+                    className="button-icon resume-icon"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
                   >
@@ -1989,7 +1989,7 @@ function ShowDetailView({
                   </svg>
                 ) : (
                   <svg
-                    className="button-icon"
+                    className="button-icon stop-icon"
                     viewBox="0 0 24 24"
                     aria-hidden="true"
                   >

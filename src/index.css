@@ -416,6 +416,11 @@ input:focus {
   color: #0a0f14;
 }
 
+.primary.add-show-button {
+  background: linear-gradient(130deg, var(--add-show), var(--add-show-strong));
+  color: #0a0f14;
+}
+
 .primary--with-icon {
   display: inline-flex;
   align-items: center;
@@ -431,6 +436,14 @@ input:focus {
 .button-icon {
   width: 16px;
   height: 16px;
+}
+
+.stop-icon {
+  color: #f28b82;
+}
+
+.resume-icon {
+  color: var(--add-show);
 }
 
 .outline {
@@ -1351,7 +1364,7 @@ input:focus {
 }
 
 .settings-profile-action--danger {
-  color: var(--text-muted);
+  color: #f28b82;
 }
 
 .settings-profile-action--danger:hover {
@@ -1365,7 +1378,7 @@ input:focus {
   height: 44px;
   border: 1px solid rgba(138, 180, 248, 0.35);
   background: rgba(138, 180, 248, 0.08);
-  color: #e8eaed;
+  color: #f28b82;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
 }
 

@@ -736,7 +736,7 @@ function App() {
             </svg>
           </button>
           <button
-            className="primary primary--with-icon"
+            className="primary primary--with-icon add-show-button"
             type="button"
             onClick={() => navigate('/add')}
           >

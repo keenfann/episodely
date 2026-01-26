@@ -768,7 +768,7 @@ input:focus {
 
 .show-detail__title-row {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
   min-width: 0;
@@ -778,6 +778,8 @@ input:focus {
   font-size: 0.7rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  line-height: 1.2;
+  align-self: center;
 }
 
 .show-detail__meta {

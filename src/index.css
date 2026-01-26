@@ -447,6 +447,10 @@ input:focus {
   width: auto;
 }
 
+.add-show-page .search-bar .primary {
+  justify-content: center;
+}
+
 .icon-button {
   width: 40px;
   height: 40px;

@@ -58,6 +58,13 @@ Requirements: Node.js 22+
 - `npm test` runs the Vitest suite
 
 The API is available at `http://localhost:4285/api/health` during development.
+The Vite dev server listens on `localhost:5173` by default. Override with
+`VITE_HOST`, `VITE_PORT`, and `VITE_API_TARGET` in `.env` if needed.
+
+## Dev Container
+This repo includes a `.devcontainer/` setup pinned to Node.js 22 with ports
+5173 (Vite) and 4285 (API) forwarded. The container sets `VITE_HOST=0.0.0.0`
+and disables auto-opening the browser for headless workflows.
 
 ### First run
 - Create an account and log in.

@@ -9,6 +9,7 @@ Current layout is a single Node server with a Vite-built UI:
 - `data/` Docker-mounted SQLite data
 - `public/` static assets served by Vite (favicons)
 - `scripts/` one-off helpers for imports and maintenance
+- `.devcontainer/` development container configuration (Node 22, forwarded ports)
 - `index.html`, `vite.config.js`, `package.json` at repo root
 
 If you add a new top-level directory, update this section with a one-line purpose.
@@ -21,7 +22,7 @@ If you add a new top-level directory, update this section with a one-line purpos
 - `npm run start` serve the API and built UI from one process
 - `docker compose up --build` build and run the Docker image
 
-The Vite dev server proxies `/api` to `http://localhost:3000` for local API calls.
+The Vite dev server proxies `/api` to `http://localhost:4285` by default (override with `VITE_API_TARGET`).
 
 ## Coding Style & Naming Conventions
 Keep formatting consistent and easy to scan:

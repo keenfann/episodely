@@ -1786,6 +1786,10 @@ input:focus {
     grid-template-columns: 1fr;
   }
 
+  .show-detail {
+    gap: 0.4rem;
+  }
+
   .show-detail__heading {
     width: 100%;
     flex-direction: column;

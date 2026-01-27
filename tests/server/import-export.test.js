@@ -157,10 +157,12 @@ describe('tvmaze, import/export, calendar', () => {
 
     const response = await agent.get('/api/export');
     expect(response.status).toBe(200);
-    expect(response.body.version).toBe(1);
+    expect(response.body.version).toBe(2);
     expect(response.body.shows).toHaveLength(1);
     expect(response.body.shows[0].tvmazeId).toBe(7001);
     expect(response.body.shows[0].watchedEpisodes[0].tvmazeEpisodeId).toBe(7101);
+    expect(Array.isArray(response.body.shows[0].episodes)).toBe(true);
+    expect(response.body.shows[0].episodes[0].tvmazeEpisodeId).toBe(7101);
   });
 
   it('writes profile export backups that match the importable shape', () => {
@@ -187,7 +189,7 @@ describe('tvmaze, import/export, calendar', () => {
     const payload = JSON.parse(
       fs.readFileSync(path.join(profileDir, files[0]), 'utf8')
     );
-    expect(payload.version).toBe(1);
+    expect(payload.version).toBe(2);
     expect(Array.isArray(payload.shows)).toBe(true);
     expect(payload.shows[0].tvmazeId).toBe(7201);
   });
@@ -244,6 +246,53 @@ describe('tvmaze, import/export, calendar', () => {
       )
       .get(profileId, episodeRow.id);
     expect(watchedRow?.watched_at).toBe('2024-04-03T12:00:00Z');
+  });
+
+  it('imports shows using payload metadata without tvmaze fetch', async () => {
+    const response = await agent.post('/api/import', {
+      shows: [
+        {
+          tvmazeId: 8201,
+          name: 'Payload Show',
+          summary: 'Seeded summary',
+          status: 'Running',
+          premiered: '2019-01-01',
+          imageMedium: 'm.png',
+          imageOriginal: 'o.png',
+          episodes: [
+            {
+              tvmazeEpisodeId: 8202,
+              season: 1,
+              number: 1,
+              name: 'Payload Ep',
+              airdate: '2019-01-02',
+              watchedAt: '2019-02-01T10:00:00Z',
+            },
+          ],
+        },
+      ],
+    });
+    expect(response.status).toBe(200);
+
+    const showRow = db
+      .prepare('SELECT name, summary FROM shows WHERE tvmaze_id = ?')
+      .get(8201);
+    expect(showRow.name).toBe('Payload Show');
+    expect(showRow.summary).toBe('Seeded summary');
+
+    const episodeRow = db
+      .prepare('SELECT id FROM episodes WHERE tvmaze_id = ?')
+      .get(8202);
+    expect(episodeRow).not.toBeUndefined();
+
+    const watchedRow = db
+      .prepare(
+        'SELECT watched_at FROM profile_episodes WHERE profile_id = ? AND episode_id = ?'
+      )
+      .get(profileId, episodeRow.id);
+    expect(watchedRow.watched_at).toBe('2019-02-01T10:00:00Z');
+
+    expect(tvmaze.fetchShow).not.toHaveBeenCalled();
   });
 
   it('returns upcoming calendar episodes and filters TBD dates', async () => {

@@ -161,40 +161,74 @@ function getProducingCompany(show) {
 function buildProfileExport(profileId, exportedAt = nowIso()) {
   const shows = db
     .prepare(
-      `SELECT s.id, s.tvmaze_id, s.name, ps.created_at
+      `SELECT s.id, s.tvmaze_id, s.name, s.summary, s.status, s.premiered,
+              s.ended, s.company, s.image_medium, s.image_original, s.imdb_id,
+              ps.created_at, ps.status AS profile_status
        FROM shows s
        JOIN profile_shows ps ON ps.show_id = s.id
        WHERE ps.profile_id = ? AND (ps.status IS NULL OR ps.status != 'stopped')`
     )
     .all(profileId);
 
-  const episodes = db
+  const episodeRows = db
     .prepare(
-      `SELECT e.tvmaze_id, e.show_id, pe.watched_at
-       FROM profile_episodes pe
-       JOIN episodes e ON e.id = pe.episode_id
-       WHERE pe.profile_id = ?`
+      `SELECT e.*, pe.watched_at
+       FROM episodes e
+       JOIN profile_shows ps ON ps.show_id = e.show_id
+       LEFT JOIN profile_episodes pe
+         ON pe.episode_id = e.id AND pe.profile_id = ?
+       WHERE ps.profile_id = ?`
     )
-    .all(profileId);
+    .all(profileId, profileId);
 
   const watchedByShow = new Map();
-  episodes.forEach((episode) => {
+  const episodesByShow = new Map();
+  episodeRows.forEach((episode) => {
+    if (!episodesByShow.has(episode.show_id)) {
+      episodesByShow.set(episode.show_id, []);
+    }
+    episodesByShow.get(episode.show_id).push({
+      tvmazeEpisodeId: episode.tvmaze_id,
+      season: episode.season,
+      number: episode.number,
+      name: episode.name,
+      summary: episode.summary,
+      airdate: episode.airdate,
+      airtime: episode.airtime,
+      runtime: episode.runtime,
+      imageMedium: episode.image_medium,
+      imageOriginal: episode.image_original,
+      watchedAt: episode.watched_at || null,
+    });
+
     if (!watchedByShow.has(episode.show_id)) {
       watchedByShow.set(episode.show_id, []);
     }
-    watchedByShow.get(episode.show_id).push({
-      tvmazeEpisodeId: episode.tvmaze_id,
-      watchedAt: episode.watched_at,
-    });
+    if (episode.watched_at) {
+      watchedByShow.get(episode.show_id).push({
+        tvmazeEpisodeId: episode.tvmaze_id,
+        watchedAt: episode.watched_at,
+      });
+    }
   });
 
   return {
-    version: 1,
+    version: 2,
     exportedAt,
     shows: shows.map((show) => ({
       tvmazeId: show.tvmaze_id,
       name: show.name,
+      summary: show.summary,
+      status: show.status,
+      premiered: show.premiered,
+      ended: show.ended,
+      company: show.company,
+      imageMedium: show.image_medium,
+      imageOriginal: show.image_original,
+      imdbId: show.imdb_id,
       addedAt: show.created_at,
+      profileStatus: show.profile_status || null,
+      episodes: episodesByShow.get(show.id) || [],
       watchedEpisodes: watchedByShow.get(show.id) || [],
     })),
   };
@@ -308,6 +342,201 @@ function toNumber(value) {
   return typeof value === 'bigint' ? Number(value) : value;
 }
 
+function pickValue(obj, keys) {
+  for (const key of keys) {
+    if (obj && obj[key] !== undefined) return obj[key];
+  }
+  return null;
+}
+
+function getWatchedEpisodesFromPayload(showPayload) {
+  const watchedEpisodes = [];
+  const seen = new Set();
+  const episodes = Array.isArray(showPayload.episodes)
+    ? showPayload.episodes
+    : [];
+  episodes.forEach((episode) => {
+    const watchedAt = pickValue(episode, ['watchedAt', 'watched_at']);
+    if (!watchedAt) return;
+    const tvmazeEpisodeId = pickValue(episode, [
+      'tvmazeEpisodeId',
+      'tvmaze_id',
+    ]);
+    if (!tvmazeEpisodeId) return;
+    watchedEpisodes.push({ tvmazeEpisodeId, watchedAt });
+    seen.add(tvmazeEpisodeId);
+  });
+  const fallback = Array.isArray(showPayload.watchedEpisodes)
+    ? showPayload.watchedEpisodes
+    : [];
+  fallback.forEach((episode) => {
+    const tvmazeEpisodeId = pickValue(episode, [
+      'tvmazeEpisodeId',
+      'tvmaze_id',
+    ]);
+    if (!tvmazeEpisodeId || seen.has(tvmazeEpisodeId)) return;
+    watchedEpisodes.push({
+      tvmazeEpisodeId,
+      watchedAt: pickValue(episode, ['watchedAt', 'watched_at']),
+    });
+  });
+  return watchedEpisodes;
+}
+
+function upsertShowWithPayload(showPayload) {
+  const tvmazeId = pickValue(showPayload, ['tvmazeId', 'tvmaze_id']);
+  if (!tvmazeId) {
+    throw new Error('Missing tvmazeId');
+  }
+  const showRow = db
+    .prepare('SELECT id FROM shows WHERE tvmaze_id = ?')
+    .get(tvmazeId);
+  const showData = {
+    tvmaze_id: tvmazeId,
+    name: pickValue(showPayload, ['name']) || `Show ${tvmazeId}`,
+    summary: pickValue(showPayload, ['summary']),
+    status: pickValue(showPayload, ['status']),
+    premiered: pickValue(showPayload, ['premiered']),
+    ended: pickValue(showPayload, ['ended']),
+    company: pickValue(showPayload, ['company']),
+    image_medium: pickValue(showPayload, [
+      'imageMedium',
+      'image_medium',
+    ]),
+    image_original: pickValue(showPayload, [
+      'imageOriginal',
+      'image_original',
+    ]),
+    imdb_id: pickValue(showPayload, ['imdbId', 'imdb_id']),
+    updated_at: nowIso(),
+  };
+
+  const insertShow = db.prepare(
+    `INSERT INTO shows
+      (tvmaze_id, name, summary, status, premiered, ended, company, image_medium, image_original, imdb_id, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  const updateShow = db.prepare(
+    `UPDATE shows
+       SET name = ?, summary = ?, status = ?, premiered = ?, ended = ?, company = ?,
+           image_medium = ?, image_original = ?, imdb_id = ?, updated_at = ?
+     WHERE tvmaze_id = ?`
+  );
+
+  let showId = showRow?.id;
+
+  runTransaction(() => {
+    if (showRow) {
+      updateShow.run(
+        showData.name,
+        showData.summary,
+        showData.status,
+        showData.premiered,
+        showData.ended,
+        showData.company,
+        showData.image_medium,
+        showData.image_original,
+        showData.imdb_id,
+        showData.updated_at,
+        showData.tvmaze_id
+      );
+    } else {
+      const result = insertShow.run(
+        showData.tvmaze_id,
+        showData.name,
+        showData.summary,
+        showData.status,
+        showData.premiered,
+        showData.ended,
+        showData.company,
+        showData.image_medium,
+        showData.image_original,
+        showData.imdb_id,
+        showData.updated_at
+      );
+      showId = toNumber(result.lastInsertRowid);
+    }
+
+    const episodes = Array.isArray(showPayload.episodes)
+      ? showPayload.episodes
+      : [];
+    if (episodes.length > 0) {
+      const selectEpisode = db.prepare(
+        'SELECT id FROM episodes WHERE tvmaze_id = ?'
+      );
+      const insertEpisode = db.prepare(
+        `INSERT INTO episodes
+          (show_id, tvmaze_id, season, number, name, summary, airdate, airtime, runtime, image_medium, image_original)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      );
+      const updateEpisode = db.prepare(
+        `UPDATE episodes
+           SET show_id = ?, season = ?, number = ?, name = ?, summary = ?,
+               airdate = ?, airtime = ?, runtime = ?, image_medium = ?, image_original = ?
+         WHERE tvmaze_id = ?`
+      );
+
+      episodes.forEach((episode) => {
+        const tvmazeEpisodeId = pickValue(episode, [
+          'tvmazeEpisodeId',
+          'tvmaze_id',
+        ]);
+        if (!tvmazeEpisodeId) return;
+        const episodeData = {
+          tvmaze_id: tvmazeEpisodeId,
+          season: pickValue(episode, ['season']),
+          number: pickValue(episode, ['number']),
+          name: pickValue(episode, ['name']),
+          summary: pickValue(episode, ['summary']),
+          airdate: pickValue(episode, ['airdate']),
+          airtime: pickValue(episode, ['airtime']),
+          runtime: pickValue(episode, ['runtime']),
+          image_medium: pickValue(episode, [
+            'imageMedium',
+            'image_medium',
+          ]),
+          image_original: pickValue(episode, [
+            'imageOriginal',
+            'image_original',
+          ]),
+        };
+        const existingEpisode = selectEpisode.get(episodeData.tvmaze_id);
+        if (existingEpisode) {
+          updateEpisode.run(
+            showId,
+            episodeData.season,
+            episodeData.number,
+            episodeData.name,
+            episodeData.summary,
+            episodeData.airdate,
+            episodeData.airtime,
+            episodeData.runtime,
+            episodeData.image_medium,
+            episodeData.image_original,
+            episodeData.tvmaze_id
+          );
+        } else {
+          insertEpisode.run(
+            showId,
+            episodeData.tvmaze_id,
+            episodeData.season,
+            episodeData.number,
+            episodeData.name,
+            episodeData.summary,
+            episodeData.airdate,
+            episodeData.airtime,
+            episodeData.runtime,
+            episodeData.image_medium,
+            episodeData.image_original
+          );
+        }
+      });
+    }
+  });
+
+  return { showId: toNumber(showId) };
+}
+
 function getOrCreateDevUser() {
   const existing = db
     .prepare('SELECT id FROM users WHERE username = ?')
@@ -348,30 +577,62 @@ async function importProfilePayload(profileId, payload) {
   }
   const imported = [];
   for (const show of payload.shows) {
-    if (!show.tvmazeId) continue;
-    const { showId } = await upsertShowWithEpisodes(show.tvmazeId);
+    const tvmazeId = pickValue(show, ['tvmazeId', 'tvmaze_id']);
+    if (!tvmazeId) continue;
+    const hasPayloadData =
+      (Array.isArray(show.episodes) && show.episodes.length > 0) ||
+      pickValue(show, [
+        'summary',
+        'status',
+        'premiered',
+        'ended',
+        'company',
+        'imageMedium',
+        'imageOriginal',
+        'imdbId',
+        'image_medium',
+        'image_original',
+        'imdb_id',
+      ]) !== null;
+    let showId = null;
+    if (hasPayloadData) {
+      showId = upsertShowWithPayload(show).showId;
+    } else {
+      const result = await upsertShowWithEpisodes(tvmazeId);
+      showId = result.showId;
+    }
     db.prepare(
       'INSERT OR IGNORE INTO profile_shows (profile_id, show_id, created_at) VALUES (?, ?, ?)'
     ).run(profileId, showId, show.addedAt || nowIso());
 
-    if (Array.isArray(show.watchedEpisodes)) {
-      show.watchedEpisodes.forEach((episode) => {
-        if (!episode.tvmazeEpisodeId) return;
-        const row = db
-          .prepare('SELECT id FROM episodes WHERE tvmaze_id = ?')
-          .get(episode.tvmazeEpisodeId);
-        if (row) {
-          db.prepare(
-            `INSERT INTO profile_episodes (profile_id, episode_id, watched_at)
-             VALUES (?, ?, ?)
-             ON CONFLICT(profile_id, episode_id)
-             DO UPDATE SET watched_at = excluded.watched_at`
-          ).run(profileId, row.id, episode.watchedAt || nowIso());
-        }
-      });
+    const profileStatus = pickValue(show, ['profileStatus', 'profile_status']);
+    if (profileStatus !== null && profileStatus !== undefined) {
+      db.prepare(
+        'UPDATE profile_shows SET status = ? WHERE profile_id = ? AND show_id = ?'
+      ).run(profileStatus, profileId, showId);
     }
 
-    imported.push(show.tvmazeId);
+    const watchedEpisodes = getWatchedEpisodesFromPayload(show);
+    watchedEpisodes.forEach((episode) => {
+      const tvmazeEpisodeId = pickValue(episode, [
+        'tvmazeEpisodeId',
+        'tvmaze_id',
+      ]);
+      if (!tvmazeEpisodeId) return;
+      const row = db
+        .prepare('SELECT id FROM episodes WHERE tvmaze_id = ?')
+        .get(tvmazeEpisodeId);
+      if (row) {
+        db.prepare(
+          `INSERT INTO profile_episodes (profile_id, episode_id, watched_at)
+           VALUES (?, ?, ?)
+           ON CONFLICT(profile_id, episode_id)
+           DO UPDATE SET watched_at = excluded.watched_at`
+        ).run(profileId, row.id, episode.watchedAt || nowIso());
+      }
+    });
+
+    imported.push(tvmazeId);
   }
   return imported.length;
 }

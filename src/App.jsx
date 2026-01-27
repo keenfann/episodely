@@ -31,6 +31,20 @@ function formatEpisodeCode(episode) {
   )}`;
 }
 
+function getLocalTimezoneLabel() {
+  try {
+    const formatter = new Intl.DateTimeFormat(undefined, {
+      timeZoneName: 'short',
+    });
+    const parts = formatter.formatToParts(new Date());
+    const label = parts.find((part) => part.type === 'timeZoneName')?.value;
+    if (label) return label;
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  } catch {
+    return '';
+  }
+}
+
 function daysUntil(airdate) {
   if (!airdate) return null;
   const today = new Date();
@@ -237,19 +251,26 @@ function updateCategoriesWithOptimisticShow(categories, detail, computed) {
   });
 }
 
-function AirdateBadge({ airdate }) {
+function AirdateBadge({ airdate, airtime, timezoneSuffix = '' }) {
   if (!airdate) {
     return <span className="badge badge--muted">TBD</span>;
   }
+  const dateLabel = airtime
+    ? `${airdate} · ${airtime}${timezoneSuffix}`
+    : airdate;
   const remaining = daysUntil(airdate);
   if (remaining > 0) {
+    const dayLabel = remaining === 1 ? 'day' : 'days';
     return (
-      <span className="badge badge--accent">
-        {airdate} - {remaining}d
-      </span>
+      <>
+        <span className="badge badge--muted">{dateLabel}</span>
+        <span className="badge badge--accent">
+          In {remaining} {dayLabel}
+        </span>
+      </>
     );
   }
-  return <span className="badge badge--muted">{airdate}</span>;
+  return <span className="badge badge--muted">{dateLabel}</span>;
 }
 
 function App() {
@@ -1419,6 +1440,9 @@ function ShowDetailPage({
 }
 
 function CalendarPage({ calendar }) {
+  const timezoneLabel = getLocalTimezoneLabel();
+  const timezoneSuffix = timezoneLabel ? ` ${timezoneLabel}` : '';
+
   return (
     <section className="panel">
       <div className="panel__header">
@@ -1442,15 +1466,16 @@ function CalendarPage({ calendar }) {
               </div>
               <div className="calendar-card__body">
                 <div className="calendar-card__meta">
-                  <AirdateBadge airdate={episode.airdate} />
+                  <AirdateBadge
+                    airdate={episode.airdate}
+                    airtime={episode.airtime}
+                    timezoneSuffix={timezoneSuffix}
+                  />
                 </div>
                 <h3 className="calendar-card__show">{episode.showName}</h3>
                 <h4 className="calendar-card__episode">
                   {formatEpisodeCode(episode)} - {episode.name}
                 </h4>
-                {episode.airtime && (
-                  <p className="muted">Airs at {episode.airtime}</p>
-                )}
                 <p className="muted">
                   {episode.summary || 'No episode summary available.'}
                 </p>

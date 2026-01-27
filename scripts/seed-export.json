@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "exportedAt": "2026-01-27T15:23:19Z",
+  "shows": [
+    {
+      "tvmazeId": 53063,
+      "name": "A Knight of the Seven Kingdoms",
+      "addedAt": "2026-01-24T18:01:51.530Z",
+      "watchedEpisodes": []
+    },
+    {
+      "tvmazeId": 551,
+      "name": "Curb Your Enthusiasm",
+      "addedAt": "2026-01-24T22:39:36.363Z",
+      "watchedEpisodes": []
+    },
+    {
+      "tvmazeId": 82,
+      "name": "Game of Thrones",
+      "addedAt": "2026-01-24T22:34:29.081Z",
+      "watchedEpisodes": [
+        {
+          "tvmazeEpisodeId": 4963,
+          "watchedAt": "2026-01-24T22:47:48.495Z"
+        },
+        {
+          "tvmazeEpisodeId": 4962,
+          "watchedAt": "2026-01-24T22:47:48.495Z"
+        },
+        {
+          "tvmazeEpisodeId": 162186,
+          "watchedAt": "2026-01-24T22:47:48.496Z"
+        },
+        {
+          "tvmazeEpisodeId": 4975,
+          "watchedAt": "2026-01-24T22:47:48.497Z"
+        },
+        {
+          "tvmazeEpisodeId": 4953,
+          "watchedAt": "2026-01-24T22:47:48.497Z"
+        },
+        {
+          "tvmazeEpisodeId": 729575,
+          "watchedAt": "2026-01-24T22:47:48.498Z"
+        },
+        {
+          "tvmazeEpisodeId": 937256,
+          "watchedAt": "2026-01-24T22:47:48.498Z"
+        },
+        {
+          "tvmazeEpisodeId": 1623965,
+          "watchedAt": "2026-01-24T22:47:48.498Z"
+        }
+      ]
+    },
+    {
+      "tvmazeId": 526,
+      "name": "The Office",
+      "addedAt": "2026-01-24T22:39:35.424Z",
+      "watchedEpisodes": [
+        {
+          "tvmazeEpisodeId": 47678,
+          "watchedAt": "2026-01-27T11:33:52.623Z"
+        },
+        {
+          "tvmazeEpisodeId": 47786,
+          "watchedAt": "2026-01-27T11:33:56.008Z"
+        },
+        {
+          "tvmazeEpisodeId": 47685,
+          "watchedAt": "2026-01-27T11:33:52.623Z"
+        },
+        {
+          "tvmazeEpisodeId": 47760,
+          "watchedAt": "2026-01-24T22:47:46.871Z"
+        },
+        {
+          "tvmazeEpisodeId": 47756,
+          "watchedAt": "2026-01-24T22:47:46.871Z"
+        },
+        {
+          "tvmazeEpisodeId": 47838,
+          "watchedAt": "2026-01-27T11:33:57.691Z"
+        },
+        {
+          "tvmazeEpisodeId": 47796,
+          "watchedAt": "2026-01-24T22:47:46.872Z"
+        },
+        {
+          "tvmazeEpisodeId": 47831,
+          "watchedAt": "2026-01-27T11:33:57.691Z"
+        }
+      ]
+    },
+    {
+      "tvmazeId": 465,
+      "name": "Band of Brothers",
+      "addedAt": "2026-01-24T19:49:35.123Z",
+      "watchedEpisodes": [
+        {
+          "tvmazeEpisodeId": 42790,
+          "watchedAt": "2026-01-24T22:47:47.228Z"
+        },
+        {
+          "tvmazeEpisodeId": 42791,
+          "watchedAt": "2026-01-24T22:47:47.228Z"
+        },
+        {
+          "tvmazeEpisodeId": 42792,
+          "watchedAt": "2026-01-24T22:47:47.227Z"
+        },
+        {
+          "tvmazeEpisodeId": 42793,
+          "watchedAt": "2026-01-24T22:47:47.228Z"
+        },
+        {
+          "tvmazeEpisodeId": 42794,
+          "watchedAt": "2026-01-24T22:47:47.228Z"
+        },
+        {
+          "tvmazeEpisodeId": 42795,
+          "watchedAt": "2026-01-24T22:47:47.228Z"
+        },
+        {
+          "tvmazeEpisodeId": 42796,
+          "watchedAt": "2026-01-24T22:47:47.227Z"
+        },
+        {
+          "tvmazeEpisodeId": 42797,
+          "watchedAt": "2026-01-24T22:47:47.228Z"
+        }
+      ]
+    },
+    {
+      "tvmazeId": 530,
+      "name": "Seinfeld",
+      "addedAt": "2026-01-24T22:39:37.073Z",
+      "watchedEpisodes": [
+        {
+          "tvmazeEpisodeId": 48190,
+          "watchedAt": "2026-01-24T22:47:47.970Z"
+        },
+        {
+          "tvmazeEpisodeId": 48134,
+          "watchedAt": "2026-01-24T22:47:47.970Z"
+        },
+        {
+          "tvmazeEpisodeId": 48114,
+          "watchedAt": "2026-01-24T22:47:47.971Z"
+        },
+        {
+          "tvmazeEpisodeId": 48244,
+          "watchedAt": "2026-01-24T22:47:47.971Z"
+        },
+        {
+          "tvmazeEpisodeId": 48171,
+          "watchedAt": "2026-01-24T22:47:47.972Z"
+        },
+        {
+          "tvmazeEpisodeId": 48203,
+          "watchedAt": "2026-01-24T22:47:47.972Z"
+        },
+        {
+          "tvmazeEpisodeId": 48103,
+          "watchedAt": "2026-01-24T22:47:47.972Z"
+        },
+        {
+          "tvmazeEpisodeId": 48069,
+          "watchedAt": "2026-01-24T22:47:47.973Z"
+        }
+      ]
+    }
+  ]
+}

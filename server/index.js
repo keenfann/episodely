@@ -26,6 +26,12 @@ let tvmazeSyncInProgress = false;
 const exportBackupIntervalMs = 7 * 24 * 60 * 60 * 1000;
 const exportBackupRetentionMs = 52 * exportBackupIntervalMs;
 let exportBackupInProgress = false;
+const isDevEnv = process.env.NODE_ENV !== 'production';
+const devSeedPath = isDevEnv ? process.env.DEV_SEED_PATH : null;
+const devAutologinEnabled = isDevEnv && process.env.DEV_AUTOLOGIN === 'true';
+const devUserName = process.env.DEV_USER || 'codex';
+const devProfileName = process.env.DEV_PROFILE || 'Demo';
+const devPassword = process.env.DEV_PASSWORD || 'dev';
 const CSRF_HEADER = 'x-csrf-token';
 const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -52,6 +58,28 @@ app.use((req, res, next) => {
   const headerToken = req.get(CSRF_HEADER);
   if (!sessionToken || !headerToken || sessionToken !== headerToken) {
     return res.status(403).json({ error: 'Invalid CSRF token' });
+  }
+  return next();
+});
+
+app.use((req, res, next) => {
+  if (!devAutologinEnabled) {
+    return next();
+  }
+  const forwardedFor = req.get('x-forwarded-for');
+  const isLocal =
+    req.ip === '127.0.0.1' ||
+    req.ip === '::1' ||
+    req.ip === '::ffff:127.0.0.1' ||
+    (!forwardedFor && req.hostname === 'localhost');
+  if (!isLocal) {
+    return next();
+  }
+  if (!req.session?.userId) {
+    const userId = getOrCreateDevUser();
+    const profileId = getOrCreateDevProfile(userId);
+    req.session.userId = userId;
+    req.session.profileId = profileId;
   }
   return next();
 });
@@ -278,6 +306,96 @@ function runTransaction(fn) {
 
 function toNumber(value) {
   return typeof value === 'bigint' ? Number(value) : value;
+}
+
+function getOrCreateDevUser() {
+  const existing = db
+    .prepare('SELECT id FROM users WHERE username = ?')
+    .get(devUserName);
+  if (existing) return toNumber(existing.id);
+  const passwordHash = bcrypt.hashSync(devPassword, 10);
+  const result = db
+    .prepare(
+      'INSERT INTO users (username, password_hash, created_at) VALUES (?, ?, ?)'
+    )
+    .run(devUserName, passwordHash, nowIso());
+  return toNumber(result.lastInsertRowid);
+}
+
+function getOrCreateDevProfile(userId) {
+  const existing = db
+    .prepare('SELECT id FROM profiles WHERE user_id = ? AND name = ?')
+    .get(userId, devProfileName);
+  if (existing) return toNumber(existing.id);
+  const result = db
+    .prepare('INSERT INTO profiles (user_id, name, created_at) VALUES (?, ?, ?)')
+    .run(userId, devProfileName, nowIso());
+  const profileId = toNumber(result.lastInsertRowid);
+  db.prepare('UPDATE users SET last_profile_id = ? WHERE id = ?').run(
+    profileId,
+    userId
+  );
+  return profileId;
+}
+
+function isValidImportPayload(payload) {
+  return payload && Array.isArray(payload.shows);
+}
+
+async function importProfilePayload(profileId, payload) {
+  if (!isValidImportPayload(payload)) {
+    throw new Error('Invalid import file');
+  }
+  const imported = [];
+  for (const show of payload.shows) {
+    if (!show.tvmazeId) continue;
+    const { showId } = await upsertShowWithEpisodes(show.tvmazeId);
+    db.prepare(
+      'INSERT OR IGNORE INTO profile_shows (profile_id, show_id, created_at) VALUES (?, ?, ?)'
+    ).run(profileId, showId, show.addedAt || nowIso());
+
+    if (Array.isArray(show.watchedEpisodes)) {
+      show.watchedEpisodes.forEach((episode) => {
+        if (!episode.tvmazeEpisodeId) return;
+        const row = db
+          .prepare('SELECT id FROM episodes WHERE tvmaze_id = ?')
+          .get(episode.tvmazeEpisodeId);
+        if (row) {
+          db.prepare(
+            `INSERT INTO profile_episodes (profile_id, episode_id, watched_at)
+             VALUES (?, ?, ?)
+             ON CONFLICT(profile_id, episode_id)
+             DO UPDATE SET watched_at = excluded.watched_at`
+          ).run(profileId, row.id, episode.watchedAt || nowIso());
+        }
+      });
+    }
+
+    imported.push(show.tvmazeId);
+  }
+  return imported.length;
+}
+
+async function maybeSeedDevData() {
+  if (!devSeedPath) {
+    return;
+  }
+  const hasShows = db.prepare('SELECT 1 FROM profile_shows LIMIT 1').get();
+  if (hasShows) {
+    return;
+  }
+  const userId = getOrCreateDevUser();
+  const profileId = getOrCreateDevProfile(userId);
+  try {
+    const raw = fs.readFileSync(devSeedPath, 'utf8');
+    const payload = JSON.parse(raw);
+    const importedCount = await importProfilePayload(profileId, payload);
+    console.log(
+      `Seeded dev data from ${devSeedPath} (${importedCount} shows)`
+    );
+  } catch (error) {
+    console.warn(`Failed to seed dev data: ${error.message}`);
+  }
 }
 
 function getCsrfToken(req) {
@@ -1185,45 +1303,15 @@ app.get('/api/export', requireAuth, requireProfile, (req, res) => {
 
 app.post('/api/import', requireAuth, requireProfile, async (req, res) => {
   try {
-    const payload = req.body;
-    if (!payload || !Array.isArray(payload.shows)) {
-      return res.status(400).json({ error: 'Invalid import file' });
-    }
-
-    const imported = [];
-    for (const show of payload.shows) {
-      if (!show.tvmazeId) continue;
-      const { showId } = await upsertShowWithEpisodes(show.tvmazeId);
-      db.prepare(
-        'INSERT OR IGNORE INTO profile_shows (profile_id, show_id, created_at) VALUES (?, ?, ?)'
-      ).run(req.session.profileId, showId, show.addedAt || nowIso());
-
-      if (Array.isArray(show.watchedEpisodes)) {
-        show.watchedEpisodes.forEach((episode) => {
-          if (!episode.tvmazeEpisodeId) return;
-          const row = db
-            .prepare('SELECT id FROM episodes WHERE tvmaze_id = ?')
-            .get(episode.tvmazeEpisodeId);
-          if (row) {
-            db.prepare(
-              `INSERT INTO profile_episodes (profile_id, episode_id, watched_at)
-               VALUES (?, ?, ?)
-               ON CONFLICT(profile_id, episode_id)
-               DO UPDATE SET watched_at = excluded.watched_at`
-            ).run(
-              req.session.profileId,
-              row.id,
-              episode.watchedAt || nowIso()
-            );
-          }
-        });
-      }
-
-      imported.push(show.tvmazeId);
-    }
-
-    return res.json({ ok: true, importedCount: imported.length });
+    const importedCount = await importProfilePayload(
+      req.session.profileId,
+      req.body
+    );
+    return res.json({ ok: true, importedCount });
   } catch (error) {
+    if (error.message === 'Invalid import file') {
+      return res.status(400).json({ error: error.message });
+    }
     return res.status(500).json({ error: error.message });
   }
 });
@@ -1306,9 +1394,13 @@ function startServer() {
 }
 
 if (process.env.NODE_ENV !== 'test') {
-  startTvmazeSync();
-  startExportBackups();
-  startServer();
+  const start = async () => {
+    await maybeSeedDevData();
+    startTvmazeSync();
+    startExportBackups();
+    startServer();
+  };
+  start();
 }
 
 export { app, runExportBackupsOnce, startExportBackups, startServer, startTvmazeSync };

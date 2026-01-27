@@ -53,6 +53,18 @@ body {
   }
 }
 
+@keyframes addShowPop {
+  0% {
+    transform: translateY(6px) scale(0.88);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.05);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
 button,
 input,
 select,
@@ -564,6 +576,45 @@ input:focus {
   background: var(--surface-muted);
   border: 1px solid var(--border);
   animation: fadeUp 0.4s ease;
+}
+
+.search-card__action {
+  display: grid;
+  align-items: center;
+  justify-items: end;
+  min-height: 36px;
+}
+
+.search-card__add,
+.search-card__badge {
+  grid-area: 1 / 1;
+}
+
+.search-card__add {
+  transition: opacity 0.2s ease, transform 0.25s ease;
+  user-select: none;
+}
+
+.search-card__badge {
+  opacity: 0;
+  transform: translateY(6px) scale(0.88);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.search-card__action--added .search-card__add {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.9);
+  pointer-events: none;
+}
+
+.search-card__action--added .search-card__badge {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.search-card__action--animating .search-card__badge {
+  animation: addShowPop 0.45s ease;
 }
 
 .search-card__meta {
@@ -1865,10 +1916,14 @@ input:focus {
     height: 160px;
   }
 
-  .search-card button,
-  .search-card .badge {
-    justify-self: start;
-  }
+.search-card button,
+.search-card .badge {
+  justify-self: start;
+}
+
+.search-card__action {
+  justify-items: start;
+}
 
   .calendar-card {
     grid-template-columns: 1fr;

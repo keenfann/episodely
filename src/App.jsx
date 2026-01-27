@@ -491,10 +491,13 @@ function App() {
       method: 'POST',
       body: JSON.stringify({ tvmazeId }),
     });
-    setSearchResults([]);
-    setSearchQuery('');
-    setSearchError('');
-    setHasSearched(false);
+    setSearchResults((prev) =>
+      prev.map((result) =>
+        result.id === tvmazeId
+          ? { ...result, existingState: result.existingState || 'queued' }
+          : result
+      )
+    );
     await loadShows();
   };
 
@@ -1140,12 +1143,89 @@ function AddShowPage({
   onAddShow,
 }) {
   const inputRef = useRef(null);
+  const [addingIds, setAddingIds] = useState({});
+  const [animatingIds, setAnimatingIds] = useState({});
+  const timeoutsRef = useRef(new Map());
+  const previousStatesRef = useRef(new Map());
+  const hasHydratedRef = useRef(false);
+  const pendingAnimationRef = useRef(new Set());
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
+
+  useEffect(() => {
+    const nextStates = new Map();
+    const newlyAdded = [];
+    searchResults.forEach((result) => {
+      const previousState = previousStatesRef.current.get(result.id);
+      if (
+        !previousState &&
+        result.existingState &&
+        pendingAnimationRef.current.has(result.id)
+      ) {
+        newlyAdded.push(result.id);
+      }
+      nextStates.set(result.id, result.existingState || null);
+    });
+    previousStatesRef.current = nextStates;
+    if (!hasHydratedRef.current) {
+      hasHydratedRef.current = true;
+      return;
+    }
+    if (newlyAdded.length === 0) return;
+    setAnimatingIds((prev) => {
+      const next = { ...prev };
+      newlyAdded.forEach((id) => {
+        next[id] = true;
+        pendingAnimationRef.current.delete(id);
+        const existingTimeout = timeoutsRef.current.get(id);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+        }
+        const timeout = setTimeout(() => {
+          setAnimatingIds((current) => {
+            if (!current[id]) return current;
+            const updated = { ...current };
+            delete updated[id];
+            return updated;
+          });
+          timeoutsRef.current.delete(id);
+        }, 650);
+        timeoutsRef.current.set(id, timeout);
+      });
+      return next;
+    });
+  }, [searchResults]);
+
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+      timeoutsRef.current.clear();
+    };
+  }, []);
+
+  const handleAddClick = async (id) => {
+    if (addingIds[id]) return;
+    pendingAnimationRef.current.add(id);
+    setAddingIds((prev) => ({ ...prev, [id]: true }));
+    let succeeded = false;
+    try {
+      await onAddShow(id);
+      succeeded = true;
+    } finally {
+      if (!succeeded) {
+        pendingAnimationRef.current.delete(id);
+      }
+      setAddingIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+  };
 
   return (
     <section className="panel add-show-page">
@@ -1223,14 +1303,21 @@ function AddShowPage({
                     {result.summary || 'No summary available.'}
                   </p>
                 </div>
-                {result.existingState ? (
-                  <span className="badge badge--muted">
-                    {STATE_LABELS[result.existingState] || 'Added'}
-                  </span>
-                ) : (
+                <div
+                  className={[
+                    'search-card__action',
+                    result.existingState ? 'search-card__action--added' : '',
+                    animatingIds[result.id] ? 'search-card__action--animating' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
                   <button
-                    className="outline outline--with-icon"
-                    onClick={() => onAddShow(result.id)}
+                    className="outline outline--with-icon search-card__add"
+                    onClick={() => handleAddClick(result.id)}
+                    disabled={addingIds[result.id] || Boolean(result.existingState)}
+                    aria-hidden={Boolean(result.existingState)}
+                    tabIndex={result.existingState ? -1 : 0}
                   >
                     <svg
                       className="button-icon"
@@ -1246,9 +1333,15 @@ function AddShowPage({
                         strokeWidth="2"
                       />
                     </svg>
-                    Add
+                    {addingIds[result.id] ? 'Adding' : 'Add'}
                   </button>
-                )}
+                  <span
+                    className="badge badge--muted search-card__badge"
+                    aria-hidden={!result.existingState}
+                  >
+                    {STATE_LABELS[result.existingState] || 'Added'}
+                  </span>
+                </div>
               </div>
             );
           })}

@@ -57,23 +57,43 @@ describe('shows and episodes', () => {
 
     const watchNextId = createShow({ tvmazeId: 102, name: 'Next Show' });
     linkProfileShow({ profileId, showId: watchNextId });
-    const watchedEpisode = createEpisode({
+    const previousSeasonEpisode = createEpisode({
       showId: watchNextId,
       tvmazeId: 1002,
       season: 1,
       number: 1,
-      name: 'Next Ep 1',
+      name: 'Season One Ep',
       airdate: releasedDate,
     });
     createEpisode({
       showId: watchNextId,
       tvmazeId: 1003,
-      season: 1,
-      number: 2,
-      name: 'Next Ep 2',
+      season: 2,
+      number: 1,
+      name: 'Season Two Ep 1',
       airdate: secondReleased,
     });
-    markEpisodeWatched({ profileId, episodeId: watchedEpisode });
+    markEpisodeWatched({ profileId, episodeId: previousSeasonEpisode });
+
+    const watchingId = createShow({ tvmazeId: 106, name: 'Watching Show' });
+    linkProfileShow({ profileId, showId: watchingId });
+    const watchingEpisode = createEpisode({
+      showId: watchingId,
+      tvmazeId: 1007,
+      season: 1,
+      number: 1,
+      name: 'Watching Ep 1',
+      airdate: releasedDate,
+    });
+    createEpisode({
+      showId: watchingId,
+      tvmazeId: 1008,
+      season: 1,
+      number: 2,
+      name: 'Watching Ep 2',
+      airdate: secondReleased,
+    });
+    markEpisodeWatched({ profileId, episodeId: watchingEpisode });
 
     const upToDateId = createShow({ tvmazeId: 103, name: 'Up To Date' });
     linkProfileShow({ profileId, showId: upToDateId });
@@ -124,6 +144,7 @@ describe('shows and episodes', () => {
 
     expect(buckets['queued'].map((show) => show.name)).toContain('Queued Show');
     expect(buckets['watch-next'].map((show) => show.name)).toContain('Next Show');
+    expect(buckets.watching.map((show) => show.name)).toContain('Watching Show');
     expect(buckets['up-to-date'].map((show) => show.name)).toContain('Up To Date');
     expect(buckets.completed.map((show) => show.name)).toContain('Completed Show');
     expect(buckets.stopped.map((show) => show.name)).toContain('Stopped Show');

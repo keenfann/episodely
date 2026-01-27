@@ -1144,7 +1144,9 @@ function ShowsPage({
                         </div>
                         <div className="show-card__body">
                           <div className="show-card__title">
-                            <span className="tag">{STATE_LABELS[show.state]}</span>
+                            <span className={`tag tag--${show.state}`}>
+                              {STATE_LABELS[show.state]}
+                            </span>
                             <h3>{show.name}</h3>
                           </div>
                           {show.nextEpisode && (
@@ -2178,7 +2180,9 @@ function ShowDetailView({
             <div className="show-detail__title-row">
               <h2>{show.name}</h2>
               {stateLabel && (
-                <span className="badge badge--muted show-detail__badge">
+                <span
+                  className={`badge show-detail__badge show-detail__badge--${show.state}`}
+                >
                   {stateLabel}
                 </span>
               )}

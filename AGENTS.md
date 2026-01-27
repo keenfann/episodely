@@ -41,6 +41,7 @@ Testing framework is TBD. Until then:
 - New features should include tests or a short PR note explaining why coverage is deferred.
 - Write new or updated tests whenever behavior changes or features are added.
 - Run tests when building new features (`npm test`); call out if tests were not run.
+- Run relevant tests even if the user does not explicitly ask; note any skipped tests with a brief reason.
 - Keep tests offline and fast: avoid network calls and long sleeps; mock external APIs.
 
 ## Commit & Pull Request Guidelines

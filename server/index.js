@@ -66,6 +66,15 @@ app.use((req, res, next) => {
   if (!devAutologinEnabled) {
     return next();
   }
+  const forwardedFor = req.get('x-forwarded-for');
+  const isLocal =
+    req.ip === '127.0.0.1' ||
+    req.ip === '::1' ||
+    req.ip === '::ffff:127.0.0.1' ||
+    (!forwardedFor && req.hostname === 'localhost');
+  if (!isLocal) {
+    return next();
+  }
   if (!req.session?.userId) {
     const userId = getOrCreateDevUser();
     const profileId = getOrCreateDevProfile(userId);

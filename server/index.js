@@ -119,6 +119,17 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function getPremiereYear(premiered) {
+  if (!premiered) return null;
+  const [year] = String(premiered).split('-');
+  const numericYear = Number(year);
+  return Number.isNaN(numericYear) ? null : numericYear;
+}
+
+function getProducingCompany(show) {
+  return show?.network?.name || show?.webChannel?.name || null;
+}
+
 function buildProfileExport(profileId, exportedAt = nowIso()) {
   const shows = db
     .prepare(
@@ -777,6 +788,8 @@ app.get('/api/tvmaze/search', requireAuth, async (req, res) => {
       summary: stripHtml(item.show.summary),
       status: item.show.status,
       premiered: item.show.premiered,
+      releaseYear: getPremiereYear(item.show.premiered),
+      company: getProducingCompany(item.show),
       image: item.show.image?.medium || null,
     }));
     return res.json({ results: payload });

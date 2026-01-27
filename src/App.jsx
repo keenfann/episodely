@@ -299,6 +299,7 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [showDetail, setShowDetail] = useState(null);
   const [calendar, setCalendar] = useState({ days: 45, episodes: [] });
+  const [loadingCalendar, setLoadingCalendar] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState('');
@@ -441,8 +442,13 @@ function App() {
 
   const loadCalendar = async () => {
     if (!activeProfile) return;
-    const data = await apiFetch('/api/calendar');
-    setCalendar(data);
+    setLoadingCalendar(true);
+    try {
+      const data = await apiFetch('/api/calendar');
+      setCalendar(data);
+    } finally {
+      setLoadingCalendar(false);
+    }
   };
 
   const handleAuth = async (mode, username, password) => {
@@ -704,7 +710,7 @@ function App() {
   if (auth.loading || booting) {
     return (
       <div className="app-shell">
-        <div className="panel panel--center panel--loading">Loading...</div>
+        <div className="boot-loading" aria-hidden="true" />
       </div>
     );
   }
@@ -969,6 +975,7 @@ function App() {
             element={
               <CalendarPage
                 calendar={calendar}
+                loading={loadingCalendar}
                 onShowSelect={(showId) =>
                   navigate(`/shows/${showId}`, { state: { from: 'calendar' } })
                 }
@@ -1075,7 +1082,7 @@ function ShowsPage({
         </div>
       </div>
         {loadingShows ? (
-          <div className="empty-state empty-state--loading">Loading shows...</div>
+          <div className="empty-state empty-state--loading" aria-hidden="true" />
         ) : (
           filteredCategories.map((category) => (
             <div
@@ -1507,7 +1514,7 @@ function ShowDetailPage({
   );
 }
 
-function CalendarPage({ calendar, onShowSelect }) {
+function CalendarPage({ calendar, loading, onShowSelect }) {
   const timezoneLabel = getLocalTimezoneLabel();
   const timezoneSuffix = timezoneLabel ? ` ${timezoneLabel}` : '';
 
@@ -1519,7 +1526,9 @@ function CalendarPage({ calendar, onShowSelect }) {
           <p className="muted">Next {calendar.days} days across your shows.</p>
         </div>
       </div>
-      {calendar.episodes.length === 0 ? (
+      {loading ? (
+        <div className="empty-state empty-state--loading" aria-hidden="true" />
+      ) : calendar.episodes.length === 0 ? (
         <div className="empty-state">No upcoming episodes found.</div>
       ) : (
         <div className="calendar-list">

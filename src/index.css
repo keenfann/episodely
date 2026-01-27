@@ -42,6 +42,16 @@ body {
   overflow-x: hidden;
 }
 
+.boot-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;

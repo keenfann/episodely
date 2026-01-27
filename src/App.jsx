@@ -1484,7 +1484,7 @@ function ShowDetailPage({
   if (!showDetail && loading) {
     return (
       <section className="panel">
-        <div className="empty-state empty-state--loading">Loading show...</div>
+        <div className="empty-state empty-state--loading" aria-hidden="true" />
       </section>
     );
   }

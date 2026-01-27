@@ -136,7 +136,7 @@ function buildProfileExport(profileId, exportedAt = nowIso()) {
       `SELECT s.id, s.tvmaze_id, s.name, ps.created_at
        FROM shows s
        JOIN profile_shows ps ON ps.show_id = s.id
-       WHERE ps.profile_id = ?`
+       WHERE ps.profile_id = ? AND (ps.status IS NULL OR ps.status != 'stopped')`
     )
     .all(profileId);
 
@@ -1088,7 +1088,7 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
        LEFT JOIN profile_episodes pe
          ON pe.episode_id = e.id AND pe.profile_id = ?
        JOIN profile_shows ps ON ps.show_id = s.id
-       WHERE ps.profile_id = ?
+       WHERE ps.profile_id = ? AND (ps.status IS NULL OR ps.status != 'stopped')
        ORDER BY e.airdate ASC`
     )
     .all(req.session.profileId, req.session.profileId);

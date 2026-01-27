@@ -544,6 +544,7 @@ function App() {
     });
     await loadShowDetail(showId, { silent: true });
     await loadShows();
+    await loadCalendar();
   };
 
   const handleShowRemove = async (showId) => {
@@ -552,6 +553,7 @@ function App() {
       setShowDetail(null);
     }
     await loadShows();
+    await loadCalendar();
     if (location.pathname.startsWith('/shows/')) {
       navigate('/shows', { replace: true });
     }

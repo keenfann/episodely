@@ -44,6 +44,7 @@ db.exec(`
     status TEXT,
     premiered TEXT,
     ended TEXT,
+    company TEXT,
     image_medium TEXT,
     image_original TEXT,
     updated_at TEXT NOT NULL
@@ -121,6 +122,10 @@ const showColumns = db
 
 if (!showColumns.includes('imdb_id')) {
   db.exec('ALTER TABLE shows ADD COLUMN imdb_id TEXT;');
+}
+
+if (!showColumns.includes('company')) {
+  db.exec('ALTER TABLE shows ADD COLUMN company TEXT;');
 }
 
 export default db;

@@ -1,0 +1,20 @@
+{
+  "name": "episodely",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm",
+  "forwardPorts": [5173, 4285],
+  "portsAttributes": {
+    "5173": {
+      "label": "Vite dev server"
+    },
+    "4285": {
+      "label": "API server"
+    }
+  },
+  "containerEnv": {
+    "VITE_HOST": "0.0.0.0",
+    "VITE_PORT": "5173",
+    "VITE_API_TARGET": "http://localhost:4285",
+    "EPISODELY_SKIP_OPEN": "true"
+  },
+  "postCreateCommand": "npm install"
+}

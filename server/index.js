@@ -136,7 +136,7 @@ function buildProfileExport(profileId, exportedAt = nowIso()) {
       `SELECT s.id, s.tvmaze_id, s.name, ps.created_at
        FROM shows s
        JOIN profile_shows ps ON ps.show_id = s.id
-       WHERE ps.profile_id = ?`
+       WHERE ps.profile_id = ? AND (ps.status IS NULL OR ps.status != 'stopped')`
     )
     .all(profileId);
 
@@ -364,6 +364,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
     status: show.status,
     premiered: show.premiered,
     ended: show.ended,
+    company: getProducingCompany(show),
     image_medium: show.image?.medium || null,
     image_original: show.image?.original || null,
     imdb_id: show.externals?.imdb || null,
@@ -376,12 +377,12 @@ async function upsertShowWithEpisodes(tvmazeId) {
 
   const insertShow = db.prepare(
     `INSERT INTO shows
-      (tvmaze_id, name, summary, status, premiered, ended, image_medium, image_original, imdb_id, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      (tvmaze_id, name, summary, status, premiered, ended, company, image_medium, image_original, imdb_id, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
   const updateShow = db.prepare(
     `UPDATE shows
-       SET name = ?, summary = ?, status = ?, premiered = ?, ended = ?,
+       SET name = ?, summary = ?, status = ?, premiered = ?, ended = ?, company = ?,
            image_medium = ?, image_original = ?, imdb_id = ?, updated_at = ?
      WHERE tvmaze_id = ?`
   );
@@ -411,6 +412,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
         showPayload.status,
         showPayload.premiered,
         showPayload.ended,
+        showPayload.company,
         showPayload.image_medium,
         showPayload.image_original,
         showPayload.imdb_id,
@@ -425,6 +427,7 @@ async function upsertShowWithEpisodes(tvmazeId) {
         showPayload.status,
         showPayload.premiered,
         showPayload.ended,
+        showPayload.company,
         showPayload.image_medium,
         showPayload.image_original,
         showPayload.imdb_id,
@@ -537,6 +540,8 @@ function listShowsForProfile(profileId) {
       summary: show.summary,
       status: show.status,
       premiered: show.premiered,
+      releaseYear: getPremiereYear(show.premiered),
+      company: show.company || null,
       ended: show.ended,
       image: show.image_original || show.image_medium,
       profileStatus: show.profile_status || null,
@@ -788,8 +793,10 @@ app.get('/api/tvmaze/search', requireAuth, async (req, res) => {
       summary: stripHtml(item.show.summary),
       status: item.show.status,
       premiered: item.show.premiered,
+      ended: item.show.ended,
       releaseYear: getPremiereYear(item.show.premiered),
       company: getProducingCompany(item.show),
+      imdbId: item.show.externals?.imdb || null,
       image: item.show.image?.medium || null,
     }));
     return res.json({ results: payload });
@@ -917,6 +924,8 @@ app.get('/api/shows/:id', requireAuth, requireProfile, (req, res) => {
       summary: show.summary,
       status: show.status,
       premiered: show.premiered,
+      releaseYear: getPremiereYear(show.premiered),
+      company: show.company || null,
       ended: show.ended,
       image: show.image_original || show.image_medium,
       imdbId: show.imdb_id || null,
@@ -1073,14 +1082,16 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
 
   const episodes = db
     .prepare(
-      `SELECT e.*, s.name AS show_name, s.image_medium, s.image_original
+      `SELECT e.*, pe.watched_at, s.name AS show_name, s.image_medium, s.image_original
        FROM episodes e
        JOIN shows s ON s.id = e.show_id
+       LEFT JOIN profile_episodes pe
+         ON pe.episode_id = e.id AND pe.profile_id = ?
        JOIN profile_shows ps ON ps.show_id = s.id
-       WHERE ps.profile_id = ?
+       WHERE ps.profile_id = ? AND (ps.status IS NULL OR ps.status != 'stopped')
        ORDER BY e.airdate ASC`
     )
-    .all(req.session.profileId);
+    .all(req.session.profileId, req.session.profileId);
 
   const upcoming = episodes.filter((episode) => {
     const airtime = (episode.airtime || '').trim();
@@ -1099,18 +1110,43 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
     return a.airdate.localeCompare(b.airdate);
   });
 
-  const payload = sorted.map((episode) => ({
-    id: episode.id,
-    showName: episode.show_name,
-    showImage: episode.image_original || episode.image_medium,
+  const episodesByShowId = new Map();
+  episodes.forEach((episode) => {
+    if (!episodesByShowId.has(episode.show_id)) {
+      episodesByShowId.set(episode.show_id, []);
+    }
+    episodesByShowId.get(episode.show_id).push(episode);
+  });
+
+  const showRows = db
+    .prepare(
+      `SELECT s.*, ps.status AS profile_status
+       FROM shows s
+       JOIN profile_shows ps ON ps.show_id = s.id
+       WHERE ps.profile_id = ?`
+    )
+    .all(req.session.profileId);
+  const showById = new Map(showRows.map((show) => [show.id, show]));
+
+  const payload = sorted.map((episode) => {
+    const showEpisodes = episodesByShowId.get(episode.show_id) || [];
+    const show = showById.get(episode.show_id);
+    const { state } = show ? computeShowState(show, showEpisodes) : { state: null };
+    return {
+      id: episode.id,
+      showId: episode.show_id,
+      showName: episode.show_name,
+      showImage: episode.image_original || episode.image_medium,
     season: episode.season,
     number: episode.number,
     name: episode.name,
-    summary: episode.summary,
-    airdate: episode.airdate,
-    airtime: episode.airtime,
-    runtime: episode.runtime,
-  }));
+      summary: episode.summary,
+      airdate: episode.airdate,
+      airtime: episode.airtime,
+      runtime: episode.runtime,
+      showState: state,
+    };
+  });
 
   res.json({ days, episodes: payload });
 });

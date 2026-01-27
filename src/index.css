@@ -42,6 +42,16 @@ body {
   overflow-x: hidden;
 }
 
+.boot-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
 @keyframes fadeUp {
   from {
     opacity: 0;
@@ -50,6 +60,18 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes addShowPop {
+  0% {
+    transform: translateY(6px) scale(0.88);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.05);
+  }
+  100% {
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -65,6 +87,15 @@ button {
   border: none;
   background: none;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.35);
+}
+
+button:active:not(:disabled) {
+  filter: brightness(0.85);
 }
 
 button,
@@ -154,6 +185,8 @@ input:focus {
   gap: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.02em;
+  color: inherit;
+  text-decoration: none;
 }
 
 .brand__logo {
@@ -200,6 +233,15 @@ input:focus {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  transition: filter 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.tab:hover {
+  filter: brightness(1.35);
+}
+
+.tab:active {
+  filter: brightness(0.85);
 }
 
 .top-bar .tab,
@@ -540,9 +582,7 @@ input:focus {
 }
 
 .icon-button--back:hover {
-  transform: translateY(-1px);
-  background: rgba(138, 180, 248, 0.16);
-  border-color: rgba(138, 180, 248, 0.6);
+  filter: brightness(1.35);
 }
 
 .icon-button--back svg {
@@ -564,6 +604,70 @@ input:focus {
   background: var(--surface-muted);
   border: 1px solid var(--border);
   animation: fadeUp 0.4s ease;
+}
+
+.search-card__action {
+  display: grid;
+  align-items: center;
+  justify-items: end;
+  min-height: 36px;
+}
+
+.search-card__add,
+.search-card__badge {
+  grid-area: 1 / 1;
+}
+
+.search-card__add {
+  transition: opacity 0.2s ease, transform 0.25s ease;
+  user-select: none;
+}
+
+.search-card__badge {
+  opacity: 0;
+  transform: translateY(6px) scale(0.88);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.search-card__badge--watch-next {
+  background: rgba(138, 180, 248, 0.2);
+  color: #dbe8ff;
+}
+
+.search-card__badge--queued {
+  background: rgba(197, 138, 249, 0.2);
+  color: #f1dcff;
+}
+
+.search-card__badge--up-to-date {
+  background: rgba(129, 201, 149, 0.2);
+  color: #d9f7e1;
+}
+
+.search-card__badge--completed {
+  background: rgba(154, 160, 166, 0.2);
+  color: #e2e4e7;
+}
+
+.search-card__badge--stopped {
+  background: rgba(242, 139, 130, 0.2);
+  color: #ffd7d3;
+}
+
+.search-card__action--added .search-card__add {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.9);
+  pointer-events: none;
+}
+
+.search-card__action--added .search-card__badge {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.search-card__action--animating .search-card__badge {
+  animation: addShowPop 0.45s ease;
 }
 
 .search-card__meta {
@@ -740,12 +844,23 @@ input:focus {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 0.75rem;
-  transition: transform 0.2s ease, border 0.2s ease;
+  transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
   animation: fadeUp 0.4s ease;
 }
 
-.show-card:hover {
-  border-color: rgba(138, 180, 248, 0.4);
+.show-card:hover:not(:disabled),
+.show-card:active:not(:disabled),
+.show-card:focus-visible {
+  filter: none;
+}
+
+.show-card:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3);
+}
+
+.show-card:active:not(:disabled) {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
 }
 
 .show-card__art {
@@ -782,7 +897,7 @@ input:focus {
 }
 
 .highlight {
-  color: var(--orange);
+  color: var(--add-show);
 }
 
 .tag {
@@ -872,11 +987,13 @@ input:focus {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  position: relative;
 }
 
 .show-detail__actions .settings-profile-confirm {
-  margin-left: 0;
+  margin-left: auto;
 }
+
 
 .show-detail__delete {
   width: 44px;
@@ -906,6 +1023,7 @@ input:focus {
 .show-detail__summary {
   display: grid;
   gap: 0.6rem;
+  margin-bottom: 0.75rem;
   font-size: 0.94rem;
   color: var(--text-muted);
   min-width: 0;
@@ -1175,7 +1293,32 @@ input:focus {
   padding: 1rem;
   border: 1px solid var(--border);
   animation: fadeUp 0.4s ease;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
 }
+
+.calendar-card:hover:not(:disabled),
+.calendar-card:active:not(:disabled),
+.calendar-card:focus-visible {
+  filter: none;
+}
+
+.calendar-card:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3);
+}
+
+.calendar-card:active:not(:disabled) {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+}
+
+.calendar-card:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
 
 .calendar-card__image {
   width: 110px;
@@ -1187,6 +1330,36 @@ input:focus {
   gap: 0.6rem;
   align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.calendar-card__state {
+  background: rgba(154, 160, 166, 0.12);
+  color: #d7dbe0;
+}
+
+.calendar-card__state--watch-next {
+  background: rgba(138, 180, 248, 0.2);
+  color: #dbe8ff;
+}
+
+.calendar-card__state--queued {
+  background: rgba(197, 138, 249, 0.2);
+  color: #f1dcff;
+}
+
+.calendar-card__state--up-to-date {
+  background: rgba(129, 201, 149, 0.2);
+  color: #d9f7e1;
+}
+
+.calendar-card__state--completed {
+  background: rgba(154, 160, 166, 0.2);
+  color: #e2e4e7;
+}
+
+.calendar-card__state--stopped {
+  background: rgba(242, 139, 130, 0.2);
+  color: #ffd7d3;
 }
 
 .calendar-card__show {
@@ -1401,8 +1574,8 @@ input:focus {
 }
 
 .show-detail__delete:hover {
-  background: rgba(138, 180, 248, 0.16);
-  border-color: rgba(138, 180, 248, 0.6);
+  background: rgba(138, 180, 248, 0.08);
+  border-color: rgba(138, 180, 248, 0.35);
 }
 
 .show-detail__delete svg {
@@ -1571,6 +1744,22 @@ input:focus {
   color: var(--text-muted);
 }
 
+.empty-state--loading {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.panel--loading {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 .error {
   color: #ff8c8c;
   font-size: 0.9rem;
@@ -1733,20 +1922,32 @@ input:focus {
     grid-template-columns: 1fr;
   }
 
+  .show-detail {
+    gap: 0.4rem;
+  }
+
   .show-detail__heading {
     width: 100%;
     flex-direction: column;
     align-items: flex-start;
     flex-wrap: wrap;
+    gap: var(--show-detail-header-gap);
+    margin-top: var(--show-detail-heading-offset);
   }
 
   .show-detail__header {
     position: relative;
+    --show-detail-heading-offset: -0.35rem;
+  }
+
+  .panel.show-detail {
+    --show-detail-header-top: 0;
+    --show-detail-header-gap: 0.65rem;
   }
 
   .show-detail__actions .settings-profile-action--danger {
     position: absolute;
-    top: 0;
+    top: var(--show-detail-heading-offset);
     right: 0;
   }
 
@@ -1754,6 +1955,7 @@ input:focus {
     width: 100%;
     flex-wrap: wrap;
     justify-content: flex-start;
+    position: static;
   }
 
   .show-detail__action {
@@ -1762,13 +1964,18 @@ input:focus {
   }
 
   .show-detail__actions .settings-profile-confirm {
-    width: 100%;
+    position: absolute;
+    top: calc(22px + var(--show-detail-heading-offset));
+    right: 0;
+    margin: 0;
+    width: auto;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: flex-end;
+    transform: translateY(-50%);
   }
 
   .show-detail__actions .settings-profile-confirm span {
-    flex-basis: 100%;
+    flex-basis: auto;
   }
 
   .show-detail__title-row {
@@ -1802,6 +2009,10 @@ input:focus {
 
   .panel {
     padding: 1.25rem;
+  }
+
+  .panel.show-detail {
+    padding-top: var(--show-detail-header-top);
   }
 
   .app-shell .panel {
@@ -1865,10 +2076,14 @@ input:focus {
     height: 160px;
   }
 
-  .search-card button,
-  .search-card .badge {
-    justify-self: start;
-  }
+.search-card button,
+.search-card .badge {
+  justify-self: start;
+}
+
+.search-card__action {
+  justify-items: start;
+}
 
   .calendar-card {
     grid-template-columns: 1fr;

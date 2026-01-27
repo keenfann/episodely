@@ -31,6 +31,31 @@ function formatEpisodeCode(episode) {
   )}`;
 }
 
+function getLocalTimezoneLabel() {
+  try {
+    const formatter = new Intl.DateTimeFormat(undefined, {
+      timeZoneName: 'short',
+    });
+    const parts = formatter.formatToParts(new Date());
+    const label = parts.find((part) => part.type === 'timeZoneName')?.value;
+    if (label) return label;
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  } catch {
+    return '';
+  }
+}
+
+function buildYearLabel({ releaseYear, premiered, ended }) {
+  const startYear = Number.isFinite(Number(releaseYear))
+    ? Number(releaseYear)
+    : premiered
+      ? Number(String(premiered).split('-')[0])
+      : null;
+  if (!startYear) return null;
+  const endYear = ended ? Number(String(ended).split('-')[0]) : null;
+  return endYear ? `${startYear}-${endYear}` : `${startYear}-`;
+}
+
 function daysUntil(airdate) {
   if (!airdate) return null;
   const today = new Date();
@@ -237,19 +262,26 @@ function updateCategoriesWithOptimisticShow(categories, detail, computed) {
   });
 }
 
-function AirdateBadge({ airdate }) {
+function AirdateBadge({ airdate, airtime, timezoneSuffix = '' }) {
   if (!airdate) {
     return <span className="badge badge--muted">TBD</span>;
   }
+  const dateLabel = airtime
+    ? `${airdate} · ${airtime}${timezoneSuffix}`
+    : airdate;
   const remaining = daysUntil(airdate);
   if (remaining > 0) {
+    const dayLabel = remaining === 1 ? 'day' : 'days';
     return (
-      <span className="badge badge--accent">
-        {airdate} - {remaining}d
-      </span>
+      <>
+        <span className="badge badge--muted">{dateLabel}</span>
+        <span className="badge badge--accent">
+          In {remaining} {dayLabel}
+        </span>
+      </>
     );
   }
-  return <span className="badge badge--muted">{airdate}</span>;
+  return <span className="badge badge--muted">{dateLabel}</span>;
 }
 
 function App() {
@@ -267,10 +299,12 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [showDetail, setShowDetail] = useState(null);
   const [calendar, setCalendar] = useState({ days: 45, episodes: [] });
+  const [loadingCalendar, setLoadingCalendar] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [loadingShows, setLoadingShows] = useState(false);
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
@@ -408,8 +442,13 @@ function App() {
 
   const loadCalendar = async () => {
     if (!activeProfile) return;
-    const data = await apiFetch('/api/calendar');
-    setCalendar(data);
+    setLoadingCalendar(true);
+    try {
+      const data = await apiFetch('/api/calendar');
+      setCalendar(data);
+    } finally {
+      setLoadingCalendar(false);
+    }
   };
 
   const handleAuth = async (mode, username, password) => {
@@ -476,6 +515,7 @@ function App() {
     if (!searchQuery.trim()) return;
     setSearchError('');
     setHasSearched(true);
+    setIsSearching(true);
     try {
       const data = await apiFetch(
         `/api/tvmaze/search?q=${encodeURIComponent(searchQuery)}`
@@ -483,6 +523,8 @@ function App() {
       setSearchResults(data.results || []);
     } catch (error) {
       setSearchError(error.message);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -491,10 +533,13 @@ function App() {
       method: 'POST',
       body: JSON.stringify({ tvmazeId }),
     });
-    setSearchResults([]);
-    setSearchQuery('');
-    setSearchError('');
-    setHasSearched(false);
+    setSearchResults((prev) =>
+      prev.map((result) =>
+        result.id === tvmazeId
+          ? { ...result, existingState: result.existingState || 'queued' }
+          : result
+      )
+    );
     await loadShows();
   };
 
@@ -505,6 +550,7 @@ function App() {
     });
     await loadShowDetail(showId, { silent: true });
     await loadShows();
+    await loadCalendar();
   };
 
   const handleShowRemove = async (showId) => {
@@ -513,6 +559,7 @@ function App() {
       setShowDetail(null);
     }
     await loadShows();
+    await loadCalendar();
     if (location.pathname.startsWith('/shows/')) {
       navigate('/shows', { replace: true });
     }
@@ -663,7 +710,7 @@ function App() {
   if (auth.loading || booting) {
     return (
       <div className="app-shell">
-        <div className="panel panel--center">Loading...</div>
+        <div className="boot-loading" aria-hidden="true" />
       </div>
     );
   }
@@ -693,10 +740,10 @@ function App() {
   return (
     <div className="app-shell">
       <header className="top-bar">
-        <div className="brand">
+        <NavLink className="brand" to="/shows" aria-label="Go to shows">
           <img className="brand__logo" src={logo} alt="Episodely logo" />
           <span>Episodely</span>
-        </div>
+        </NavLink>
         <nav className="nav">
           <NavLink
             to="/shows"
@@ -902,6 +949,7 @@ function App() {
                 searchResults={searchResults}
                 searchError={searchError}
                 hasSearched={hasSearched}
+                isSearching={isSearching}
                 onSearchQuery={handleSearchQuery}
                 onSearch={handleSearch}
                 onAddShow={handleAddShow}
@@ -925,7 +973,13 @@ function App() {
           <Route
             path="/calendar"
             element={
-              <CalendarPage calendar={calendar} />
+              <CalendarPage
+                calendar={calendar}
+                loading={loadingCalendar}
+                onShowSelect={(showId) =>
+                  navigate(`/shows/${showId}`, { state: { from: 'calendar' } })
+                }
+              />
             }
           />
           <Route
@@ -1028,7 +1082,7 @@ function ShowsPage({
         </div>
       </div>
         {loadingShows ? (
-          <div className="empty-state">Loading shows...</div>
+          <div className="empty-state empty-state--loading" aria-hidden="true" />
         ) : (
           filteredCategories.map((category) => (
             <div
@@ -1110,7 +1164,11 @@ function ShowsPage({
                             </span>
                             {show.stats.releasedUnwatched > 0 && (
                               <span className="highlight">
-                                {show.stats.releasedUnwatched} released left
+                                {show.stats.releasedUnwatched}{' '}
+                                {show.stats.releasedUnwatched === 1
+                                  ? 'episode'
+                                  : 'episodes'}{' '}
+                                left
                               </span>
                             )}
                           </div>
@@ -1135,17 +1193,95 @@ function AddShowPage({
   searchResults,
   searchError,
   hasSearched,
+  isSearching,
   onSearchQuery,
   onSearch,
   onAddShow,
 }) {
   const inputRef = useRef(null);
+  const [addingIds, setAddingIds] = useState({});
+  const [animatingIds, setAnimatingIds] = useState({});
+  const timeoutsRef = useRef(new Map());
+  const previousStatesRef = useRef(new Map());
+  const hasHydratedRef = useRef(false);
+  const pendingAnimationRef = useRef(new Set());
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
+
+  useEffect(() => {
+    const nextStates = new Map();
+    const newlyAdded = [];
+    searchResults.forEach((result) => {
+      const previousState = previousStatesRef.current.get(result.id);
+      if (
+        !previousState &&
+        result.existingState &&
+        pendingAnimationRef.current.has(result.id)
+      ) {
+        newlyAdded.push(result.id);
+      }
+      nextStates.set(result.id, result.existingState || null);
+    });
+    previousStatesRef.current = nextStates;
+    if (!hasHydratedRef.current) {
+      hasHydratedRef.current = true;
+      return;
+    }
+    if (newlyAdded.length === 0) return;
+    setAnimatingIds((prev) => {
+      const next = { ...prev };
+      newlyAdded.forEach((id) => {
+        next[id] = true;
+        pendingAnimationRef.current.delete(id);
+        const existingTimeout = timeoutsRef.current.get(id);
+        if (existingTimeout) {
+          clearTimeout(existingTimeout);
+        }
+        const timeout = setTimeout(() => {
+          setAnimatingIds((current) => {
+            if (!current[id]) return current;
+            const updated = { ...current };
+            delete updated[id];
+            return updated;
+          });
+          timeoutsRef.current.delete(id);
+        }, 650);
+        timeoutsRef.current.set(id, timeout);
+      });
+      return next;
+    });
+  }, [searchResults]);
+
+  useEffect(() => {
+    return () => {
+      timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+      timeoutsRef.current.clear();
+    };
+  }, []);
+
+  const handleAddClick = async (id) => {
+    if (addingIds[id]) return;
+    pendingAnimationRef.current.add(id);
+    setAddingIds((prev) => ({ ...prev, [id]: true }));
+    let succeeded = false;
+    try {
+      await onAddShow(id);
+      succeeded = true;
+    } finally {
+      if (!succeeded) {
+        pendingAnimationRef.current.delete(id);
+      }
+      setAddingIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
+  };
 
   return (
     <section className="panel add-show-page">
@@ -1200,14 +1336,36 @@ function AddShowPage({
       {searchResults.length > 0 && (
         <div className="search-results">
           {searchResults.map((result) => {
-            const metaParts = [];
-            if (result.releaseYear) {
-              metaParts.push(result.releaseYear);
-            }
+            const yearLabel = buildYearLabel({
+              releaseYear: result.releaseYear,
+              premiered: result.premiered,
+              ended: result.ended,
+            });
+            const metaItems = [];
             if (result.company) {
-              metaParts.push(result.company);
+              metaItems.push({ key: 'company', node: result.company });
             }
-            const meta = metaParts.join(' • ');
+            if (result.imdbId) {
+              metaItems.push({
+                key: 'imdb',
+                node: (
+                  <a
+                    className="show-detail__imdb-link"
+                    href={`https://www.imdb.com/title/${result.imdbId}/`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    IMDb
+                  </a>
+                ),
+              });
+            }
+            if (result.status) {
+              metaItems.push({ key: 'status', node: result.status });
+            }
+            if (yearLabel) {
+              metaItems.push({ key: 'years', node: yearLabel });
+            }
 
             return (
               <div key={result.id} className="search-card">
@@ -1218,19 +1376,35 @@ function AddShowPage({
                 )}
                 <div>
                   <h3>{result.name}</h3>
-                  {meta && <p className="muted search-card__meta">{meta}</p>}
+                  {metaItems.length > 0 && (
+                    <p className="muted search-card__meta">
+                      {metaItems.map((item, index) => (
+                        <span key={item.key}>
+                          {item.node}
+                          {index < metaItems.length - 1 ? ' • ' : ''}
+                        </span>
+                      ))}
+                    </p>
+                  )}
                   <p className="muted">
                     {result.summary || 'No summary available.'}
                   </p>
                 </div>
-                {result.existingState ? (
-                  <span className="badge badge--muted">
-                    {STATE_LABELS[result.existingState] || 'Added'}
-                  </span>
-                ) : (
+                <div
+                  className={[
+                    'search-card__action',
+                    result.existingState ? 'search-card__action--added' : '',
+                    animatingIds[result.id] ? 'search-card__action--animating' : '',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
                   <button
-                    className="outline outline--with-icon"
-                    onClick={() => onAddShow(result.id)}
+                    className="outline outline--with-icon search-card__add"
+                    onClick={() => handleAddClick(result.id)}
+                    disabled={addingIds[result.id] || Boolean(result.existingState)}
+                    aria-hidden={Boolean(result.existingState)}
+                    tabIndex={result.existingState ? -1 : 0}
                   >
                     <svg
                       className="button-icon"
@@ -1246,15 +1420,27 @@ function AddShowPage({
                         strokeWidth="2"
                       />
                     </svg>
-                    Add
+                    {addingIds[result.id] ? 'Adding' : 'Add'}
                   </button>
-                )}
+                  <span
+                    className={[
+                      'badge',
+                      'search-card__badge',
+                      result.existingState
+                        ? `search-card__badge--${result.existingState}`
+                        : 'badge--muted',
+                    ].join(' ')}
+                    aria-hidden={!result.existingState}
+                  >
+                    {STATE_LABELS[result.existingState] || 'Added'}
+                  </span>
+                </div>
               </div>
             );
           })}
         </div>
       )}
-      {hasSearched && !searchError && searchResults.length === 0 && (
+      {hasSearched && !searchError && !isSearching && searchResults.length === 0 && (
         <div className="empty-state">No shows found. Try another search.</div>
       )}
       {searchError && <div className="error">{searchError}</div>}
@@ -1272,8 +1458,11 @@ function ShowDetailPage({
   onRemoveShow,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
   const showId = Number(params.id);
+  const backTarget =
+    location.state?.from === 'calendar' ? '/calendar' : '/shows';
 
   useEffect(() => {
     if (!Number.isNaN(showId)) {
@@ -1285,7 +1474,7 @@ function ShowDetailPage({
     return (
       <section className="panel">
         <div className="empty-state">Invalid show.</div>
-        <button className="outline" onClick={() => navigate('/shows')}>
+        <button className="outline" onClick={() => navigate(backTarget)}>
           Back to shows
         </button>
       </section>
@@ -1295,7 +1484,7 @@ function ShowDetailPage({
   if (!showDetail && loading) {
     return (
       <section className="panel">
-        <div className="empty-state">Loading show...</div>
+        <div className="empty-state empty-state--loading" aria-hidden="true" />
       </section>
     );
   }
@@ -1304,7 +1493,7 @@ function ShowDetailPage({
     return (
       <section className="panel">
         <div className="empty-state">Show not found.</div>
-        <button className="outline" onClick={() => navigate('/shows')}>
+        <button className="outline" onClick={() => navigate(backTarget)}>
           Back to shows
         </button>
       </section>
@@ -1316,7 +1505,7 @@ function ShowDetailPage({
       show={showDetail.show}
       seasons={showDetail.seasons}
       loading={loading}
-      onBack={() => navigate('/shows')}
+      onBack={() => navigate(backTarget)}
       onToggleEpisode={onToggleEpisode}
       onToggleSeason={onToggleSeason}
       onUpdateShowStatus={onUpdateShowStatus}
@@ -1325,7 +1514,10 @@ function ShowDetailPage({
   );
 }
 
-function CalendarPage({ calendar }) {
+function CalendarPage({ calendar, loading, onShowSelect }) {
+  const timezoneLabel = getLocalTimezoneLabel();
+  const timezoneSuffix = timezoneLabel ? ` ${timezoneLabel}` : '';
+
   return (
     <section className="panel">
       <div className="panel__header">
@@ -1334,12 +1526,27 @@ function CalendarPage({ calendar }) {
           <p className="muted">Next {calendar.days} days across your shows.</p>
         </div>
       </div>
-      {calendar.episodes.length === 0 ? (
+      {loading ? (
+        <div className="empty-state empty-state--loading" aria-hidden="true" />
+      ) : calendar.episodes.length === 0 ? (
         <div className="empty-state">No upcoming episodes found.</div>
       ) : (
         <div className="calendar-list">
-          {calendar.episodes.map((episode) => (
-            <div key={episode.id} className="calendar-card">
+          {calendar.episodes.map((episode) => {
+            const showId = episode.showId ?? episode.show_id;
+            const canNavigate = Number.isFinite(showId);
+            return (
+            <button
+              key={episode.id}
+              className="calendar-card"
+              type="button"
+              onClick={() => {
+                if (canNavigate) {
+                  onShowSelect(showId);
+                }
+              }}
+              disabled={!canNavigate}
+            >
               <div className="calendar-card__image">
                 {episode.showImage ? (
                   <img src={episode.showImage} alt={episode.showName} />
@@ -1349,21 +1556,34 @@ function CalendarPage({ calendar }) {
               </div>
               <div className="calendar-card__body">
                 <div className="calendar-card__meta">
-                  <AirdateBadge airdate={episode.airdate} />
+                  <AirdateBadge
+                    airdate={episode.airdate}
+                    airtime={episode.airtime}
+                    timezoneSuffix={timezoneSuffix}
+                  />
+                  {episode.showState && (
+                    <span
+                      className={[
+                        'badge',
+                        'calendar-card__state',
+                        `calendar-card__state--${episode.showState}`,
+                      ].join(' ')}
+                    >
+                      {STATE_LABELS[episode.showState] || episode.showState}
+                    </span>
+                  )}
                 </div>
                 <h3 className="calendar-card__show">{episode.showName}</h3>
                 <h4 className="calendar-card__episode">
                   {formatEpisodeCode(episode)} - {episode.name}
                 </h4>
-                {episode.airtime && (
-                  <p className="muted">Airs at {episode.airtime}</p>
-                )}
                 <p className="muted">
                   {episode.summary || 'No episode summary available.'}
                 </p>
               </div>
-            </div>
-          ))}
+            </button>
+            );
+          })}
         </div>
       )}
     </section>
@@ -1922,6 +2142,16 @@ function ShowDetailView({
   const imdbUrl = show.imdbId
     ? `https://www.imdb.com/title/${show.imdbId}/`
     : null;
+  const yearLabel = buildYearLabel({
+    releaseYear: show.releaseYear,
+    premiered: show.premiered,
+    ended: show.ended,
+  });
+  const producerMeta = show.company || '';
+  const statusMetaParts = [];
+  if (show.status) statusMetaParts.push(show.status);
+  if (yearLabel) statusMetaParts.push(yearLabel);
+  const statusMeta = statusMetaParts.join(' · ');
   return (
     <section className="panel show-detail">
       <div className="panel__header show-detail__header">
@@ -1953,13 +2183,11 @@ function ShowDetailView({
                 </span>
               )}
             </div>
-            <p className="muted show-detail__meta">
-              {show.status || 'Unknown status'}
-              {show.premiered ? ` - Premiered ${show.premiered}` : ''}
-              {show.ended ? ` - Ended ${show.ended}` : ''}
-              {imdbUrl && (
-                <>
-                  {' · '}
+            {(producerMeta || imdbUrl) && (
+              <p className="muted show-detail__meta">
+                {producerMeta}
+                {producerMeta && imdbUrl ? ' · ' : ''}
+                {imdbUrl && (
                   <a
                     className="show-detail__imdb-link"
                     href={imdbUrl}
@@ -1968,9 +2196,14 @@ function ShowDetailView({
                   >
                     IMDb
                   </a>
-                </>
-              )}
-            </p>
+                )}
+              </p>
+            )}
+            {statusMeta && (
+              <p className="muted show-detail__meta">
+                {statusMeta}
+              </p>
+            )}
           </div>
         </div>
         {(canToggleStatus || canRemove) && (
@@ -2086,7 +2319,11 @@ function ShowDetailView({
           <p>{show.summary || 'No synopsis available.'}</p>
         </div>
       </div>
-      {loading && <div className="empty-state">Loading episodes...</div>}
+      {loading && (
+        <div className="empty-state empty-state--loading">
+          Loading episodes...
+        </div>
+      )}
       {!loading && (
         <div className="season-list">
           {seasons.map((season) => {

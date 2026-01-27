@@ -38,6 +38,9 @@ Testing framework is TBD. Until then:
 - Place tests under `tests/` and mirror `src/` paths.
 - Use `*.test.jsx` (or language-appropriate equivalents) for test files.
 - New features should include tests or a short PR note explaining why coverage is deferred.
+- Write new or updated tests whenever behavior changes or features are added.
+- Run tests when building new features (`npm test`); call out if tests were not run.
+- Keep tests offline and fast: avoid network calls and long sleeps; mock external APIs.
 
 ## Commit & Pull Request Guidelines
 Git history only contains an "Initial commit," so no convention exists yet. Use Conventional Commits going forward:

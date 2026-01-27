@@ -26,6 +26,9 @@
     "router": "2.2.0",
     "path-to-regexp": "8.3.0"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.1.2",
     "concurrently": "^9.2.1",

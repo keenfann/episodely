@@ -71,6 +71,13 @@ and disables auto-opening the browser for headless workflows.
 - Create or select a profile.
 - Search TVmaze and add shows to your queue.
 
+### Dev autologin + seed data
+To preload a development instance (useful for screenshots), set:
+- `DEV_AUTOLOGIN=true` to bypass the login screen.
+- `DEV_SEED_PATH=/path/to/export.json` to import a backup export on startup.
+Optional overrides: `DEV_USER`, `DEV_PROFILE`, and `DEV_PASSWORD`.
+For a small sample seed, use `scripts/seed-export.json`.
+
 ## Quick Start (Docker)
 - `docker compose up`
 - Visit `http://localhost:4285`

@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "exportedAt": "2026-01-27T15:50:38Z",
+  "exportedAt": "2026-01-27T16:02:30Z",
   "shows": [
     {
       "tvmazeId": 465,
@@ -191,224 +191,224 @@
       ]
     },
     {
-      "tvmazeId": 82,
-      "name": "Game of Thrones",
-      "summary": "Based on the bestselling book series A Song of Ice and Fire by George R.R. Martin, this sprawling new HBO drama is set in a world where summers span decades and winters can last a lifetime. From the scheming south and the savage eastern lands, to the frozen north and ancient Wall that protects the realm from the mysterious darkness beyond, the powerful families of the Seven Kingdoms are locked in a battle for the Iron Throne. This is a story of duplicity and treachery, nobility and honor, conquest and triumph. In the Game of Thrones, you either win or you die.",
-      "status": "Ended",
-      "premiered": "2011-04-17",
-      "ended": "2019-05-19",
-      "company": "HBO",
-      "imageMedium": "https://static.tvmaze.com/uploads/images/medium_portrait/498/1245274.jpg",
-      "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/498/1245274.jpg",
-      "imdbId": "tt0944947",
-      "addedAt": "2026-01-24T22:34:29.081Z",
+      "tvmazeId": 44933,
+      "name": "Severance",
+      "summary": "Mark Scout leads a team at Lumon Industries, whose employees have undergone a severance procedure, which surgically divides their memories between their work and personal lives. This daring experiment in \"work-life balance\" is called into question as Mark finds himself at the center of an unraveling mystery that will force him to confront the true nature of his work\u2026 and of himself.",
+      "status": "Running",
+      "premiered": "2022-02-18",
+      "ended": null,
+      "company": "Apple TV",
+      "imageMedium": "https://static.tvmaze.com/uploads/images/medium_portrait/548/1371406.jpg",
+      "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/548/1371406.jpg",
+      "imdbId": "tt11280740",
+      "addedAt": "2026-01-24T22:39:44.557Z",
       "profileStatus": null,
       "episodes": [
         {
-          "tvmazeEpisodeId": 4952,
+          "tvmazeEpisodeId": 2238231,
           "season": 1,
           "number": 1,
-          "name": "Winter is Coming",
-          "summary": "Lord Eddard Stark, ruler of the North, is summoned to court by his old friend, King Robert Baratheon, to serve as the King's Hand. Eddard reluctantly agrees after learning of a possible threat to the King's life. Eddard's bastard son Jon Snow must make a painful decision about his own future, while in the distant east Viserys Targaryen plots to reclaim his father's throne, usurped by Robert, by selling his sister in marriage.",
-          "airdate": "2011-04-17",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195111.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195111.jpg",
-          "watchedAt": "2026-01-24T22:47:48.502Z"
+          "name": "Good News About Hell",
+          "summary": "Mark is promoted to lead a team who've had their memories surgically divided between their work and personal lives.",
+          "airdate": "2022-02-18",
+          "airtime": "",
+          "runtime": 57,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/396/991497.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/396/991497.jpg",
+          "watchedAt": "2026-01-24T22:47:52.499Z"
         },
         {
-          "tvmazeEpisodeId": 4953,
+          "tvmazeEpisodeId": 2238339,
           "season": 1,
           "number": 2,
-          "name": "The Kingsroad",
-          "summary": "An incident on the Kingsroad threatens Eddard and Robert's friendship. Jon and Tyrion travel to the Wall, where they discover that the reality of the Night's Watch may not match the heroic image of it.",
-          "airdate": "2011-04-24",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195110.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195110.jpg",
-          "watchedAt": "2026-01-24T22:47:48.497Z"
+          "name": "Half Loop",
+          "summary": "The team train new hire Helly on macrodata refinement. Mark takes a day off to meet with a mysterious former colleague.",
+          "airdate": "2022-02-18",
+          "airtime": "",
+          "runtime": 53,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/396/991498.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/396/991498.jpg",
+          "watchedAt": "2026-01-24T22:47:52.498Z"
         },
         {
-          "tvmazeEpisodeId": 4954,
+          "tvmazeEpisodeId": 2238340,
           "season": 1,
           "number": 3,
-          "name": "Lord Snow",
-          "summary": "Jon Snow attempts to find his place amongst the Night's Watch. Eddard and his daughters arrive at King's Landing.",
-          "airdate": "2011-05-01",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195109.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195109.jpg",
-          "watchedAt": "2026-01-24T22:47:48.508Z"
+          "name": "In Perpetuity",
+          "summary": "Mark takes the team on a field trip, but Helly continues to rebel. A deteriorating Petey struggles to tell Mark about Lumon's misdeeds.",
+          "airdate": "2022-02-25",
+          "airtime": "",
+          "runtime": 56,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/396/991499.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/396/991499.jpg",
+          "watchedAt": "2026-01-24T22:47:52.495Z"
         },
         {
-          "tvmazeEpisodeId": 4955,
+          "tvmazeEpisodeId": 2257189,
           "season": 1,
           "number": 4,
-          "name": "Cripples, Bastards, and Broken Things",
-          "summary": "Tyrion stops at Winterfell on his way home and gets a frosty reception from Robb Stark. Eddard's investigation into the death of his predecessor gets underway.",
-          "airdate": "2011-05-08",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195107.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195107.jpg",
-          "watchedAt": "2026-01-24T22:47:48.506Z"
+          "name": "The You You Are",
+          "summary": "Irving finds an intriguing book at work. Helly aggressively pursues a meeting with her Outie. Mark attends a funeral with Ms. Selvig.",
+          "airdate": "2022-03-04",
+          "airtime": "",
+          "runtime": 46,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/398/996068.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/398/996068.jpg",
+          "watchedAt": "2026-01-24T22:47:52.499Z"
         },
         {
-          "tvmazeEpisodeId": 4956,
+          "tvmazeEpisodeId": 2257190,
           "season": 1,
           "number": 5,
-          "name": "The Wolf and the Lion",
-          "summary": "Catelyn's actions on the road have repercussions for Eddard. Tyrion enjoys the dubious hospitality of the Eyrie.",
-          "airdate": "2011-05-15",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195106.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195106.jpg",
-          "watchedAt": "2026-01-24T22:47:48.504Z"
+          "name": "The Grim Barbarity of Optics and Design",
+          "summary": "Irving and Dylan confront Burt about his lies. Mark and Helly discover a strange new department.",
+          "airdate": "2022-03-11",
+          "airtime": "",
+          "runtime": 43,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/398/996070.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/398/996070.jpg",
+          "watchedAt": "2026-01-24T22:47:52.498Z"
         },
         {
-          "tvmazeEpisodeId": 4957,
+          "tvmazeEpisodeId": 2292925,
           "season": 1,
           "number": 6,
-          "name": "A Golden Crown",
-          "summary": "Viserys is increasingly frustrated by the lack of progress towards gaining his crown.",
-          "airdate": "2011-05-22",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195105.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195105.jpg",
-          "watchedAt": "2026-01-24T22:47:48.504Z"
+          "name": "Hide and Seek",
+          "summary": "The team angers Cobel by forming an alliance.",
+          "airdate": "2022-03-18",
+          "airtime": "",
+          "runtime": 40,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/400/1000620.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/400/1000620.jpg",
+          "watchedAt": "2026-01-24T22:47:52.494Z"
         },
         {
-          "tvmazeEpisodeId": 4958,
+          "tvmazeEpisodeId": 2297221,
           "season": 1,
           "number": 7,
-          "name": "You Win or You Die",
-          "summary": "Eddard's investigations in King's Landing reach a climax and a dark secret is revealed.",
-          "airdate": "2011-05-29",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195104.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195104.jpg",
-          "watchedAt": "2026-01-24T22:47:48.507Z"
+          "name": "Defiant Jazz",
+          "summary": "Mark and the team encounter new security measures from Cobel.",
+          "airdate": "2022-03-25",
+          "airtime": "",
+          "runtime": 49,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/400/1000621.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/400/1000621.jpg",
+          "watchedAt": "2026-01-24T22:47:52.497Z"
         },
         {
-          "tvmazeEpisodeId": 4959,
+          "tvmazeEpisodeId": 2301245,
           "season": 1,
           "number": 8,
-          "name": "The Pointy End",
-          "summary": "Tyrion joins his father's army with unexpected allies. Events in King's Landing take a turn for the worse as Arya's lessons are put to the test.",
-          "airdate": "2011-06-05",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195097.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195097.jpg",
-          "watchedAt": "2026-01-24T22:47:48.502Z"
+          "name": "What's for Dinner?",
+          "summary": "The team prepares a plan. Mark attends Devon and Ricken's party.",
+          "airdate": "2022-04-01",
+          "airtime": "",
+          "runtime": 46,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/402/1006127.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/402/1006127.jpg",
+          "watchedAt": "2026-01-24T22:47:52.497Z"
         },
         {
-          "tvmazeEpisodeId": 4960,
+          "tvmazeEpisodeId": 2302265,
           "season": 1,
           "number": 9,
-          "name": "Baelor",
-          "summary": "Catelyn must negotiate with the irascible Lord Walder Frey.",
-          "airdate": "2011-06-12",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195099.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195099.jpg",
-          "watchedAt": "2026-01-24T22:47:48.503Z"
+          "name": "The We We Are",
+          "summary": "Season finale. The team discovers troubling revelations.",
+          "airdate": "2022-04-08",
+          "airtime": "",
+          "runtime": 40,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/403/1008751.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/403/1008751.jpg",
+          "watchedAt": "2026-01-24T22:47:52.495Z"
         },
         {
-          "tvmazeEpisodeId": 4961,
-          "season": 1,
-          "number": 10,
-          "name": "Fire and Blood",
-          "summary": "Daenerys must realize her destiny. Jaime finds himself in an unfamiliar predicament.",
-          "airdate": "2011-06-19",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195102.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195102.jpg",
-          "watchedAt": "2026-01-24T22:47:48.501Z"
-        },
-        {
-          "tvmazeEpisodeId": 4962,
+          "tvmazeEpisodeId": 2939679,
           "season": 2,
           "number": 1,
-          "name": "The North Remembers",
-          "summary": "War grips the continent of Westeros. As Tyrion Lannister tries to take his strong-willed nephew in hand in King's Landing, Stannis Baratheon launches his own campaign to take the Iron Throne with the help of a mysterious priestess. In the east, Daenerys must lead her retinue through a desolate wasteland whilst beyond the Wall the Night's Watch seeks the aid of a wildling.",
-          "airdate": "2012-04-01",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195118.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195118.jpg",
-          "watchedAt": "2026-01-24T22:47:48.495Z"
+          "name": "Hello, Ms. Cobel",
+          "summary": "Mark returns to work under different circumstances. Secrets from the Outie world come to light.",
+          "airdate": "2025-01-17",
+          "airtime": "",
+          "runtime": 48,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/552/1381306.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/552/1381306.jpg",
+          "watchedAt": "2026-01-24T22:47:52.499Z"
         },
         {
-          "tvmazeEpisodeId": 4963,
+          "tvmazeEpisodeId": 2939702,
           "season": 2,
           "number": 2,
-          "name": "The Night Lands",
-          "summary": "Stannis uses Ser Davos to seek out new allies for his war with the Lannisters. On the road north, Arya confides in Gendry. Robb Stark sends Theon Greyjoy to win an alliance with his father and the fierce warriors of the Iron Islands. Cersei and Tyrion clash on how to rule in King's Landing.",
-          "airdate": "2012-04-08",
-          "airtime": "21:00",
-          "runtime": 60,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195119.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195119.jpg",
-          "watchedAt": "2026-01-24T22:47:48.495Z"
+          "name": "Goodbye, Mrs. Selvig",
+          "summary": "Outie Mark contemplates the meaning of a message. Lumon grapples with the fallout of the Overtime Contingency.",
+          "airdate": "2025-01-24",
+          "airtime": "",
+          "runtime": 46,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/552/1381307.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/552/1381307.jpg",
+          "watchedAt": "2026-01-24T22:47:52.497Z"
+        },
+        {
+          "tvmazeEpisodeId": 2939703,
+          "season": 2,
+          "number": 3,
+          "name": "Who Is Alive?",
+          "summary": "Mark, Helly, Irving, and Dylan search for answers.",
+          "airdate": "2025-01-31",
+          "airtime": "",
+          "runtime": 53,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/553/1384260.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/553/1384260.jpg",
+          "watchedAt": "2026-01-24T22:47:52.496Z"
         }
       ],
       "watchedEpisodes": [
         {
-          "tvmazeEpisodeId": 4952,
-          "watchedAt": "2026-01-24T22:47:48.502Z"
+          "tvmazeEpisodeId": 2238231,
+          "watchedAt": "2026-01-24T22:47:52.499Z"
         },
         {
-          "tvmazeEpisodeId": 4953,
-          "watchedAt": "2026-01-24T22:47:48.497Z"
+          "tvmazeEpisodeId": 2238339,
+          "watchedAt": "2026-01-24T22:47:52.498Z"
         },
         {
-          "tvmazeEpisodeId": 4954,
-          "watchedAt": "2026-01-24T22:47:48.508Z"
+          "tvmazeEpisodeId": 2238340,
+          "watchedAt": "2026-01-24T22:47:52.495Z"
         },
         {
-          "tvmazeEpisodeId": 4955,
-          "watchedAt": "2026-01-24T22:47:48.506Z"
+          "tvmazeEpisodeId": 2257189,
+          "watchedAt": "2026-01-24T22:47:52.499Z"
         },
         {
-          "tvmazeEpisodeId": 4956,
-          "watchedAt": "2026-01-24T22:47:48.504Z"
+          "tvmazeEpisodeId": 2257190,
+          "watchedAt": "2026-01-24T22:47:52.498Z"
         },
         {
-          "tvmazeEpisodeId": 4957,
-          "watchedAt": "2026-01-24T22:47:48.504Z"
+          "tvmazeEpisodeId": 2292925,
+          "watchedAt": "2026-01-24T22:47:52.494Z"
         },
         {
-          "tvmazeEpisodeId": 4958,
-          "watchedAt": "2026-01-24T22:47:48.507Z"
+          "tvmazeEpisodeId": 2297221,
+          "watchedAt": "2026-01-24T22:47:52.497Z"
         },
         {
-          "tvmazeEpisodeId": 4959,
-          "watchedAt": "2026-01-24T22:47:48.502Z"
+          "tvmazeEpisodeId": 2301245,
+          "watchedAt": "2026-01-24T22:47:52.497Z"
         },
         {
-          "tvmazeEpisodeId": 4960,
-          "watchedAt": "2026-01-24T22:47:48.503Z"
+          "tvmazeEpisodeId": 2302265,
+          "watchedAt": "2026-01-24T22:47:52.495Z"
         },
         {
-          "tvmazeEpisodeId": 4961,
-          "watchedAt": "2026-01-24T22:47:48.501Z"
+          "tvmazeEpisodeId": 2939679,
+          "watchedAt": "2026-01-24T22:47:52.499Z"
         },
         {
-          "tvmazeEpisodeId": 4962,
-          "watchedAt": "2026-01-24T22:47:48.495Z"
+          "tvmazeEpisodeId": 2939702,
+          "watchedAt": "2026-01-24T22:47:52.497Z"
         },
         {
-          "tvmazeEpisodeId": 4963,
-          "watchedAt": "2026-01-24T22:47:48.495Z"
+          "tvmazeEpisodeId": 2939703,
+          "watchedAt": "2026-01-24T22:47:52.496Z"
         }
       ]
     },
@@ -568,19 +568,6 @@
           "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/241/604653.jpg",
           "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/241/604653.jpg",
           "watchedAt": "2026-01-24T22:47:47.989Z"
-        },
-        {
-          "tvmazeEpisodeId": 48078,
-          "season": 2,
-          "number": 7,
-          "name": "The Revenge",
-          "summary": "George quits his job in a huff, but comes to regret the decision, and is later humiliated by his boss. Jerry believes that the man at the laundromat has stolen a large sum of money from his laundry bag. Employing Elaine's and Kramer's help, respectively, they each plan revenge.",
-          "airdate": "1991-04-18",
-          "airtime": "",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/241/604654.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/241/604654.jpg",
-          "watchedAt": "2026-01-24T22:47:47.985Z"
         }
       ],
       "watchedEpisodes": [
@@ -603,429 +590,6 @@
         {
           "tvmazeEpisodeId": 48071,
           "watchedAt": "2026-01-24T22:47:47.973Z"
-        },
-        {
-          "tvmazeEpisodeId": 48072,
-          "watchedAt": "2026-01-24T22:47:47.985Z"
-        },
-        {
-          "tvmazeEpisodeId": 48073,
-          "watchedAt": "2026-01-24T22:47:47.974Z"
-        },
-        {
-          "tvmazeEpisodeId": 48074,
-          "watchedAt": "2026-01-24T22:47:47.978Z"
-        },
-        {
-          "tvmazeEpisodeId": 48075,
-          "watchedAt": "2026-01-24T22:47:47.986Z"
-        },
-        {
-          "tvmazeEpisodeId": 48076,
-          "watchedAt": "2026-01-24T22:47:47.974Z"
-        },
-        {
-          "tvmazeEpisodeId": 48077,
-          "watchedAt": "2026-01-24T22:47:47.989Z"
-        },
-        {
-          "tvmazeEpisodeId": 48078,
-          "watchedAt": "2026-01-24T22:47:47.985Z"
-        }
-      ]
-    },
-    {
-      "tvmazeId": 551,
-      "name": "Curb Your Enthusiasm",
-      "summary": "Curb Your Enthusiasm stars Seinfeld co-creator Larry David as himself in an unsparing but tongue-in-cheek depiction of his life. Shot in a verite style and featuring celebrities playing themselves, the episodes are improvised by the actors from an outline created by David.",
-      "status": "Ended",
-      "premiered": "2000-10-15",
-      "ended": "2024-04-07",
-      "company": "HBO",
-      "imageMedium": "https://static.tvmaze.com/uploads/images/medium_portrait/500/1250735.jpg",
-      "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/500/1250735.jpg",
-      "imdbId": "tt0264235",
-      "addedAt": "2026-01-24T22:39:36.363Z",
-      "profileStatus": null,
-      "episodes": [
-        {
-          "tvmazeEpisodeId": 51109,
-          "season": 1,
-          "number": 1,
-          "name": "The Pants Tent",
-          "summary": "Larry's baggy new pants create awkward misunderstandings among Larry, Cheryl, and her friend. A movie-theater argument with a female 'stranger' leads to tensions between Larry and his best friend. Larry jokingly refers to Cheryl as \"Hitler\" during a car speakerphone conversation with Jeff and his attempts to hide it from her\u2014and to appease Jeff's Holocaust-sensitive parents\u2014backfired disastrously.",
-          "airdate": "2000-10-15",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605390.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605390.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51110,
-          "season": 1,
-          "number": 2,
-          "name": "Ted and Mary",
-          "summary": "Larry and Cheryl enjoy their bowling double-date with Ted Danson and Mary Steenburgen, but it ends badly when Larry accuses the bowling alley of misplacing his sneakers. Later, Ted gets the wrong idea about Larry when he goes shopping with Mary at a downtown department store.",
-          "airdate": "2000-10-22",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605391.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605391.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51111,
-          "season": 1,
-          "number": 3,
-          "name": "Porno Gil",
-          "summary": "By not picking up a golf ball that drops out of a bucket carried by a man in a tacky western hat, Larry sets off a bizarre chain of events in which he's forced to attend a party at the home of a porno businessman named Gil, getting lost with Cheryl along the way. The party ends up being a disaster, as Larry refuses to take off his shoes, breaks a lamp, loses his watch, is forced to do a dreaded \"double goodbye.\" Meanwhile, Jeff is hospitalized for emergency bypass surgery and asks Larry to remove the secret porno stash at his home so his wife doesn't find it. While carrying out the favor, Larry discovers a familiar face on one of the video boxes.",
-          "airdate": "2000-10-29",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605392.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605392.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51112,
-          "season": 1,
-          "number": 4,
-          "name": "The Bracelet",
-          "summary": "Larry wants to buy a bracelet for Cheryl, but he is not buzzed into the store because he is wearing his workout clothes and looks like a slob. Richard then decides to buy it for his girlfriend instead, upsetting Cheryl. Larry and Richard Lewis help a blind man move into his apartment but he becomes belligerent and ungrateful. Larry returns to a restaurant where he left behind his credit card, but his car is blocked in by the waiter captain because Larry did not tip him the previous day. Larry runs to the jewelry store to try to prevent Richard from buying the bracelet; they fight outside the door because neither is buzzed in.",
-          "airdate": "2000-11-05",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605393.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605393.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51113,
-          "season": 1,
-          "number": 5,
-          "name": "Interior Decorator",
-          "summary": "By politely holding the elevator door for a woman in an office building, Larry ends up losing his place before her at the doctor's office, and is delayed 40 minutes. As a result, Larry ends up missing an important meeting with Diane Keaton. At home, Larry and Cheryl are visited by their interior decorator, who has Keaton's phone number but won't give it to Larry even though the actress called and left her number, which Larry couldn't decipher because of static. Thanks to Jeff, however, Larry is able to go to Keaton's house, where he runs into his decorator, gets into a fight, and breaks Diane's lamp -- the same type that was in Porno Gil's pad.",
-          "airdate": "2000-11-12",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605394.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605394.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51114,
-          "season": 1,
-          "number": 6,
-          "name": "The Wire",
-          "summary": "Cheryl gives Larry an ultimatum - bury the wire in the backyard - or else! But the permit the city gives Larry requires six signatures from his neighbors, and that means having to be nice to them at all costs - or else.",
-          "airdate": "2000-11-19",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605395.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605395.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51115,
-          "season": 1,
-          "number": 7,
-          "name": "AAMCO",
-          "summary": "Jeff buys a '57 Chevy and insists that Larry take it for a drive. At a stop sign, Larry mistakes the honking horn from an AAMCO commercial for the car behind him and yells at the other driver, who then hits the Chevy and speeds away. Luckily, Larry meets an antique auto mechanic at a dinner party who says he can fix Jeff's Chevy.",
-          "airdate": "2000-11-26",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605396.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605396.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51116,
-          "season": 1,
-          "number": 8,
-          "name": "Beloved Aunt",
-          "summary": "When Cheryl's aunt dies, the family asks Larry to write the obituary. But when it gets printed in the newspaper, an unfortunate typo lands Larry in the hot seat.",
-          "airdate": "2000-12-03",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605397.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605397.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51117,
-          "season": 1,
-          "number": 9,
-          "name": "Affirmative Action",
-          "summary": "Cheryl needs a prescription picked up for a terrible rash, which is repeatedly complicated by Larry, including a bad joke that he tells in front of Richard Lewis' doctor.",
-          "airdate": "2000-12-10",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605398.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605398.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51118,
-          "season": 1,
-          "number": 10,
-          "name": "The Group",
-          "summary": "Thanks to Larry's manager, Jeff, Cheryl is up for a part in \"The Vagina Monologues.\" Meanwhile, Larry runs into an ex, who asks him to attend a survivors-of-incest support group with her to lend moral support while she deals with her past.",
-          "airdate": "2000-12-17",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605399.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605399.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51119,
-          "season": 2,
-          "number": 1,
-          "name": "The Car Salesman",
-          "summary": "Living out of a hotel (they were fed up with \"the wire\" at their old home), Larry and Cheryl make a successful bid on a seaside chateau owned by Jason Alexander's new agent, Jay Schneider. Moving in, however, they learn their new dream home has a disturbing \"house sound\" of unknown origin. Meanwhile, Larry shocks his wife and friends by deciding to take a job as a car salesman, but is foiled by when \"high maintenance\" friend Richard Lewis shows up at the dealership.",
-          "airdate": "2001-09-23",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605402.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605402.jpg",
-          "watchedAt": null
-        },
-        {
-          "tvmazeEpisodeId": 51120,
-          "season": 2,
-          "number": 2,
-          "name": "Thor",
-          "summary": "While going to meet Jason Alexander to discuss an idea for a new TV project, Larry has a run-in with professional wrestler Thor Olsen. Thor accuses Larry of \"shooting at his kids\", and Larry thinks Thor slashed his tires. Meanwhile, Jeff separates from Suzie, and asks Larry to go pick up his clothes. Doing so incurs the wrath of Suzie, and he asks Jeff to repay the favor by letting the air out of Thor's tires.",
-          "airdate": "2001-09-30",
-          "airtime": "22:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/242/605403.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/242/605403.jpg",
-          "watchedAt": null
-        }
-      ],
-      "watchedEpisodes": []
-    },
-    {
-      "tvmazeId": 526,
-      "name": "The Office",
-      "summary": "Steve Carell stars in The Office, a fresh and funny mockumentary-style glimpse into the daily interactions of the eccentric workers at the Dunder Mifflin paper supply company. Based on the smash-hit British series of the same name and adapted for American Television by Greg Daniels, this fast-paced comedy parodies contemporary American water-cooler culture. Earnest but clueless regional manager Michael Scott believes himself to be an exceptional boss and mentor, but actually receives more eye-rolls than respect from his oddball staff.",
-      "status": "Ended",
-      "premiered": "2005-03-24",
-      "ended": "2013-05-16",
-      "company": "NBC",
-      "imageMedium": "https://static.tvmaze.com/uploads/images/medium_portrait/481/1204342.jpg",
-      "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/481/1204342.jpg",
-      "imdbId": "tt0386676",
-      "addedAt": "2026-01-24T22:39:35.424Z",
-      "profileStatus": null,
-      "episodes": [
-        {
-          "tvmazeEpisodeId": 47640,
-          "season": 1,
-          "number": 1,
-          "name": "Pilot",
-          "summary": "A documentary crew arrives at Dundler Mifflin to observe the workplace. Michael Scott tries to paint a happy picture while facing potential downsizing.",
-          "airdate": "2005-03-24",
-          "airtime": "21:30",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/49/124795.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/49/124795.jpg",
-          "watchedAt": "2026-01-24T22:47:46.879Z"
-        },
-        {
-          "tvmazeEpisodeId": 47641,
-          "season": 1,
-          "number": 2,
-          "name": "Diversity Day",
-          "summary": "Corporate sends in a consultant after Michael attempts to imitate a Chris Rock routine. Michael ends up staging his own Diversity Day event.",
-          "airdate": "2005-03-29",
-          "airtime": "21:30",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/49/124859.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/49/124859.jpg",
-          "watchedAt": "2026-01-24T22:47:46.887Z"
-        },
-        {
-          "tvmazeEpisodeId": 47642,
-          "season": 1,
-          "number": 3,
-          "name": "Health Care",
-          "summary": "Dwight ends up in charge of picking a new health care plan.",
-          "airdate": "2005-04-05",
-          "airtime": "21:30",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/50/125614.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/50/125614.jpg",
-          "watchedAt": "2026-01-24T22:47:46.876Z"
-        },
-        {
-          "tvmazeEpisodeId": 47643,
-          "season": 1,
-          "number": 4,
-          "name": "The Alliance",
-          "summary": "With Dwight worried about downsizing, Jim agrees to an alliance; Michael tries to increase moral be throwing a birthday party for Meredith.",
-          "airdate": "2005-04-12",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/50/125615.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/50/125615.jpg",
-          "watchedAt": "2026-01-24T22:47:46.878Z"
-        },
-        {
-          "tvmazeEpisodeId": 47644,
-          "season": 1,
-          "number": 5,
-          "name": "Basketball",
-          "summary": "Michael challenges the warehouse staff to a basketball game versus the office staff.",
-          "airdate": "2005-04-19",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/50/126301.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/50/126301.jpg",
-          "watchedAt": "2026-01-24T22:47:46.878Z"
-        },
-        {
-          "tvmazeEpisodeId": 47645,
-          "season": 1,
-          "number": 6,
-          "name": "Hot Girl",
-          "summary": "Several male staff members vie for the attention of an attractive purse sales woman.",
-          "airdate": "2005-04-26",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/50/126302.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/50/126302.jpg",
-          "watchedAt": "2026-01-24T22:47:46.877Z"
-        },
-        {
-          "tvmazeEpisodeId": 47646,
-          "season": 2,
-          "number": 1,
-          "name": "The Dundies",
-          "summary": "Michael hosts the annual Dundies awards.",
-          "airdate": "2005-09-20",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/50/127495.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/50/127495.jpg",
-          "watchedAt": "2026-01-24T22:47:46.874Z"
-        },
-        {
-          "tvmazeEpisodeId": 47647,
-          "season": 2,
-          "number": 2,
-          "name": "Sexual Harassment",
-          "summary": "Michael's continual sending of explicit e-mail forwards forces Dunder Mifflin to review it's sexual harassment policy; Pam's mom makes a visit to the office.",
-          "airdate": "2005-09-27",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/51/127560.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/51/127560.jpg",
-          "watchedAt": "2026-01-24T22:47:46.888Z"
-        },
-        {
-          "tvmazeEpisodeId": 47648,
-          "season": 2,
-          "number": 3,
-          "name": "Office Olympics",
-          "summary": "With Michael and Dwight out of the house, Jim organizes an office Olympics.",
-          "airdate": "2005-10-04",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/51/127912.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/51/127912.jpg",
-          "watchedAt": "2026-01-24T22:47:46.887Z"
-        },
-        {
-          "tvmazeEpisodeId": 47649,
-          "season": 2,
-          "number": 4,
-          "name": "The Fire",
-          "summary": "A fire starts in the office kitchen.",
-          "airdate": "2005-10-11",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/244/612242.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/244/612242.jpg",
-          "watchedAt": "2026-01-24T22:47:46.873Z"
-        },
-        {
-          "tvmazeEpisodeId": 47650,
-          "season": 2,
-          "number": 5,
-          "name": "Halloween",
-          "summary": "Michael has to fire someone on Halloween.",
-          "airdate": "2005-10-18",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/194/486287.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/194/486287.jpg",
-          "watchedAt": "2026-01-24T22:47:46.882Z"
-        },
-        {
-          "tvmazeEpisodeId": 47651,
-          "season": 2,
-          "number": 6,
-          "name": "The Fight",
-          "summary": "Michael challenges Dwight to a fight at his martial arts studio.",
-          "airdate": "2005-11-01",
-          "airtime": "21:00",
-          "runtime": 30,
-          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/194/486288.jpg",
-          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/194/486288.jpg",
-          "watchedAt": "2026-01-24T22:47:46.885Z"
-        }
-      ],
-      "watchedEpisodes": [
-        {
-          "tvmazeEpisodeId": 47640,
-          "watchedAt": "2026-01-24T22:47:46.879Z"
-        },
-        {
-          "tvmazeEpisodeId": 47641,
-          "watchedAt": "2026-01-24T22:47:46.887Z"
-        },
-        {
-          "tvmazeEpisodeId": 47642,
-          "watchedAt": "2026-01-24T22:47:46.876Z"
-        },
-        {
-          "tvmazeEpisodeId": 47643,
-          "watchedAt": "2026-01-24T22:47:46.878Z"
-        },
-        {
-          "tvmazeEpisodeId": 47644,
-          "watchedAt": "2026-01-24T22:47:46.878Z"
-        },
-        {
-          "tvmazeEpisodeId": 47645,
-          "watchedAt": "2026-01-24T22:47:46.877Z"
-        },
-        {
-          "tvmazeEpisodeId": 47646,
-          "watchedAt": "2026-01-24T22:47:46.874Z"
-        },
-        {
-          "tvmazeEpisodeId": 47647,
-          "watchedAt": "2026-01-24T22:47:46.888Z"
-        },
-        {
-          "tvmazeEpisodeId": 47648,
-          "watchedAt": "2026-01-24T22:47:46.887Z"
-        },
-        {
-          "tvmazeEpisodeId": 47649,
-          "watchedAt": "2026-01-24T22:47:46.873Z"
-        },
-        {
-          "tvmazeEpisodeId": 47650,
-          "watchedAt": "2026-01-24T22:47:46.882Z"
-        },
-        {
-          "tvmazeEpisodeId": 47651,
-          "watchedAt": "2026-01-24T22:47:46.885Z"
         }
       ]
     },
@@ -1208,48 +772,536 @@
         {
           "tvmazeEpisodeId": 10141,
           "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10142,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10143,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10144,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10145,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10146,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10147,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10148,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10149,
-          "watchedAt": "2026-01-25T18:59:36.814Z"
-        },
-        {
-          "tvmazeEpisodeId": 10150,
-          "watchedAt": "2026-01-25T18:59:36.815Z"
-        },
-        {
-          "tvmazeEpisodeId": 10151,
-          "watchedAt": "2026-01-25T18:59:36.815Z"
         }
       ]
+    },
+    {
+      "tvmazeId": 142,
+      "name": "Veep",
+      "summary": "Former Senator Selina Meyer has accepted the call to serve as Vice President of the United States. The job is nothing like she imagined and everything she was warned about. Veep follows Meyer and her staff as they attempt to make their mark and leave a lasting legacy, without getting tripped up in the day-to-day political games that define Washington.",
+      "status": "Ended",
+      "premiered": "2012-04-22",
+      "ended": "2019-05-12",
+      "company": "HBO",
+      "imageMedium": "https://static.tvmaze.com/uploads/images/medium_portrait/189/472887.jpg",
+      "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/189/472887.jpg",
+      "imdbId": "tt1759761",
+      "addedAt": "2026-01-24T22:39:38.646Z",
+      "profileStatus": null,
+      "episodes": [
+        {
+          "tvmazeEpisodeId": 10869,
+          "season": 1,
+          "number": 1,
+          "name": "Fundraiser",
+          "summary": "Selina makes a offensive joke while at a fundraiser; Selina attempts to make Clean Jobs her legacy but runs into issues the the plastics and oil industry. Amy makes an error when signing Selina's name to a condolence card.",
+          "airdate": "2012-04-22",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279421.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279421.jpg",
+          "watchedAt": "2026-01-24T22:47:49.046Z"
+        },
+        {
+          "tvmazeEpisodeId": 10870,
+          "season": 1,
+          "number": 2,
+          "name": "Frozen Yoghurt",
+          "summary": "Selina is late for a meet and greet at a local yoghurt shop that has named a flavor after her when a POTUS health scare puts her in charge.",
+          "airdate": "2012-04-29",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279422.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279422.jpg",
+          "watchedAt": "2026-01-24T22:47:49.042Z"
+        },
+        {
+          "tvmazeEpisodeId": 10871,
+          "season": 1,
+          "number": 3,
+          "name": "Catherine",
+          "summary": "The VP and her team run into trouble when their appointee to the Clean Job task force is met with dissatisfaction. Selina's daughter pays a visit.",
+          "airdate": "2012-05-06",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279423.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279423.jpg",
+          "watchedAt": "2026-01-24T22:47:49.038Z"
+        },
+        {
+          "tvmazeEpisodeId": 10872,
+          "season": 1,
+          "number": 4,
+          "name": "Chung",
+          "summary": "Amy gives Selina bad information about Governor Chung leading to what is construted at a racist comment about his citizenship.",
+          "airdate": "2012-05-13",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279424.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279424.jpg",
+          "watchedAt": "2026-01-24T22:47:49.043Z"
+        },
+        {
+          "tvmazeEpisodeId": 10873,
+          "season": 1,
+          "number": 5,
+          "name": "Nicknames",
+          "summary": "Selina discovers there are numerous not so flattering nicknames about her.",
+          "airdate": "2012-05-20",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279425.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279425.jpg",
+          "watchedAt": "2026-01-24T22:47:49.036Z"
+        },
+        {
+          "tvmazeEpisodeId": 10874,
+          "season": 1,
+          "number": 6,
+          "name": "Baseball",
+          "summary": "Selina attends a event to help fight obesity (the new cause the President wants her to undertake) at Camden Yards. Selina worries she may be pregnant.",
+          "airdate": "2012-05-27",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279426.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279426.jpg",
+          "watchedAt": "2026-01-24T22:47:49.046Z"
+        },
+        {
+          "tvmazeEpisodeId": 10875,
+          "season": 1,
+          "number": 7,
+          "name": "Full Disclosure",
+          "summary": "Selina orders a partial full disclosure in the wake of her pregnancy rumor and the reassignment of a Secret Service agent for smiling.",
+          "airdate": "2012-06-03",
+          "airtime": "22:10",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279427.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279427.jpg",
+          "watchedAt": "2026-01-24T22:47:49.038Z"
+        },
+        {
+          "tvmazeEpisodeId": 10876,
+          "season": 1,
+          "number": 8,
+          "name": "Tears",
+          "summary": "Selina travels to Ohio to support Furlong for governor, who changes his mind about Selina endorsing him. Amy and Mike play up Selina's tears.",
+          "airdate": "2012-06-10",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279428.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279428.jpg",
+          "watchedAt": "2026-01-24T22:47:49.044Z"
+        },
+        {
+          "tvmazeEpisodeId": 10877,
+          "season": 2,
+          "number": 1,
+          "name": "Midterms",
+          "summary": "Fresh off successful campaign appearances for midterm elections, Selina sees an opportunity to expand her role, but must first curry favor with Kent Davison, the president's icy senior strategist. Meanwhile, there are new developments in the staff's personal lives.",
+          "airdate": "2013-04-14",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279429.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279429.jpg",
+          "watchedAt": "2026-01-24T22:47:49.046Z"
+        },
+        {
+          "tvmazeEpisodeId": 10878,
+          "season": 2,
+          "number": 2,
+          "name": "Signals",
+          "summary": "Selina attends a pig roast in North Carolina as part of the president's \"Listen to Rural America\" initiative. Dan takes up Pilates to get face time.",
+          "airdate": "2013-04-21",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279430.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279430.jpg",
+          "watchedAt": "2026-01-24T22:47:49.036Z"
+        },
+        {
+          "tvmazeEpisodeId": 10879,
+          "season": 2,
+          "number": 3,
+          "name": "Hostages",
+          "summary": "As a hostage crisis in Uzbekistan heats up, Selina and Secretary of Defense General Maddox have trouble getting on the same page at their joint appearance at the Marine Corps Base at Quantico. Sue testifies at a congressional hearing on governmental efficiencies; Dan and Gary jockey for the Veep's ear.",
+          "airdate": "2013-04-28",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279431.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279431.jpg",
+          "watchedAt": "2026-01-24T22:47:49.042Z"
+        },
+        {
+          "tvmazeEpisodeId": 10880,
+          "season": 2,
+          "number": 4,
+          "name": "The Vic Allen Dinner",
+          "summary": "Selina is rankled when the White House releases an unflattering photo of her. Mike and Kent bond over sailing; Jonah gets an executive parking space; Sue has a job interview. Selina takes steps to keep her staff happy as they prepare for her appearance at the Vic Allen dinner.",
+          "airdate": "2013-05-05",
+          "airtime": "22:00",
+          "runtime": 30,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/111/279432.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/111/279432.jpg",
+          "watchedAt": "2026-01-24T22:47:49.044Z"
+        }
+      ],
+      "watchedEpisodes": [
+        {
+          "tvmazeEpisodeId": 10869,
+          "watchedAt": "2026-01-24T22:47:49.046Z"
+        },
+        {
+          "tvmazeEpisodeId": 10870,
+          "watchedAt": "2026-01-24T22:47:49.042Z"
+        }
+      ]
+    },
+    {
+      "tvmazeId": 7,
+      "name": "Homeland",
+      "summary": "The winner of 6 Emmy Awards including Outstanding Drama Series, Homeland is an edge-of-your-seat sensation. Marine Sergeant Nicholas Brody is both a decorated hero and a serious threat. CIA officer Carrie Mathison is tops in her field despite being bipolar. The delicate dance these two complex characters perform, built on lies, suspicion, and desire, is at the heart of this gripping, emotional thriller in which nothing short of the fate of our nation is at stake.",
+      "status": "Ended",
+      "premiered": "2011-10-02",
+      "ended": "2020-04-26",
+      "company": "Paramount+ with Showtime",
+      "imageMedium": "https://static.tvmaze.com/uploads/images/medium_portrait/498/1245275.jpg",
+      "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/498/1245275.jpg",
+      "imdbId": "tt1796960",
+      "addedAt": "2026-01-24T22:39:38.804Z",
+      "profileStatus": null,
+      "episodes": [
+        {
+          "tvmazeEpisodeId": 189,
+          "season": 1,
+          "number": 1,
+          "name": "Pilot",
+          "summary": "In the opener of this \"Manchurian Candidate\"-like political thriller, a marine rescued after eight years as a POW in Afghanistan returns home a war hero. But a CIA operative suspects he may actually be an enemy agent with a connection to Al Qaeda and part of a plan to commit a terrorist act on U.S. soil.",
+          "airdate": "2011-10-02",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14578.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14578.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 190,
+          "season": 1,
+          "number": 2,
+          "name": "Grace",
+          "summary": "An undercover agent with connections to a Saudi prince who may be funding terrorist activities provides Carrie with a revealing bit of electronic evidence. Meanwhile, Carrie studies surveillance footage of life in Brody's home, where he appears troubled by traumatic memories and resists Pentagon and media pressure to be hyped as an American war hero.",
+          "airdate": "2011-10-09",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14579.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14579.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 191,
+          "season": 1,
+          "number": 3,
+          "name": "Clean Skin",
+          "summary": "An exclusive television interview will thrust the Brody family into the national spotlight, unless Dana pulls off her plan to sidetrack the whole bogus process. Elsewhere, Carrie and the team sniff out an Al Qaeda attack on American soil; and Carrie's embedded operative in Prince Farid's camp gets trapped in a chilling situation.",
+          "airdate": "2011-10-16",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14580.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14580.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 192,
+          "season": 1,
+          "number": 4,
+          "name": "Semper I",
+          "summary": "Political powers make big plans to promote Brody as a national hero, but erratic behavior on his part threatens his media image. Elsewhere, a desperate Carrie searches for evidence to link Brody with Abu Nazir, while Saul enjoins her to follow the terrorist financier's money trail.",
+          "airdate": "2011-10-23",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14581.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14581.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 193,
+          "season": 1,
+          "number": 5,
+          "name": "Blind Spot",
+          "summary": "Carrie believes her suspicions about Brody may be proven correct when he confronts the sole survivor of the insurgents who held him hostage. But the reunion ultimately raises more questions. Meanwhile, the agency zeros in on Aileen and Faisel, the lovers who used funds from the stolen jewelry to purchase the house near the airport.",
+          "airdate": "2011-10-30",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14582.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14582.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 194,
+          "season": 1,
+          "number": 6,
+          "name": "The Good Soldier",
+          "summary": "Having lost a number of essential personnel to Nazir's terrorist plot against the U.S., the CIA issue polygraph tests on everyone who had contact with them. This includes Brody, which Carrie hopes will reveal the truth about him.",
+          "airdate": "2011-11-06",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14583.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14583.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 195,
+          "season": 1,
+          "number": 7,
+          "name": "The Weekend",
+          "summary": "Carrie and Brody spend a weekend in the countryside, which ends up complicating their relationship further. Elsewhere, Jessica and Mike catch flak about the truth behind their relationship, while Saul catches Aileen hightailing it to Mexico.",
+          "airdate": "2011-11-13",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14584.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14584.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 196,
+          "season": 1,
+          "number": 8,
+          "name": "Achilles Heel",
+          "summary": "While Carrie and Saul are left reeling by the news that Walker is alive, the intelligence organisations squabble over how to capture him. The FBI leans toward using the public's help, but Carrie thinks they should use his family to draw him out. Elsewhere, Brody sets out to find a mysterious man who has surprising info about his years as a captive.",
+          "airdate": "2011-11-20",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14585.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14585.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 197,
+          "season": 1,
+          "number": 9,
+          "name": "Crossfire",
+          "summary": "Brody's efforts to sever ties with Abu Nazir triggers flashbacks to his time as a captive. Meanwhile, the mosque shooting results in a public-relations nightmare for Carrie.",
+          "airdate": "2011-11-27",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14586.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14586.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 198,
+          "season": 1,
+          "number": 10,
+          "name": "Representative Brody",
+          "summary": "Walker's Washington contact is identified by Carrie and Saul, but the target is protected via diplomatic immunity. Meanwhile, political bigwigs approach Brody about running for a disgraced congressman's seat.",
+          "airdate": "2011-12-04",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14587.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14587.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 199,
+          "season": 1,
+          "number": 11,
+          "name": "The Vest",
+          "summary": "When the dust settles from an explosion, Saul finds a manic Carrie hospitalised and realises there may be merit to her wild theories. Meanwhile, with his congressional campaign set to kick off, Brody takes the family on a weekend getaway to Gettysburg, where he obtains an important item.",
+          "airdate": "2011-12-11",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14588.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14588.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        },
+        {
+          "tvmazeEpisodeId": 200,
+          "season": 1,
+          "number": 12,
+          "name": "Marine One",
+          "summary": "In the Season 1 finale, a near-catatonic Carrie is confined to bed as Saul puzzles over the unnerving implications of her time line. Elsewhere, Walker settles on a perch from which to complete his mission; and Brody preps for the vice president's policy summit.",
+          "airdate": "2011-12-18",
+          "airtime": "22:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/5/14589.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/5/14589.jpg",
+          "watchedAt": "2026-01-26T12:11:15.499Z"
+        }
+      ],
+      "watchedEpisodes": []
+    },
+    {
+      "tvmazeId": 82,
+      "name": "Game of Thrones",
+      "summary": "Based on the bestselling book series A Song of Ice and Fire by George R.R. Martin, this sprawling new HBO drama is set in a world where summers span decades and winters can last a lifetime. From the scheming south and the savage eastern lands, to the frozen north and ancient Wall that protects the realm from the mysterious darkness beyond, the powerful families of the Seven Kingdoms are locked in a battle for the Iron Throne. This is a story of duplicity and treachery, nobility and honor, conquest and triumph. In the Game of Thrones, you either win or you die.",
+      "status": "Ended",
+      "premiered": "2011-04-17",
+      "ended": "2019-05-19",
+      "company": "HBO",
+      "imageMedium": "https://static.tvmaze.com/uploads/images/medium_portrait/498/1245274.jpg",
+      "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/498/1245274.jpg",
+      "imdbId": "tt0944947",
+      "addedAt": "2026-01-24T22:34:29.081Z",
+      "profileStatus": "stopped",
+      "episodes": [
+        {
+          "tvmazeEpisodeId": 4952,
+          "season": 1,
+          "number": 1,
+          "name": "Winter is Coming",
+          "summary": "Lord Eddard Stark, ruler of the North, is summoned to court by his old friend, King Robert Baratheon, to serve as the King's Hand. Eddard reluctantly agrees after learning of a possible threat to the King's life. Eddard's bastard son Jon Snow must make a painful decision about his own future, while in the distant east Viserys Targaryen plots to reclaim his father's throne, usurped by Robert, by selling his sister in marriage.",
+          "airdate": "2011-04-17",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195111.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195111.jpg",
+          "watchedAt": "2026-01-24T22:47:48.502Z"
+        },
+        {
+          "tvmazeEpisodeId": 4953,
+          "season": 1,
+          "number": 2,
+          "name": "The Kingsroad",
+          "summary": "An incident on the Kingsroad threatens Eddard and Robert's friendship. Jon and Tyrion travel to the Wall, where they discover that the reality of the Night's Watch may not match the heroic image of it.",
+          "airdate": "2011-04-24",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195110.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195110.jpg",
+          "watchedAt": "2026-01-24T22:47:48.497Z"
+        },
+        {
+          "tvmazeEpisodeId": 4954,
+          "season": 1,
+          "number": 3,
+          "name": "Lord Snow",
+          "summary": "Jon Snow attempts to find his place amongst the Night's Watch. Eddard and his daughters arrive at King's Landing.",
+          "airdate": "2011-05-01",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195109.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195109.jpg",
+          "watchedAt": "2026-01-24T22:47:48.508Z"
+        },
+        {
+          "tvmazeEpisodeId": 4955,
+          "season": 1,
+          "number": 4,
+          "name": "Cripples, Bastards, and Broken Things",
+          "summary": "Tyrion stops at Winterfell on his way home and gets a frosty reception from Robb Stark. Eddard's investigation into the death of his predecessor gets underway.",
+          "airdate": "2011-05-08",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195107.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195107.jpg",
+          "watchedAt": "2026-01-24T22:47:48.506Z"
+        },
+        {
+          "tvmazeEpisodeId": 4956,
+          "season": 1,
+          "number": 5,
+          "name": "The Wolf and the Lion",
+          "summary": "Catelyn's actions on the road have repercussions for Eddard. Tyrion enjoys the dubious hospitality of the Eyrie.",
+          "airdate": "2011-05-15",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195106.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195106.jpg",
+          "watchedAt": "2026-01-24T22:47:48.504Z"
+        },
+        {
+          "tvmazeEpisodeId": 4957,
+          "season": 1,
+          "number": 6,
+          "name": "A Golden Crown",
+          "summary": "Viserys is increasingly frustrated by the lack of progress towards gaining his crown.",
+          "airdate": "2011-05-22",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195105.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195105.jpg",
+          "watchedAt": "2026-01-24T22:47:48.504Z"
+        },
+        {
+          "tvmazeEpisodeId": 4958,
+          "season": 1,
+          "number": 7,
+          "name": "You Win or You Die",
+          "summary": "Eddard's investigations in King's Landing reach a climax and a dark secret is revealed.",
+          "airdate": "2011-05-29",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195104.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195104.jpg",
+          "watchedAt": "2026-01-24T22:47:48.507Z"
+        },
+        {
+          "tvmazeEpisodeId": 4959,
+          "season": 1,
+          "number": 8,
+          "name": "The Pointy End",
+          "summary": "Tyrion joins his father's army with unexpected allies. Events in King's Landing take a turn for the worse as Arya's lessons are put to the test.",
+          "airdate": "2011-06-05",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195097.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195097.jpg",
+          "watchedAt": "2026-01-24T22:47:48.502Z"
+        },
+        {
+          "tvmazeEpisodeId": 4960,
+          "season": 1,
+          "number": 9,
+          "name": "Baelor",
+          "summary": "Catelyn must negotiate with the irascible Lord Walder Frey.",
+          "airdate": "2011-06-12",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195099.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195099.jpg",
+          "watchedAt": "2026-01-24T22:47:48.503Z"
+        },
+        {
+          "tvmazeEpisodeId": 4961,
+          "season": 1,
+          "number": 10,
+          "name": "Fire and Blood",
+          "summary": "Daenerys must realize her destiny. Jaime finds himself in an unfamiliar predicament.",
+          "airdate": "2011-06-19",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195102.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195102.jpg",
+          "watchedAt": "2026-01-24T22:47:48.501Z"
+        },
+        {
+          "tvmazeEpisodeId": 4962,
+          "season": 2,
+          "number": 1,
+          "name": "The North Remembers",
+          "summary": "War grips the continent of Westeros. As Tyrion Lannister tries to take his strong-willed nephew in hand in King's Landing, Stannis Baratheon launches his own campaign to take the Iron Throne with the help of a mysterious priestess. In the east, Daenerys must lead her retinue through a desolate wasteland whilst beyond the Wall the Night's Watch seeks the aid of a wildling.",
+          "airdate": "2012-04-01",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195118.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195118.jpg",
+          "watchedAt": "2026-01-24T22:47:48.495Z"
+        },
+        {
+          "tvmazeEpisodeId": 4963,
+          "season": 2,
+          "number": 2,
+          "name": "The Night Lands",
+          "summary": "Stannis uses Ser Davos to seek out new allies for his war with the Lannisters. On the road north, Arya confides in Gendry. Robb Stark sends Theon Greyjoy to win an alliance with his father and the fierce warriors of the Iron Islands. Cersei and Tyrion clash on how to rule in King's Landing.",
+          "airdate": "2012-04-08",
+          "airtime": "21:00",
+          "runtime": 60,
+          "imageMedium": "https://static.tvmaze.com/uploads/images/medium_landscape/478/1195119.jpg",
+          "imageOriginal": "https://static.tvmaze.com/uploads/images/original_untouched/478/1195119.jpg",
+          "watchedAt": "2026-01-24T22:47:48.495Z"
+        }
+      ],
+      "watchedEpisodes": []
     }
   ]
 }

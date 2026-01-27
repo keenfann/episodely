@@ -1796,11 +1796,12 @@ input:focus {
     align-items: flex-start;
     flex-wrap: wrap;
     gap: var(--show-detail-header-gap);
-    margin-top: -0.35rem;
+    margin-top: var(--show-detail-heading-offset);
   }
 
   .show-detail__header {
     position: relative;
+    --show-detail-heading-offset: -0.35rem;
   }
 
   .panel.show-detail {
@@ -1810,7 +1811,7 @@ input:focus {
 
   .show-detail__actions .settings-profile-action--danger {
     position: absolute;
-    top: 0;
+    top: var(--show-detail-heading-offset);
     right: 0;
   }
 
@@ -1828,7 +1829,7 @@ input:focus {
 
   .show-detail__actions .settings-profile-confirm {
     position: absolute;
-    top: 22px;
+    top: calc(22px + var(--show-detail-heading-offset));
     right: 0;
     margin: 0;
     width: auto;

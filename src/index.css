@@ -923,11 +923,13 @@ input:focus {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  position: relative;
 }
 
 .show-detail__actions .settings-profile-confirm {
-  margin-left: 0;
+  margin-left: auto;
 }
+
 
 .show-detail__delete {
   width: 44px;
@@ -1805,6 +1807,7 @@ input:focus {
     width: 100%;
     flex-wrap: wrap;
     justify-content: flex-start;
+    position: static;
   }
 
   .show-detail__action {
@@ -1813,13 +1816,18 @@ input:focus {
   }
 
   .show-detail__actions .settings-profile-confirm {
-    width: 100%;
+    position: absolute;
+    top: 22px;
+    right: 0;
+    margin: 0;
+    width: auto;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: flex-end;
+    transform: translateY(-50%);
   }
 
   .show-detail__actions .settings-profile-confirm span {
-    flex-basis: 100%;
+    flex-basis: auto;
   }
 
   .show-detail__title-row {

@@ -1039,6 +1039,7 @@ function ShowsPage({
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [collapsedCategories, setCollapsedCategories] = useState(() => ({
+    'up-to-date': true,
     completed: true,
     stopped: true,
   }));

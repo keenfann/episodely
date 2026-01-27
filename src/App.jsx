@@ -303,6 +303,7 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [loadingShows, setLoadingShows] = useState(false);
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
@@ -508,6 +509,7 @@ function App() {
     if (!searchQuery.trim()) return;
     setSearchError('');
     setHasSearched(true);
+    setIsSearching(true);
     try {
       const data = await apiFetch(
         `/api/tvmaze/search?q=${encodeURIComponent(searchQuery)}`
@@ -515,6 +517,8 @@ function App() {
       setSearchResults(data.results || []);
     } catch (error) {
       setSearchError(error.message);
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -698,7 +702,7 @@ function App() {
   if (auth.loading || booting) {
     return (
       <div className="app-shell">
-        <div className="panel panel--center">Loading...</div>
+        <div className="panel panel--center panel--loading">Loading...</div>
       </div>
     );
   }
@@ -937,6 +941,7 @@ function App() {
                 searchResults={searchResults}
                 searchError={searchError}
                 hasSearched={hasSearched}
+                isSearching={isSearching}
                 onSearchQuery={handleSearchQuery}
                 onSearch={handleSearch}
                 onAddShow={handleAddShow}
@@ -1068,7 +1073,7 @@ function ShowsPage({
         </div>
       </div>
         {loadingShows ? (
-          <div className="empty-state">Loading shows...</div>
+          <div className="empty-state empty-state--loading">Loading shows...</div>
         ) : (
           filteredCategories.map((category) => (
             <div
@@ -1175,6 +1180,7 @@ function AddShowPage({
   searchResults,
   searchError,
   hasSearched,
+  isSearching,
   onSearchQuery,
   onSearch,
   onAddShow,
@@ -1421,7 +1427,7 @@ function AddShowPage({
           })}
         </div>
       )}
-      {hasSearched && !searchError && searchResults.length === 0 && (
+      {hasSearched && !searchError && !isSearching && searchResults.length === 0 && (
         <div className="empty-state">No shows found. Try another search.</div>
       )}
       {searchError && <div className="error">{searchError}</div>}
@@ -1465,7 +1471,7 @@ function ShowDetailPage({
   if (!showDetail && loading) {
     return (
       <section className="panel">
-        <div className="empty-state">Loading show...</div>
+        <div className="empty-state empty-state--loading">Loading show...</div>
       </section>
     );
   }
@@ -2298,7 +2304,11 @@ function ShowDetailView({
           <p>{show.summary || 'No synopsis available.'}</p>
         </div>
       </div>
-      {loading && <div className="empty-state">Loading episodes...</div>}
+      {loading && (
+        <div className="empty-state empty-state--loading">
+          Loading episodes...
+        </div>
+      )}
       {!loading && (
         <div className="season-list">
           {seasons.map((season) => {

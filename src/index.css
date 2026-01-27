@@ -1688,6 +1688,22 @@ input:focus {
   color: var(--text-muted);
 }
 
+.empty-state--loading {
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.panel--loading {
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
 .error {
   color: #ff8c8c;
   font-size: 0.9rem;

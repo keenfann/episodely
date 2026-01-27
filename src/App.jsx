@@ -740,10 +740,10 @@ function App() {
   return (
     <div className="app-shell">
       <header className="top-bar">
-        <div className="brand">
+        <NavLink className="brand" to="/shows" aria-label="Go to shows">
           <img className="brand__logo" src={logo} alt="Episodely logo" />
           <span>Episodely</span>
-        </div>
+        </NavLink>
         <nav className="nav">
           <NavLink
             to="/shows"

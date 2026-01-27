@@ -1073,14 +1073,16 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
 
   const episodes = db
     .prepare(
-      `SELECT e.*, s.name AS show_name, s.image_medium, s.image_original
+      `SELECT e.*, pe.watched_at, s.name AS show_name, s.image_medium, s.image_original
        FROM episodes e
        JOIN shows s ON s.id = e.show_id
+       LEFT JOIN profile_episodes pe
+         ON pe.episode_id = e.id AND pe.profile_id = ?
        JOIN profile_shows ps ON ps.show_id = s.id
        WHERE ps.profile_id = ?
        ORDER BY e.airdate ASC`
     )
-    .all(req.session.profileId);
+    .all(req.session.profileId, req.session.profileId);
 
   const upcoming = episodes.filter((episode) => {
     const airtime = (episode.airtime || '').trim();
@@ -1099,18 +1101,43 @@ app.get('/api/calendar', requireAuth, requireProfile, (req, res) => {
     return a.airdate.localeCompare(b.airdate);
   });
 
-  const payload = sorted.map((episode) => ({
-    id: episode.id,
-    showName: episode.show_name,
-    showImage: episode.image_original || episode.image_medium,
+  const episodesByShowId = new Map();
+  episodes.forEach((episode) => {
+    if (!episodesByShowId.has(episode.show_id)) {
+      episodesByShowId.set(episode.show_id, []);
+    }
+    episodesByShowId.get(episode.show_id).push(episode);
+  });
+
+  const showRows = db
+    .prepare(
+      `SELECT s.*, ps.status AS profile_status
+       FROM shows s
+       JOIN profile_shows ps ON ps.show_id = s.id
+       WHERE ps.profile_id = ?`
+    )
+    .all(req.session.profileId);
+  const showById = new Map(showRows.map((show) => [show.id, show]));
+
+  const payload = sorted.map((episode) => {
+    const showEpisodes = episodesByShowId.get(episode.show_id) || [];
+    const show = showById.get(episode.show_id);
+    const { state } = show ? computeShowState(show, showEpisodes) : { state: null };
+    return {
+      id: episode.id,
+      showId: episode.show_id,
+      showName: episode.show_name,
+      showImage: episode.image_original || episode.image_medium,
     season: episode.season,
     number: episode.number,
     name: episode.name,
-    summary: episode.summary,
-    airdate: episode.airdate,
-    airtime: episode.airtime,
-    runtime: episode.runtime,
-  }));
+      summary: episode.summary,
+      airdate: episode.airdate,
+      airtime: episode.airtime,
+      runtime: episode.runtime,
+      showState: state,
+    };
+  });
 
   res.json({ days, episodes: payload });
 });

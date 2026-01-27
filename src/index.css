@@ -602,6 +602,31 @@ input:focus {
   pointer-events: none;
 }
 
+.search-card__badge--watch-next {
+  background: rgba(138, 180, 248, 0.2);
+  color: #dbe8ff;
+}
+
+.search-card__badge--queued {
+  background: rgba(197, 138, 249, 0.2);
+  color: #f1dcff;
+}
+
+.search-card__badge--up-to-date {
+  background: rgba(129, 201, 149, 0.2);
+  color: #d9f7e1;
+}
+
+.search-card__badge--completed {
+  background: rgba(154, 160, 166, 0.2);
+  color: #e2e4e7;
+}
+
+.search-card__badge--stopped {
+  background: rgba(242, 139, 130, 0.2);
+  color: #ffd7d3;
+}
+
 .search-card__action--added .search-card__add {
   opacity: 0;
   transform: translateY(-6px) scale(0.9);
@@ -1228,6 +1253,14 @@ input:focus {
   padding: 1rem;
   border: 1px solid var(--border);
   animation: fadeUp 0.4s ease;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+}
+
+.calendar-card:disabled {
+  cursor: default;
+  opacity: 1;
 }
 
 .calendar-card__image {
@@ -1240,6 +1273,36 @@ input:focus {
   gap: 0.6rem;
   align-items: center;
   margin-bottom: 0.5rem;
+}
+
+.calendar-card__state {
+  background: rgba(154, 160, 166, 0.12);
+  color: #d7dbe0;
+}
+
+.calendar-card__state--watch-next {
+  background: rgba(138, 180, 248, 0.2);
+  color: #dbe8ff;
+}
+
+.calendar-card__state--queued {
+  background: rgba(197, 138, 249, 0.2);
+  color: #f1dcff;
+}
+
+.calendar-card__state--up-to-date {
+  background: rgba(129, 201, 149, 0.2);
+  color: #d9f7e1;
+}
+
+.calendar-card__state--completed {
+  background: rgba(154, 160, 166, 0.2);
+  color: #e2e4e7;
+}
+
+.calendar-card__state--stopped {
+  background: rgba(242, 139, 130, 0.2);
+  color: #ffd7d3;
 }
 
 .calendar-card__show {

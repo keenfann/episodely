@@ -285,6 +285,55 @@ describe('tvmaze, import/export, calendar', () => {
       expect(response.status).toBe(200);
       expect(response.body.episodes).toHaveLength(1);
       expect(response.body.episodes[0].name).toBe('Upcoming');
+      expect(response.body.episodes[0].showId).toBe(showId);
+      expect(response.body.episodes[0].showState).toBe('queued');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('includes computed show state for calendar episodes', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date('2024-04-10T00:00:00Z'));
+
+      const showId = createShow({ tvmazeId: 7001, name: 'Stateful Show' });
+      linkProfileShow({ profileId, showId });
+      const watchedEpisodeId = createEpisode({
+        showId,
+        tvmazeId: 7002,
+        season: 1,
+        number: 1,
+        name: 'Watched',
+        airdate: '2024-04-01',
+        airtime: '20:00',
+      });
+      createEpisode({
+        showId,
+        tvmazeId: 7003,
+        season: 1,
+        number: 2,
+        name: 'Unwatched',
+        airdate: '2024-04-05',
+        airtime: '20:00',
+      });
+      createEpisode({
+        showId,
+        tvmazeId: 7004,
+        season: 1,
+        number: 3,
+        name: 'Upcoming',
+        airdate: '2024-04-11',
+        airtime: '21:00',
+      });
+
+      markEpisodeWatched({ profileId, episodeId: watchedEpisodeId });
+
+      const response = await agent.get('/api/calendar?days=10');
+      expect(response.status).toBe(200);
+      expect(response.body.episodes).toHaveLength(1);
+      expect(response.body.episodes[0].showId).toBe(showId);
+      expect(response.body.episodes[0].showState).toBe('watch-next');
     } finally {
       vi.useRealTimers();
     }

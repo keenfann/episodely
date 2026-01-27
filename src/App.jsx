@@ -949,7 +949,12 @@ function App() {
           <Route
             path="/calendar"
             element={
-              <CalendarPage calendar={calendar} />
+              <CalendarPage
+                calendar={calendar}
+                onShowSelect={(showId) =>
+                  navigate(`/shows/${showId}`, { state: { from: 'calendar' } })
+                }
+              />
             }
           />
           <Route
@@ -1357,7 +1362,13 @@ function AddShowPage({
                     {addingIds[result.id] ? 'Adding' : 'Add'}
                   </button>
                   <span
-                    className="badge badge--muted search-card__badge"
+                    className={[
+                      'badge',
+                      'search-card__badge',
+                      result.existingState
+                        ? `search-card__badge--${result.existingState}`
+                        : 'badge--muted',
+                    ].join(' ')}
                     aria-hidden={!result.existingState}
                   >
                     {STATE_LABELS[result.existingState] || 'Added'}
@@ -1386,8 +1397,11 @@ function ShowDetailPage({
   onRemoveShow,
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
   const showId = Number(params.id);
+  const backTarget =
+    location.state?.from === 'calendar' ? '/calendar' : '/shows';
 
   useEffect(() => {
     if (!Number.isNaN(showId)) {
@@ -1399,7 +1413,7 @@ function ShowDetailPage({
     return (
       <section className="panel">
         <div className="empty-state">Invalid show.</div>
-        <button className="outline" onClick={() => navigate('/shows')}>
+        <button className="outline" onClick={() => navigate(backTarget)}>
           Back to shows
         </button>
       </section>
@@ -1418,7 +1432,7 @@ function ShowDetailPage({
     return (
       <section className="panel">
         <div className="empty-state">Show not found.</div>
-        <button className="outline" onClick={() => navigate('/shows')}>
+        <button className="outline" onClick={() => navigate(backTarget)}>
           Back to shows
         </button>
       </section>
@@ -1430,7 +1444,7 @@ function ShowDetailPage({
       show={showDetail.show}
       seasons={showDetail.seasons}
       loading={loading}
-      onBack={() => navigate('/shows')}
+      onBack={() => navigate(backTarget)}
       onToggleEpisode={onToggleEpisode}
       onToggleSeason={onToggleSeason}
       onUpdateShowStatus={onUpdateShowStatus}
@@ -1439,7 +1453,7 @@ function ShowDetailPage({
   );
 }
 
-function CalendarPage({ calendar }) {
+function CalendarPage({ calendar, onShowSelect }) {
   const timezoneLabel = getLocalTimezoneLabel();
   const timezoneSuffix = timezoneLabel ? ` ${timezoneLabel}` : '';
 
@@ -1455,8 +1469,21 @@ function CalendarPage({ calendar }) {
         <div className="empty-state">No upcoming episodes found.</div>
       ) : (
         <div className="calendar-list">
-          {calendar.episodes.map((episode) => (
-            <div key={episode.id} className="calendar-card">
+          {calendar.episodes.map((episode) => {
+            const showId = episode.showId ?? episode.show_id;
+            const canNavigate = Number.isFinite(showId);
+            return (
+            <button
+              key={episode.id}
+              className="calendar-card"
+              type="button"
+              onClick={() => {
+                if (canNavigate) {
+                  onShowSelect(showId);
+                }
+              }}
+              disabled={!canNavigate}
+            >
               <div className="calendar-card__image">
                 {episode.showImage ? (
                   <img src={episode.showImage} alt={episode.showName} />
@@ -1471,6 +1498,17 @@ function CalendarPage({ calendar }) {
                     airtime={episode.airtime}
                     timezoneSuffix={timezoneSuffix}
                   />
+                  {episode.showState && (
+                    <span
+                      className={[
+                        'badge',
+                        'calendar-card__state',
+                        `calendar-card__state--${episode.showState}`,
+                      ].join(' ')}
+                    >
+                      {STATE_LABELS[episode.showState] || episode.showState}
+                    </span>
+                  )}
                 </div>
                 <h3 className="calendar-card__show">{episode.showName}</h3>
                 <h4 className="calendar-card__episode">
@@ -1480,8 +1518,9 @@ function CalendarPage({ calendar }) {
                   {episode.summary || 'No episode summary available.'}
                 </p>
               </div>
-            </div>
-          ))}
+            </button>
+            );
+          })}
         </div>
       )}
     </section>

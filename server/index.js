@@ -793,8 +793,10 @@ app.get('/api/tvmaze/search', requireAuth, async (req, res) => {
       summary: stripHtml(item.show.summary),
       status: item.show.status,
       premiered: item.show.premiered,
+      ended: item.show.ended,
       releaseYear: getPremiereYear(item.show.premiered),
       company: getProducingCompany(item.show),
+      imdbId: item.show.externals?.imdb || null,
       image: item.show.image?.medium || null,
     }));
     return res.json({ results: payload });

@@ -45,6 +45,17 @@ function getLocalTimezoneLabel() {
   }
 }
 
+function buildYearLabel({ releaseYear, premiered, ended }) {
+  const startYear = Number.isFinite(Number(releaseYear))
+    ? Number(releaseYear)
+    : premiered
+      ? Number(String(premiered).split('-')[0])
+      : null;
+  if (!startYear) return null;
+  const endYear = ended ? Number(String(ended).split('-')[0]) : null;
+  return endYear ? `${startYear}-${endYear}` : `${startYear}-`;
+}
+
 function daysUntil(airdate) {
   if (!airdate) return null;
   const today = new Date();
@@ -1306,14 +1317,36 @@ function AddShowPage({
       {searchResults.length > 0 && (
         <div className="search-results">
           {searchResults.map((result) => {
-            const metaParts = [];
-            if (result.releaseYear) {
-              metaParts.push(result.releaseYear);
-            }
+            const yearLabel = buildYearLabel({
+              releaseYear: result.releaseYear,
+              premiered: result.premiered,
+              ended: result.ended,
+            });
+            const metaItems = [];
             if (result.company) {
-              metaParts.push(result.company);
+              metaItems.push({ key: 'company', node: result.company });
             }
-            const meta = metaParts.join(' • ');
+            if (result.imdbId) {
+              metaItems.push({
+                key: 'imdb',
+                node: (
+                  <a
+                    className="show-detail__imdb-link"
+                    href={`https://www.imdb.com/title/${result.imdbId}/`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    IMDb
+                  </a>
+                ),
+              });
+            }
+            if (result.status) {
+              metaItems.push({ key: 'status', node: result.status });
+            }
+            if (yearLabel) {
+              metaItems.push({ key: 'years', node: yearLabel });
+            }
 
             return (
               <div key={result.id} className="search-card">
@@ -1324,7 +1357,16 @@ function AddShowPage({
                 )}
                 <div>
                   <h3>{result.name}</h3>
-                  {meta && <p className="muted search-card__meta">{meta}</p>}
+                  {metaItems.length > 0 && (
+                    <p className="muted search-card__meta">
+                      {metaItems.map((item, index) => (
+                        <span key={item.key}>
+                          {item.node}
+                          {index < metaItems.length - 1 ? ' • ' : ''}
+                        </span>
+                      ))}
+                    </p>
+                  )}
                   <p className="muted">
                     {result.summary || 'No summary available.'}
                   </p>
@@ -2079,19 +2121,11 @@ function ShowDetailView({
   const imdbUrl = show.imdbId
     ? `https://www.imdb.com/title/${show.imdbId}/`
     : null;
-  const startYear = show.releaseYear
-    ? Number(show.releaseYear)
-    : show.premiered
-      ? Number(String(show.premiered).split('-')[0])
-      : null;
-  const endYear = show.ended
-    ? Number(String(show.ended).split('-')[0])
-    : null;
-  const yearLabel = startYear
-    ? endYear
-      ? `${startYear}-${endYear}`
-      : `${startYear}-`
-    : null;
+  const yearLabel = buildYearLabel({
+    releaseYear: show.releaseYear,
+    premiered: show.premiered,
+    ended: show.ended,
+  });
   const producerMeta = show.company || '';
   const statusMetaParts = [];
   if (show.status) statusMetaParts.push(show.status);

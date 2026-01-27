@@ -984,6 +984,7 @@ input:focus {
 .show-detail__summary {
   display: grid;
   gap: 0.6rem;
+  margin-bottom: 0.75rem;
   font-size: 0.94rem;
   color: var(--text-muted);
   min-width: 0;

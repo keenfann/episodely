@@ -564,6 +564,29 @@ input:focus {
   background: var(--surface-muted);
   border: 1px solid var(--border);
   animation: fadeUp 0.4s ease;
+  transition:
+    opacity 0.35s ease,
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+  transform-origin: center;
+}
+
+.search-results--clearing .search-card {
+  opacity: 0.35;
+  transform: translateY(6px) scale(0.99);
+}
+
+.search-results--clearing .search-card--adding {
+  opacity: 1;
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(138, 180, 248, 0.6);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+}
+
+.search-card button[aria-busy='true'] {
+  opacity: 0.7;
+  cursor: progress;
 }
 
 .search-card__meta {

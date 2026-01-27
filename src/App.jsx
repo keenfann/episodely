@@ -271,6 +271,8 @@ function App() {
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [addingShowId, setAddingShowId] = useState(null);
+  const [clearingSearch, setClearingSearch] = useState(false);
   const [loadingShows, setLoadingShows] = useState(false);
   const [loadingShowDetail, setLoadingShowDetail] = useState(false);
   const [notice, setNotice] = useState('');
@@ -487,15 +489,26 @@ function App() {
   };
 
   const handleAddShow = async (tvmazeId) => {
-    await apiFetch('/api/shows', {
-      method: 'POST',
-      body: JSON.stringify({ tvmazeId }),
-    });
-    setSearchResults([]);
-    setSearchQuery('');
-    setSearchError('');
-    setHasSearched(false);
-    await loadShows();
+    if (addingShowId) return;
+    setAddingShowId(tvmazeId);
+    setClearingSearch(true);
+    try {
+      await apiFetch('/api/shows', {
+        method: 'POST',
+        body: JSON.stringify({ tvmazeId }),
+      });
+      await loadShows();
+      await new Promise((resolve) => setTimeout(resolve, 420));
+      setSearchResults([]);
+      setSearchQuery('');
+      setSearchError('');
+      setHasSearched(false);
+    } catch (error) {
+      setSearchError(error.message);
+    } finally {
+      setAddingShowId(null);
+      setClearingSearch(false);
+    }
   };
 
   const handleShowStatus = async (showId, status) => {
@@ -905,6 +918,8 @@ function App() {
                 onSearchQuery={handleSearchQuery}
                 onSearch={handleSearch}
                 onAddShow={handleAddShow}
+                addingShowId={addingShowId}
+                clearingSearch={clearingSearch}
               />
             }
           />
@@ -1138,6 +1153,8 @@ function AddShowPage({
   onSearchQuery,
   onSearch,
   onAddShow,
+  addingShowId,
+  clearingSearch,
 }) {
   const inputRef = useRef(null);
 
@@ -1198,7 +1215,9 @@ function AddShowPage({
         </form>
       </div>
       {searchResults.length > 0 && (
-        <div className="search-results">
+        <div
+          className={`search-results${clearingSearch ? ' search-results--clearing' : ''}`}
+        >
           {searchResults.map((result) => {
             const metaParts = [];
             if (result.releaseYear) {
@@ -1208,9 +1227,13 @@ function AddShowPage({
               metaParts.push(result.company);
             }
             const meta = metaParts.join(' • ');
+            const isAdding = result.id === addingShowId;
 
             return (
-              <div key={result.id} className="search-card">
+              <div
+                key={result.id}
+                className={`search-card${isAdding ? ' search-card--adding' : ''}`}
+              >
                 {result.image ? (
                   <img src={result.image} alt={result.name} />
                 ) : (
@@ -1231,6 +1254,8 @@ function AddShowPage({
                   <button
                     className="outline outline--with-icon"
                     onClick={() => onAddShow(result.id)}
+                    disabled={isAdding}
+                    aria-busy={isAdding}
                   >
                     <svg
                       className="button-icon"
@@ -1246,7 +1271,7 @@ function AddShowPage({
                         strokeWidth="2"
                       />
                     </svg>
-                    Add
+                    {isAdding ? 'Adding...' : 'Add'}
                   </button>
                 )}
               </div>

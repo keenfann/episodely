@@ -849,8 +849,8 @@ app.get('/api/shows', requireAuth, requireProfile, (req, res) => {
   const shows = listShowsForProfile(req.session.profileId);
 
   const categories = [
-    { id: 'watch-next', label: 'Watch Next', shows: [] },
     { id: 'watching', label: 'Watching', shows: [] },
+    { id: 'watch-next', label: 'Watch Next', shows: [] },
     { id: 'queued', label: 'Not Started', shows: [] },
     { id: 'up-to-date', label: 'Up To Date', shows: [] },
     { id: 'completed', label: 'Finished', shows: [] },

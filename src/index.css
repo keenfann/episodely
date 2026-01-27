@@ -87,6 +87,15 @@ button {
   border: none;
   background: none;
   cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.35);
+}
+
+button:active:not(:disabled) {
+  filter: brightness(0.85);
 }
 
 button,
@@ -222,6 +231,15 @@ input:focus {
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  transition: filter 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.tab:hover {
+  filter: brightness(1.35);
+}
+
+.tab:active {
+  filter: brightness(0.85);
 }
 
 .top-bar .tab,
@@ -562,9 +580,7 @@ input:focus {
 }
 
 .icon-button--back:hover {
-  transform: translateY(-1px);
-  background: rgba(138, 180, 248, 0.16);
-  border-color: rgba(138, 180, 248, 0.6);
+  filter: brightness(1.35);
 }
 
 .icon-button--back svg {
@@ -831,7 +847,15 @@ input:focus {
 }
 
 .show-card:hover {
-  border-color: rgba(138, 180, 248, 0.4);
+  filter: brightness(1.004);
+}
+
+.show-card:active {
+  filter: brightness(0.998);
+}
+
+.show-card:hover {
+  border-color: var(--border);
 }
 
 .show-card__art {
@@ -1274,6 +1298,14 @@ input:focus {
   opacity: 1;
 }
 
+.calendar-card:hover {
+  filter: brightness(1.004);
+}
+
+.calendar-card:active {
+  filter: brightness(0.998);
+}
+
 .calendar-card__image {
   width: 110px;
   height: 150px;
@@ -1528,8 +1560,8 @@ input:focus {
 }
 
 .show-detail__delete:hover {
-  background: rgba(138, 180, 248, 0.16);
-  border-color: rgba(138, 180, 248, 0.6);
+  background: rgba(138, 180, 248, 0.08);
+  border-color: rgba(138, 180, 248, 0.35);
 }
 
 .show-detail__delete svg {

@@ -635,6 +635,11 @@ input:focus {
   color: #dbe8ff;
 }
 
+.search-card__badge--watching {
+  background: rgba(251, 188, 4, 0.2);
+  color: #fff1b8;
+}
+
 .search-card__badge--queued {
   background: rgba(197, 138, 249, 0.2);
   color: #f1dcff;
@@ -803,6 +808,11 @@ input:focus {
 .category--watch-next {
   --category-accent: #8ab4f8;
   --category-bg: rgba(138, 180, 248, 0.12);
+}
+
+.category--watching {
+  --category-accent: #fbbc04;
+  --category-bg: rgba(251, 188, 4, 0.12);
 }
 
 .category--queued {
@@ -989,6 +999,11 @@ input:focus {
 .show-detail__badge--watch-next {
   background: rgba(138, 180, 248, 0.2);
   color: #dbe8ff;
+}
+
+.show-detail__badge--watching {
+  background: rgba(251, 188, 4, 0.2);
+  color: #fff1b8;
 }
 
 .show-detail__badge--queued {

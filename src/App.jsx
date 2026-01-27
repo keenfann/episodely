@@ -13,6 +13,7 @@ import logo from './assets/episodely-logo.svg';
 
 const STATE_LABELS = {
   'watch-next': 'Watch Next',
+  watching: 'Watching',
   queued: 'Not Started',
   'up-to-date': 'Up To Date',
   completed: 'Finished',
@@ -145,6 +146,28 @@ function computeShowStats(show, episodes) {
   const releasedUnwatched = releasedEpisodes.filter(
     (episode) => !episode.watched
   );
+  const hasPartiallyWatchedSeason = (() => {
+    const seasons = new Map();
+    episodes.forEach((episode) => {
+      if (!seasons.has(episode.season)) {
+        seasons.set(episode.season, []);
+      }
+      seasons.get(episode.season).push(episode);
+    });
+    for (const seasonEpisodes of seasons.values()) {
+      const seasonReleased = seasonEpisodes.filter((episode) =>
+        isReleased(episode.airdate)
+      );
+      if (seasonReleased.length === 0) continue;
+      const watchedReleased = seasonReleased.filter(
+        (episode) => episode.watched
+      ).length;
+      if (watchedReleased > 0 && watchedReleased < seasonReleased.length) {
+        return true;
+      }
+    }
+    return false;
+  })();
   const watchedCount = episodes.filter((episode) => episode.watched).length;
   const started = watchedCount > 0;
   const hasReleased = releasedEpisodes.length > 0;
@@ -159,6 +182,8 @@ function computeShowStats(show, episodes) {
   let state = 'queued';
   if (show.profileStatus === 'stopped') {
     state = 'stopped';
+  } else if (hasPartiallyWatchedSeason) {
+    state = 'watching';
   } else if (started && releasedUnwatched.length > 0) {
     state = 'watch-next';
   } else if (!started && hasReleased) {
@@ -196,6 +221,7 @@ function computeShowStats(show, episodes) {
 
 function getCategoryId(state) {
   if (state === 'stopped') return 'stopped';
+  if (state === 'watching') return 'watching';
   if (state === 'watch-next') return 'watch-next';
   if (state === 'queued') return 'queued';
   if (state === 'up-to-date') return 'up-to-date';

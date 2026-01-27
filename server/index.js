@@ -295,6 +295,28 @@ function computeShowState(show, showEpisodes) {
   const releasedUnwatched = releasedEpisodes.filter(
     (episode) => !episode.watched_at
   );
+  const hasPartiallyWatchedSeason = (() => {
+    const seasons = new Map();
+    showEpisodes.forEach((episode) => {
+      if (!seasons.has(episode.season)) {
+        seasons.set(episode.season, []);
+      }
+      seasons.get(episode.season).push(episode);
+    });
+    for (const seasonEpisodes of seasons.values()) {
+      const seasonReleased = seasonEpisodes.filter((episode) =>
+        isReleased(episode.airdate)
+      );
+      if (seasonReleased.length === 0) continue;
+      const watchedReleased = seasonReleased.filter(
+        (episode) => episode.watched_at
+      ).length;
+      if (watchedReleased > 0 && watchedReleased < seasonReleased.length) {
+        return true;
+      }
+    }
+    return false;
+  })();
   const watchedCount = showEpisodes.filter(
     (episode) => episode.watched_at
   ).length;
@@ -313,6 +335,8 @@ function computeShowState(show, showEpisodes) {
   let state = 'queued';
   if (show.profile_status === 'stopped') {
     state = 'stopped';
+  } else if (hasPartiallyWatchedSeason) {
+    state = 'watching';
   } else if (started && releasedUnwatched.length > 0) {
     state = 'watch-next';
   } else if (!started && hasReleased) {
@@ -826,6 +850,7 @@ app.get('/api/shows', requireAuth, requireProfile, (req, res) => {
 
   const categories = [
     { id: 'watch-next', label: 'Watch Next', shows: [] },
+    { id: 'watching', label: 'Watching', shows: [] },
     { id: 'queued', label: 'Not Started', shows: [] },
     { id: 'up-to-date', label: 'Up To Date', shows: [] },
     { id: 'completed', label: 'Finished', shows: [] },
@@ -837,6 +862,8 @@ app.get('/api/shows', requireAuth, requireProfile, (req, res) => {
   shows.forEach((show) => {
     if (show.state === 'stopped') {
       bucketMap.get('stopped').shows.push(show);
+    } else if (show.state === 'watching') {
+      bucketMap.get('watching').shows.push(show);
     } else if (show.state === 'watch-next') {
       bucketMap.get('watch-next').shows.push(show);
     } else if (show.state === 'queued') {

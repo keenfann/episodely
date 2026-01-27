@@ -333,7 +333,7 @@ describe('tvmaze, import/export, calendar', () => {
       expect(response.status).toBe(200);
       expect(response.body.episodes).toHaveLength(1);
       expect(response.body.episodes[0].showId).toBe(showId);
-      expect(response.body.episodes[0].showState).toBe('watch-next');
+      expect(response.body.episodes[0].showState).toBe('watching');
     } finally {
       vi.useRealTimers();
     }

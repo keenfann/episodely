@@ -136,7 +136,12 @@ describe('shows and episodes', () => {
 
   it('returns show detail with season progress', async () => {
     const releasedDate = '2024-04-01';
-    const showId = createShow({ tvmazeId: 201, name: 'Detail Show' });
+    const showId = createShow({
+      tvmazeId: 201,
+      name: 'Detail Show',
+      premiered: '2021-02-03',
+      company: 'FX',
+    });
     linkProfileShow({ profileId, showId });
 
     const s1e1 = createEpisode({
@@ -168,6 +173,8 @@ describe('shows and episodes', () => {
     const response = await agent.get(`/api/shows/${showId}`);
     expect(response.status).toBe(200);
     expect(response.body.show.name).toBe('Detail Show');
+    expect(response.body.show.releaseYear).toBe(2021);
+    expect(response.body.show.company).toBe('FX');
     expect(response.body.seasons).toHaveLength(2);
 
     const seasonOne = response.body.seasons.find(

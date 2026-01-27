@@ -23,6 +23,7 @@ export function createShow({
   status = 'Running',
   premiered = null,
   ended = null,
+  company = null,
   imageMedium = null,
   imageOriginal = null,
   updatedAt = new Date().toISOString(),
@@ -30,8 +31,8 @@ export function createShow({
   const result = db
     .prepare(
       `INSERT INTO shows
-        (tvmaze_id, name, summary, status, premiered, ended, image_medium, image_original, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        (tvmaze_id, name, summary, status, premiered, ended, company, image_medium, image_original, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .run(
       tvmazeId,
@@ -40,6 +41,7 @@ export function createShow({
       status,
       premiered,
       ended,
+      company,
       imageMedium,
       imageOriginal,
       updatedAt

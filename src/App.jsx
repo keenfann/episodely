@@ -2079,6 +2079,24 @@ function ShowDetailView({
   const imdbUrl = show.imdbId
     ? `https://www.imdb.com/title/${show.imdbId}/`
     : null;
+  const startYear = show.releaseYear
+    ? Number(show.releaseYear)
+    : show.premiered
+      ? Number(String(show.premiered).split('-')[0])
+      : null;
+  const endYear = show.ended
+    ? Number(String(show.ended).split('-')[0])
+    : null;
+  const yearLabel = startYear
+    ? endYear
+      ? `${startYear}-${endYear}`
+      : `${startYear}-`
+    : null;
+  const producerMeta = show.company || '';
+  const statusMetaParts = [];
+  if (show.status) statusMetaParts.push(show.status);
+  if (yearLabel) statusMetaParts.push(yearLabel);
+  const statusMeta = statusMetaParts.join(' · ');
   return (
     <section className="panel show-detail">
       <div className="panel__header show-detail__header">
@@ -2110,13 +2128,11 @@ function ShowDetailView({
                 </span>
               )}
             </div>
-            <p className="muted show-detail__meta">
-              {show.status || 'Unknown status'}
-              {show.premiered ? ` - Premiered ${show.premiered}` : ''}
-              {show.ended ? ` - Ended ${show.ended}` : ''}
-              {imdbUrl && (
-                <>
-                  {' · '}
+            {(producerMeta || imdbUrl) && (
+              <p className="muted show-detail__meta">
+                {producerMeta}
+                {producerMeta && imdbUrl ? ' · ' : ''}
+                {imdbUrl && (
                   <a
                     className="show-detail__imdb-link"
                     href={imdbUrl}
@@ -2125,9 +2141,14 @@ function ShowDetailView({
                   >
                     IMDb
                   </a>
-                </>
-              )}
-            </p>
+                )}
+              </p>
+            )}
+            {statusMeta && (
+              <p className="muted show-detail__meta">
+                {statusMeta}
+              </p>
+            )}
           </div>
         </div>
         {(canToggleStatus || canRemove) && (

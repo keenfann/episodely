@@ -1199,47 +1199,59 @@ function AddShowPage({
       </div>
       {searchResults.length > 0 && (
         <div className="search-results">
-          {searchResults.map((result) => (
-            <div key={result.id} className="search-card">
-              {result.image ? (
-                <img src={result.image} alt={result.name} />
-              ) : (
-                <div className="image-fallback" />
-              )}
-              <div>
-                <h3>{result.name}</h3>
-                <p className="muted">
-                  {result.summary || 'No summary available.'}
-                </p>
-              </div>
-              {result.existingState ? (
-                <span className="badge badge--muted">
-                  {STATE_LABELS[result.existingState] || 'Added'}
-                </span>
-              ) : (
-                <button
-                  className="outline outline--with-icon"
-                  onClick={() => onAddShow(result.id)}
-                >
-                  <svg
-                    className="button-icon"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
+          {searchResults.map((result) => {
+            const metaParts = [];
+            if (result.releaseYear) {
+              metaParts.push(result.releaseYear);
+            }
+            if (result.company) {
+              metaParts.push(result.company);
+            }
+            const meta = metaParts.join(' • ');
+
+            return (
+              <div key={result.id} className="search-card">
+                {result.image ? (
+                  <img src={result.image} alt={result.name} />
+                ) : (
+                  <div className="image-fallback" />
+                )}
+                <div>
+                  <h3>{result.name}</h3>
+                  {meta && <p className="muted search-card__meta">{meta}</p>}
+                  <p className="muted">
+                    {result.summary || 'No summary available.'}
+                  </p>
+                </div>
+                {result.existingState ? (
+                  <span className="badge badge--muted">
+                    {STATE_LABELS[result.existingState] || 'Added'}
+                  </span>
+                ) : (
+                  <button
+                    className="outline outline--with-icon"
+                    onClick={() => onAddShow(result.id)}
                   >
-                    <path
-                      d="M12 5v14M5 12h14"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                  Add
-                </button>
-              )}
-            </div>
-          ))}
+                    <svg
+                      className="button-icon"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12 5v14M5 12h14"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                      />
+                    </svg>
+                    Add
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
       {hasSearched && !searchError && searchResults.length === 0 && (

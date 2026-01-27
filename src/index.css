@@ -566,6 +566,11 @@ input:focus {
   animation: fadeUp 0.4s ease;
 }
 
+.search-card__meta {
+  margin: 0.35rem 0 0.35rem;
+  font-size: 0.9rem;
+}
+
 .search-card img,
 .calendar-card__image img,
 .show-card__art img,

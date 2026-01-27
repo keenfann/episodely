@@ -858,7 +858,7 @@ input:focus {
 }
 
 .highlight {
-  color: var(--orange);
+  color: var(--add-show);
 }
 
 .tag {

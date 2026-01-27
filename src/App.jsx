@@ -1155,7 +1155,11 @@ function ShowsPage({
                             </span>
                             {show.stats.releasedUnwatched > 0 && (
                               <span className="highlight">
-                                {show.stats.releasedUnwatched} released left
+                                {show.stats.releasedUnwatched}{' '}
+                                {show.stats.releasedUnwatched === 1
+                                  ? 'episode'
+                                  : 'episodes'}{' '}
+                                left
                               </span>
                             )}
                           </div>

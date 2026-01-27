@@ -844,20 +844,23 @@ input:focus {
   border: 1px solid var(--border);
   border-radius: 18px;
   padding: 0.75rem;
-  transition: transform 0.2s ease, border 0.2s ease;
+  transition: transform 0.2s ease, border 0.2s ease, box-shadow 0.2s ease;
   animation: fadeUp 0.4s ease;
 }
 
-.show-card:hover {
-  filter: brightness(1.004);
+.show-card:hover:not(:disabled),
+.show-card:active:not(:disabled),
+.show-card:focus-visible {
+  filter: none;
 }
 
-.show-card:active {
-  filter: brightness(0.998);
+.show-card:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3);
 }
 
-.show-card:hover {
-  border-color: var(--border);
+.show-card:active:not(:disabled) {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
 }
 
 .show-card__art {
@@ -1293,6 +1296,22 @@ input:focus {
   width: 100%;
   text-align: left;
   color: inherit;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.calendar-card:hover:not(:disabled),
+.calendar-card:active:not(:disabled),
+.calendar-card:focus-visible {
+  filter: none;
+}
+
+.calendar-card:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.3);
+}
+
+.calendar-card:active:not(:disabled) {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
 }
 
 .calendar-card:disabled {
@@ -1300,13 +1319,6 @@ input:focus {
   opacity: 1;
 }
 
-.calendar-card:hover {
-  filter: brightness(1.004);
-}
-
-.calendar-card:active {
-  filter: brightness(0.998);
-}
 
 .calendar-card__image {
   width: 110px;

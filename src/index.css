@@ -501,6 +501,7 @@ input:focus {
   border: 1px solid rgba(138, 180, 248, 0.4);
   color: #e8eaed;
   background: transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
 }
 
 .text-button {
@@ -1839,6 +1840,15 @@ input:focus {
   opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+.outline:hover:not(.is-disabled),
+.outline:active:not(.is-disabled) {
+  filter: brightness(1.35);
+}
+
+.outline:active:not(.is-disabled) {
+  filter: brightness(0.85);
 }
 
 .primary.is-disabled {

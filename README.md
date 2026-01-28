@@ -84,7 +84,7 @@ For a small sample seed, use `scripts/seed-export.json`.
 
 Set `DB_PATH` in `compose.yaml` or a `.env` file (see `.env.example`). The server generates and stores `SESSION_SECRET` on first start, and the Compose file pulls `ghcr.io/keenfann/episodely:latest` on start.
 
-Sessions are stored in SQLite, so logins persist across restarts as long as `DB_PATH` points to durable storage.
+Sessions are stored in SQLite, so logins persist for up to 30 days and across restarts as long as `DB_PATH` points to durable storage.
 
 The settings screen version string is set at build time via `APP_VERSION` (defaults to the package version). You can pass it as a Docker build arg when building images.
 

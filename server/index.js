@@ -32,6 +32,16 @@ const devAutologinEnabled = isDevEnv && process.env.DEV_AUTOLOGIN === 'true';
 const devUserName = process.env.DEV_USER || 'codex';
 const devProfileName = process.env.DEV_PROFILE || 'Demo';
 const devPassword = process.env.DEV_PASSWORD || 'dev';
+const defaultSessionMaxAgeDays = 30;
+const sessionMaxAgeDays = Number(process.env.SESSION_MAX_AGE_DAYS);
+const sessionMaxAgeMs =
+  (Number.isFinite(sessionMaxAgeDays) && sessionMaxAgeDays > 0
+    ? sessionMaxAgeDays
+    : defaultSessionMaxAgeDays) *
+  24 *
+  60 *
+  60 *
+  1000;
 const CSRF_HEADER = 'x-csrf-token';
 const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
@@ -44,6 +54,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
+      maxAge: sessionMaxAgeMs,
       sameSite: 'lax',
       secure: false,
     },

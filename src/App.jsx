@@ -1513,15 +1513,20 @@ function ShowDetailPage({
   const location = useLocation();
   const params = useParams();
   const showId = Number(params.id);
-  const backTarget =
-    location.state?.from === 'calendar'
-      ? '/calendar'
-      : {
-          pathname: '/shows',
-          state: location.state?.showsView
-            ? { showsView: location.state.showsView }
-            : undefined,
-        };
+  const isFromCalendar = location.state?.from === 'calendar';
+
+  const navigateBack = () => {
+    if (isFromCalendar) {
+      navigate('/calendar');
+      return;
+    }
+
+    navigate('/shows', {
+      state: location.state?.showsView
+        ? { showsView: location.state.showsView }
+        : undefined,
+    });
+  };
 
   useEffect(() => {
     if (!Number.isNaN(showId)) {
@@ -1533,7 +1538,7 @@ function ShowDetailPage({
     return (
       <section className="panel">
         <div className="empty-state">Invalid show.</div>
-        <button className="outline" onClick={() => navigate(backTarget)}>
+        <button className="outline" onClick={navigateBack}>
           Back to shows
         </button>
       </section>
@@ -1552,7 +1557,7 @@ function ShowDetailPage({
     return (
       <section className="panel">
         <div className="empty-state">Show not found.</div>
-        <button className="outline" onClick={() => navigate(backTarget)}>
+        <button className="outline" onClick={navigateBack}>
           Back to shows
         </button>
       </section>
@@ -1564,7 +1569,7 @@ function ShowDetailPage({
       show={showDetail.show}
       seasons={showDetail.seasons}
       loading={loading}
-      onBack={() => navigate(backTarget)}
+      onBack={navigateBack}
       onToggleEpisode={onToggleEpisode}
       onToggleSeason={onToggleSeason}
       onUpdateShowStatus={onUpdateShowStatus}

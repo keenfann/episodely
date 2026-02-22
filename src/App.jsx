@@ -1037,12 +1037,24 @@ function ShowsPage({
   loadingShows,
 }) {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [collapsedCategories, setCollapsedCategories] = useState(() => ({
-    'up-to-date': true,
-    completed: true,
-    stopped: true,
-  }));
+  const location = useLocation();
+  const showsViewState = location.state?.showsView;
+  const [searchTerm, setSearchTerm] = useState(() => showsViewState?.searchTerm ?? '');
+  const [collapsedCategories, setCollapsedCategories] = useState(
+    () =>
+      showsViewState?.collapsedCategories ?? {
+        'up-to-date': true,
+        completed: true,
+        stopped: true,
+      }
+  );
+
+  useEffect(() => {
+    if (typeof showsViewState?.scrollY !== 'number') {
+      return;
+    }
+    window.scrollTo({ top: showsViewState.scrollY });
+  }, [showsViewState?.scrollY]);
 
   const toggleCategory = (categoryId) => {
     if (searchTerm.trim()) {
@@ -1160,7 +1172,18 @@ function ShowsPage({
                         key={show.id}
                         type="button"
                         className="show-card"
-                        onClick={() => navigate(`/shows/${show.id}`)}
+                        onClick={() =>
+                          navigate(`/shows/${show.id}`, {
+                            state: {
+                              from: 'shows',
+                              showsView: {
+                                searchTerm,
+                                collapsedCategories,
+                                scrollY: window.scrollY,
+                              },
+                            },
+                          })
+                        }
                       >
                         <div className="show-card__art">
                           {show.image ? (
@@ -1491,7 +1514,14 @@ function ShowDetailPage({
   const params = useParams();
   const showId = Number(params.id);
   const backTarget =
-    location.state?.from === 'calendar' ? '/calendar' : '/shows';
+    location.state?.from === 'calendar'
+      ? '/calendar'
+      : {
+          pathname: '/shows',
+          state: location.state?.showsView
+            ? { showsView: location.state.showsView }
+            : undefined,
+        };
 
   useEffect(() => {
     if (!Number.isNaN(showId)) {

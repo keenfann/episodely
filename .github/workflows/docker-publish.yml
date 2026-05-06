@@ -89,11 +89,22 @@ jobs:
         run: echo "version=1.0.${{ github.run_number }}" >> "$GITHUB_OUTPUT"
 
       - name: Create release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Release v${{ steps.version.outputs.version }}
-          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: v${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          if gh release view "$RELEASE_TAG" --repo "$GH_REPO" >/dev/null 2>&1; then
+            echo "Release '$RELEASE_TAG' already exists."
+            exit 0
+          fi
+
+          gh release create "$RELEASE_TAG" \
+            --repo "$GH_REPO" \
+            --target "${GITHUB_SHA}" \
+            --title "$RELEASE_TAG" \
+            --generate-notes
 
   build-pr:
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository

@@ -31,8 +31,8 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.5",
-    "concurrently": "^10.0.4",
+    "concurrently": "^10.0.5",
     "vite": "^8.2.1",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   }
 }
